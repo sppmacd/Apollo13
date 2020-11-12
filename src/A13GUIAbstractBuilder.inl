@@ -1,25 +1,21 @@
 #include "A13GUIProjectBuilder.h"
 
-#include "A13GameplayObjectManager.h"
-
 #include <ege/debug/Logger.h>
 #include <ege/scene/SceneWidget.h>
-#include <ege/scene/TilemapRenderer2D.h>
 #include <ege/util/Random.h>
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void PartSelectWidget<_PartType, SX, SY>::onLoad()
+template<class _PartType>
+void PartSelectWidget<_PartType>::onLoad()
 {
-    auto& gpo = A13GameplayObjectManager::instance().rocketParts;
-
-    for(auto& part : gpo)
+    ASSERT(m_gpo);
+    for(auto& part : *m_gpo)
     {
         m_parts.push_back(part.second);
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void PartSelectWidget<_PartType, SX, SY>::onMouseButtonRelease(sf::Event::MouseButtonEvent& event)
+template<class _PartType>
+void PartSelectWidget<_PartType>::onMouseButtonRelease(sf::Event::MouseButtonEvent& event)
 {
     if(m_leftClicked)
     {
@@ -36,8 +32,8 @@ void PartSelectWidget<_PartType, SX, SY>::onMouseButtonRelease(sf::Event::MouseB
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void PartSelectWidget<_PartType, SX, SY>::renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states)
+template<class _PartType>
+void PartSelectWidget<_PartType>::renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states)
 {
     if(!m_atlas)
         m_atlas = getLoop()->getResourceManager().lock()->getTexture(m_partAtlasTextureName).get();
@@ -78,51 +74,50 @@ void PartSelectWidget<_PartType, SX, SY>::renderOnly(sf::RenderTarget& target, c
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::BgWidget::onLoad()
+template<class _PartType>
+void A13GUIAbstractBuilder<_PartType>::BgWidget::onLoad()
 {
     m_bg = getLoop()->getResourceManager().lock()->getTexture(m_backgroundTextureName).get();
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::BgWidget::onResize(sf::Event::SizeEvent& event)
+template<class _PartType>
+void A13GUIAbstractBuilder<_PartType>::BgWidget::onResize(sf::Event::SizeEvent& event)
 {
     setSize({(double)event.width, (double)event.height});
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::BgWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states)
+template<class _PartType>
+void A13GUIAbstractBuilder<_PartType>::BgWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states)
 {
     EGE::Renderer renderer(target);
     renderer.renderTexturedRectangle(0, 0, getSize().x, getSize().y, *m_bg);
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-TileMapObject<_PartType, SX, SY>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::string tex)
-: EGE::SceneObject2D(scene, "a13:builder:tilemap"), m_builderPartAtlasTextureName(tex)
+template<class _Tilemap>
+TileMapObject<_Tilemap>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::string tex,  EGE::SharedPtr<_Tilemap> tilemap)
+: EGE::SceneObject2D(scene, "a13:builder:tilemap"), m_builderPartAtlasTextureName(tex), m_tilemap(tilemap)
 {
-    m_tilemap = make<EGE::FixedTileMap2D<ObjectState<_PartType>, SX, SY>>();
-
-    // Initialize tilemap
-    m_tilemap->setTileSize({16, 16});
-    m_tilemap->initialize({});
+    // Set tilemap
+    m_tilemap = tilemap;
 
     // Set renderer
-    auto renderer = make<EGE::TilemapRenderer2D<EGE::FixedTileMap2D<ObjectState<_PartType>, SX, SY>>>(scene, m_tilemap);
+    auto renderer = make<EGE::TilemapRenderer2D<_Tilemap>>(scene, m_tilemap);
     renderer->setAtlasTextureName(m_builderPartAtlasTextureName);
-    renderer->setTileAtlasMapper([](const ObjectState<_PartType>& state)->EGE::Vec2d {
+    renderer->setTileAtlasMapper([this](const typename _Tilemap::TileType& state)->EGE::Vec2d {
                                     if(!state.obj)
                                         return EGE::Vec2d(0, 0);
                                     EGE::Vec2d atlasPos = state.obj->getAtlasPosition();
-                                    return {atlasPos.x * 16 + state.cornerPos.x * 16, atlasPos.y * 16 + state.cornerPos.y * 16};
+                                    auto tileSize = m_tilemap->getTileSize();
+                                    return {atlasPos.x * tileSize.x + state.cornerPos.x * tileSize.x,
+                                            atlasPos.y * tileSize.y + state.cornerPos.y * tileSize.y};
                                  });
     setRenderer(renderer);
 
     setPosition({0, 0});
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-bool TileMapObject<_PartType, SX, SY>::canPartBePlacedHere(sf::Vector2f pos) const
+template<class _PartType>
+bool TileMapObject<_PartType>::canPartBePlacedHere(sf::Vector2f pos) const
 {
     if(!m_currentPart)
         return false;
@@ -135,7 +130,7 @@ bool TileMapObject<_PartType, SX, SY>::canPartBePlacedHere(sf::Vector2f pos) con
     for(EGE::Uint32 x = 0; x < partSize.x; x++)
     for(EGE::Uint32 y = 0; y < partSize.y; y++)
     {
-        auto tile = m_tilemap->getTile({x + tileRel.x, y + tileRel.y});
+        auto tile = (m_useEnsure ? &m_tilemap->ensureTile({x + tileRel.x, y + tileRel.y}) : m_tilemap->getTile({x + tileRel.x, y + tileRel.y}));
         if(!tile)
             return false; // Out of bounds!
         if(tile->obj)
@@ -144,8 +139,8 @@ bool TileMapObject<_PartType, SX, SY>::canPartBePlacedHere(sf::Vector2f pos) con
     return true;
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void TileMapObject<_PartType, SX, SY>::placePart(sf::Vector2f pos)
+template<class _PartType>
+void TileMapObject<_PartType>::placePart(sf::Vector2f pos)
 {
     if(!m_currentPart)
         return;
@@ -164,25 +159,29 @@ void TileMapObject<_PartType, SX, SY>::placePart(sf::Vector2f pos)
     for(EGE::Uint32 x = 0; x < partSize.x; x++)
     for(EGE::Uint32 y = 0; y < partSize.y; y++)
     {
-        auto tile = m_tilemap->getTile({x + tileRel.x, y + tileRel.y});
+        auto tile = (m_useEnsure ? &m_tilemap->ensureTile({x + tileRel.x, y + tileRel.y}) : m_tilemap->getTile({x + tileRel.x, y + tileRel.y}));
+
+        // Sanity check
+        ASSERT(tile);
+
         tile->obj = it.first->second;
         tile->cornerPos = {x, y};
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void TileMapObject<_PartType, SX, SY>::removePart(sf::Vector2f pos)
+template<class _Tilemap>
+void TileMapObject<_Tilemap>::removePart(sf::Vector2f pos)
 {
     // Calculate tile position
     sf::Vector2f relPos = pos - getPosition();
     EGE::Vec2u tileRel = m_tilemap->getTileAlignedPos({(relPos.x), (relPos.y)});
 
     // Check which object is here
-    auto tile = m_tilemap->getTile({tileRel.x, tileRel.y});
+    auto tile = (m_useEnsure ? &m_tilemap->ensureTile({tileRel.x, tileRel.y}) : m_tilemap->getTile({tileRel.x, tileRel.y}));
     if(!tile)
         return; // Out of bounds!
 
-    EGE::FlatPtr<A13RocketPart> part = tile->obj;
+    EGE::FlatPtr<typename _Tilemap::TileType::PartType> part = tile->obj;
     if(!part)
         return; // Nothing is here!
 
@@ -206,14 +205,14 @@ void TileMapObject<_PartType, SX, SY>::removePart(sf::Vector2f pos)
     for(EGE::Uint32 x = 0; x < partSize.x; x++)
     for(EGE::Uint32 y = 0; y < partSize.y; y++)
     {
-        auto tile = m_tilemap->getTile({x + objectPos.x, y + objectPos.y});
+        auto tile = (m_useEnsure ? &m_tilemap->ensureTile({x + objectPos.x, y + objectPos.y}) : m_tilemap->getTile({x + objectPos.x, y + objectPos.y}));
         tile->obj = nullptr;
         tile->cornerPos = {0, 0};
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void TileMapObject<_PartType, SX, SY>::render(sf::RenderTarget& target, const EGE::RenderStates& states) const
+template<class _Tilemap>
+void TileMapObject<_Tilemap>::render(sf::RenderTarget& target, const EGE::RenderStates& states) const
 {
     EGE::Renderer renderer(target);
 
@@ -223,7 +222,7 @@ void TileMapObject<_PartType, SX, SY>::render(sf::RenderTarget& target, const EG
     // Highlight
     sf::Color bc = canPartBePlacedHere(highlightPos) ? sf::Color::Green : sf::Color::Red;
 
-    if(getPartSize().x != 0 && highlightPos.x >= 0 && highlightPos.y >= 0)
+    if(getPartSize().x != 0)
     {
         sf::RectangleShape rs(sf::Vector2f(getPartSize().x * 16, getPartSize().y * 16));
         rs.setPosition(highlightPos.x, highlightPos.y);
@@ -242,14 +241,14 @@ void TileMapObject<_PartType, SX, SY>::render(sf::RenderTarget& target, const EG
     */
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void TileMapObject<_PartType, SX, SY>::setTile(EGE::Vec2i offset)
+template<class _Tilemap>
+void TileMapObject<_Tilemap>::setTile(EGE::Vec2i offset)
 {
     highlightPos = sf::Vector2f((offset.x) * 16, (offset.y) * 16) + getPosition();
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onLoad()
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onLoad()
 {
     EGE::GUIScreen::onLoad();
 
@@ -257,7 +256,9 @@ void A13GUIAbstractBuilder<_PartType, SX, SY>::onLoad()
     m_scene = make<EGE::Scene2D>(getLoop());
 
     // Add tilemap to scene.
-    m_tileMapObject = make<TileMapObject<_PartType, SX, SY>>(m_scene, m_builderAtlasTN);
+    ASSERT(m_tilemap);
+    m_tileMapObject = make<TileMapObject<_Tilemap>>(m_scene, m_builderAtlasTN, m_tilemap);
+    m_tileMapObject->setUseEnsure(m_useEnsure);
     m_scene->addObject(m_tileMapObject);
 
     // Add camera
@@ -277,13 +278,14 @@ void A13GUIAbstractBuilder<_PartType, SX, SY>::onLoad()
     addWidget(make<EGE::SceneWidget>(this, m_scene));
 
     // Add left panel
-    m_partSelector = make<PartSelectWidget<_PartType, SX, SY>>(this, m_tileMapObject.get());
+    m_partSelector = make<PartSelectWidget<_Tilemap>>(this, m_tileMapObject.get());
     m_partSelector->m_partAtlasTextureName = m_selectorAtlasTN;
+    m_partSelector->m_gpo = m_gpo;
     addWidget(m_partSelector);
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseButtonPress(sf::Event::MouseButtonEvent& event)
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onMouseButtonPress(sf::Event::MouseButtonEvent& event)
 {
     EGE::GUIScreen::onMouseButtonPress(event);
     if(event.button == sf::Mouse::Left)
@@ -294,15 +296,15 @@ void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseButtonPress(sf::Event::Mou
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onResize(sf::Event::SizeEvent& event)
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onResize(sf::Event::SizeEvent& event)
 {
     EGE::GUIScreen::onResize(event);
     m_partSelector->setSize({80, (double)event.height});
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseButtonRelease(sf::Event::MouseButtonEvent& event)
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onMouseButtonRelease(sf::Event::MouseButtonEvent& event)
 {
     EGE::GUIScreen::onMouseButtonRelease(event);
     auto& wnd = *getWindow().lock().get();
@@ -327,8 +329,8 @@ void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseButtonRelease(sf::Event::M
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseMove(sf::Event::MouseMoveEvent& event)
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onMouseMove(sf::Event::MouseMoveEvent& event)
 {
     EGE::GUIScreen::onMouseMove(event);
 
@@ -354,8 +356,8 @@ void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseMove(sf::Event::MouseMoveE
     }
 }
 
-template<class _PartType, EGE::Size SX, EGE::Size SY>
-void A13GUIAbstractBuilder<_PartType, SX, SY>::onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event)
+template<class _Tilemap>
+void A13GUIAbstractBuilder<_Tilemap>::onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event)
 {
     EGE::GUIScreen::onMouseWheelScroll(event);
 
