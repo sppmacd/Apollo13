@@ -30,7 +30,7 @@
 #define ORE_GOLD 8
 #define ORE_SILVER 9
 
-#define MAX_ORE_COUNT 65536
+#define MAX_ORE_COUNT 4096
 
 class A13FactoryBuilding;
 
@@ -53,8 +53,8 @@ struct Terrain
 
 struct Ore
 {
-    EGE::Uint32 id;
-    EGE::Uint32 count;
+    EGE::Uint32 id = ORE_NONE;
+    EGE::Uint32 count = 0;
 };
 
 // Layers
@@ -176,16 +176,11 @@ public:
 
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
     {
-        Terrain* terrain = (Terrain*)&state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN];
-        if(terrain->oreId != ORE_NONE)
-            return CanPlaceHere::Match;
-        return A13FactoryBuilding::canPlaceHere(pos, state) == CanPlaceHere::Yes ? CanPlaceHere::Restricted : CanPlaceHere::No;
-    }
-
-    virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i pos)
-    {
-        log() << "It shouldn't be displayed until I add ores :(";
-        return true;
+        Ore* ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
+        CanPlaceHere cph = A13FactoryBuilding::canPlaceHere(pos, state);
+        if(ore->id != ORE_NONE)
+            return cph == CanPlaceHere::Yes ? CanPlaceHere::Match : CanPlaceHere::No;
+        return cph == CanPlaceHere::Yes ? CanPlaceHere::Restricted : CanPlaceHere::No;
     }
 
 private:

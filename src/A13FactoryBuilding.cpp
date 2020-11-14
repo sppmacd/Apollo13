@@ -22,9 +22,11 @@ void A13FactoryTilemap::onActivate(EGE::Vec2i pos, const StateType& state)
 std::string A13FactoryTilemap::getTooltip(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
 {
     // TODO: use localization!
-    std::string terrain = "Terrain: " + std::to_string(state.addObjs[0]);
+    std::string terrain = "Terrain: " + std::to_string(state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN]) + "\n";
+    Ore* _ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
+    std::string ore = _ore->id ? ("Ore: " + std::to_string(_ore->count) + "x #" + std::to_string(_ore->id) + "\n") : "";
     std::string tile = state.obj ? state.obj->part->getTooltip(this, pos - EGE::Vec2i(state.cornerPos), state) : "No object";
-    return terrain + "\n" + tile;
+    return terrain + ore + tile;
 }
 
 bool A13FactoryTilemap::onPlace(EGE::Vec2i pos, EGE::SharedPtr<A13FactoryBuildingPart> part)

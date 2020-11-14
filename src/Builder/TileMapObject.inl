@@ -79,14 +79,22 @@ bool TileMapObject<_Tilemap>::canPartBePlacedHere(EGE::Vec2i tileRel, EGE::Vec2u
     // Check if objects can be placed here
     if(m_placePredicate)
     {
-        bool b = true;
+        // Don't allow placing on CanPlaceHere::No tiles
+        bool isRed = false;
+
+        // Don't allow placing if all tiles are CanPlaceHere::Restricted
+        bool isAllYellow = true;
+
         for(EGE::Size x = 0; x < partSize.x; x++)
         for(EGE::Size y = 0; y < partSize.y; y++)
         {
             CanPlaceHere cph = m_placePredicate(tileRel + EGE::Vec2i(x, y));
-            b &= (cph != CanPlaceHere::No && cph != CanPlaceHere::NotLoaded);
+            isRed |= (cph == CanPlaceHere::No || cph == CanPlaceHere::NotLoaded);
+
+            if((cph == CanPlaceHere::Match || cph == CanPlaceHere::Yes) && isAllYellow)
+                isAllYellow = false;
         }
-        return b;
+        return !isRed && !isAllYellow;
     }
 
     // Default handler - just check if there are no objects here

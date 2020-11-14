@@ -30,7 +30,16 @@ public:
                 for(EGE::Size x = 0; x < 16; x++)
                 for(EGE::Size y = 0; y < 16; y++)
                 {
-                    chunk.getTile({x, y}).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = EGE::Random::fastRandom().nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
+                    A13FactoryTilemap::StateType& state = chunk.getTile({x, y});
+                    state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = EGE::Random::fastRandom().nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
+
+                    // ores
+                    if(EGE::Random::fastRandom().nextInt(11) == 1)
+                    {
+                        Ore* ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
+                        ore->id = ORE_COAL;
+                        ore->count = EGE::Random::fastRandom().nextIntRanged(1024, MAX_ORE_COUNT);
+                    }
                 }
             }
         );
@@ -45,8 +54,8 @@ public:
         }
         else if(addLayer == FACTORY_BUILDER_LAYER_ORES)
         {
-            Ore* ore = &state.addObjs[addLayer];
-            return EGE::Vec2d(ore->type * 16, (ore->count * 8 / MAX_ORE_COUNT) * 16);
+            Ore* ore = (Ore*)&state.addObjs[addLayer];
+            return ore->id != ORE_NONE ? EGE::Vec2d(ore->id * 16, ((ore->count * 7 / MAX_ORE_COUNT) + 1) * 16) : EGE::Vec2d(0, 0);
         }
         return EGE::Vec2d(0, 0);
     }
