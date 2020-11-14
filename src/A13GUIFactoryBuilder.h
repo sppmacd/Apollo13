@@ -34,10 +34,10 @@ public:
                     state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = EGE::Random::fastRandom().nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
 
                     // ores
-                    if(EGE::Random::fastRandom().nextInt(11) == 1)
+                    if(EGE::Random::fastRandom().nextInt(21) == 1)
                     {
                         Ore* ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
-                        ore->id = ORE_COAL;
+                        ore->id = EGE::Random::fastRandom().nextInt(40) / 4;
                         ore->count = EGE::Random::fastRandom().nextIntRanged(1024, MAX_ORE_COUNT);
                     }
                 }
