@@ -1,14 +1,15 @@
 #pragma once
 
 #include "A13GUIAbstractBuilder.h"
-#include "BuilderItem.h"
-#include "BuilderPart.h"
+#include "Builder/BuilderItem.h"
+#include "Builder/BuilderPart.h"
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
 
 #define FACTORY_BUILDER_LAYER_TERRAIN 0
-#define FACTORY_BUILDER_LAYER_SHADOWS 1
+#define FACTORY_BUILDER_LAYER_ORES 1
+#define FACTORY_BUILDER_LAYER_SHADOWS 2
 
 #define TERRAIN_GRASS 0
 #define TERRAIN_ASPHALT_ROAD 1
@@ -18,32 +19,60 @@
 #define TERRAIN_WILD_GRASS 5
 #define TERRAIN_FANCY_GRASS 6
 
+#define ORE_NONE 0
+#define ORE_COAL 1
+#define ORE_IRON 2
+#define ORE_COPPER 3
+#define ORE_TITANIUM 4
+#define ORE_SILICON 5
+#define ORE_ALUMINUM 6
+#define ORE_DIAMOND 7
+#define ORE_GOLD 8
+#define ORE_SILVER 9
+
+#define MAX_ORE_COUNT 65536
+
 class A13FactoryBuilding;
 
-struct A13FactoryBuildingTile : public BuilderPart
+struct A13FactoryBuildingPart : public BuilderPart
 {
     A13FactoryBuilding* part;
 
-    A13FactoryBuildingTile(A13FactoryBuilding* _part)
+    A13FactoryBuildingPart(A13FactoryBuilding* _part)
     : part(_part) {}
 
     virtual EGE::Vec2d getAtlasPosition() const;
     virtual EGE::Vec2u getSize() const;
 };
 
+struct Terrain
+{
+    EGE::Uint32 terrain;
+    EGE::Uint32 cornerMask; // NOT USED
+};
+
+struct Ore
+{
+    EGE::Uint32 id;
+    EGE::Uint32 count;
+};
+
 // Layers
 // Multi-size object layer
 //   - Buildings
 // Additional layers
-//   - 0 - Terrain (as index in terrain.png) [TODO: make x coordinate working]
-//   - 1 - Shadows
-typedef Aliases::A13ChunkedTilemapForPart<A13FactoryBuildingTile, 16, 16, 2> A13GUIFactoryBuilder_Tilemap;
+//   - 0 - Terrain (Terrain structure)
+//   - 1 - Ores (Ore structure)
+//   - 2 - Shadows (bitmap)
+typedef Aliases::A13ChunkedTilemapForPart<A13FactoryBuildingPart, 16, 16, 3> A13GUIFactoryBuilder_Tilemap;
 
-class A13FactoryTilemap : public A13GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<A13FactoryBuildingTile, 2>
+class A13FactoryTilemap : public A13GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<A13FactoryBuildingPart, 3>
 {
 public:
     virtual void onActivate(EGE::Vec2i pos, const StateType& tile);
     virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state);
+    virtual bool onPlace(EGE::Vec2i pos, EGE::SharedPtr<A13FactoryBuildingPart> part);
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i, const A13FactoryTilemap::StateType&);
 };
 
 class A13FactoryBuilding : public EGE::GameplayObject, public BuilderPart
@@ -65,7 +94,17 @@ public:
     // Called when left-clicking on object.
     // Args: tilemap, partPos, tile
     virtual void onActivate(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&) { log() << "onActivate"; }
+
+    // Args: tilemap, tilePos, tile
     virtual std::string getTooltip(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&) { return getId(); }
+
+    // Returns true if object can be placed, false otherwise.
+    // Args: tilemap, partPos
+    virtual bool onPlace(A13FactoryTilemap*, EGE::Vec2i) { return true; }
+
+    // Returns if object can be placed here.
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile)
+        { return !tile.obj ? CanPlaceHere::Yes : CanPlaceHere::No; }
 };
 
 class A13FactoryBuildingItem : public EGE::GameplayObject, public BuilderItem<A13GUIFactoryBuilder_Tilemap>
@@ -79,9 +118,14 @@ public:
         return m_part ? m_part->getItemAtlasPosition() : EGE::Vec2d(0, 0);
     }
 
-    virtual EGE::SharedPtr<A13FactoryBuildingTile> getPart() const
+    virtual EGE::SharedPtr<A13FactoryBuildingPart> getPart() const
     {
-        return make<A13FactoryBuildingTile>(m_part);
+        return make<A13FactoryBuildingPart>(m_part);
+    }
+
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile)
+    {
+        return m_part ? m_part->canPlaceHere(tileRel, tile) : CanPlaceHere::Yes;
     }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; };
@@ -117,16 +161,47 @@ public:
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 };
 
+class A13FactoryBuildingMine : public A13FactoryBuilding
+{
+public:
+    A13FactoryBuildingMine(EGE::Size level)
+    : A13FactoryBuilding("a13:mine:" + std::to_string(level)), m_level(level) {}
+
+    virtual EGE::Vec2d getAtlasPosition() const { return {9 + m_level * 4, 0}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {m_level, 4}; }
+    virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual std::string getTooltip(A13FactoryTilemap*, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
+        { return getId() + "\nLevel " + std::to_string(m_level); }
+
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
+    {
+        Terrain* terrain = (Terrain*)&state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN];
+        if(terrain->oreId != ORE_NONE)
+            return CanPlaceHere::Match;
+        return A13FactoryBuilding::canPlaceHere(pos, state) == CanPlaceHere::Yes ? CanPlaceHere::Restricted : CanPlaceHere::No;
+    }
+
+    virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i pos)
+    {
+        log() << "It shouldn't be displayed until I add ores :(";
+        return true;
+    }
+
+private:
+    EGE::Size m_level;
+};
+
 class A13FactoryBuildingItemRoad : public A13FactoryBuildingItem
 {
 public:
     A13FactoryBuildingItemRoad(EGE::Size index, EGE::Size placedTerrain)
     : A13FactoryBuildingItem("a13:building_road:" + std::to_string(index)), m_index(index), m_placed(placedTerrain) {}
 
-    struct Tile : public A13FactoryBuildingTile
+    struct Part : public A13FactoryBuildingPart
     {
-        Tile()
-        : A13FactoryBuildingTile(nullptr) {}
+        Part()
+        : A13FactoryBuildingPart(nullptr) {}
 
         virtual EGE::Vec2u getSize() const
         {
@@ -144,9 +219,14 @@ public:
         return true;
     }
 
-    virtual EGE::SharedPtr<A13FactoryBuildingTile> getPart() const
+    virtual CanPlaceHere canPlaceHere(A13FactoryTilemap* tilemap, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
     {
-        return make<Tile>();
+        return CanPlaceHere::Yes;
+    }
+
+    virtual EGE::SharedPtr<A13FactoryBuildingPart> getPart() const
+    {
+        return make<Part>();
     }
 
 private:

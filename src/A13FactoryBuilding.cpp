@@ -1,11 +1,14 @@
 #include "A13FactoryBuilding.h"
 
-EGE::Vec2d A13FactoryBuildingTile::getAtlasPosition() const
+#include "Apollo13.h"
+#include "A13GUIProjectBuilder.h"
+
+EGE::Vec2d A13FactoryBuildingPart::getAtlasPosition() const
 {
     return part ? part->getAtlasPosition() : EGE::Vec2d(0, 0);
 }
 
-EGE::Vec2u A13FactoryBuildingTile::getSize() const
+EGE::Vec2u A13FactoryBuildingPart::getSize() const
 {
     return part ? part->getSize() : EGE::Vec2u(0, 0);
 }
@@ -24,7 +27,22 @@ std::string A13FactoryTilemap::getTooltip(EGE::Vec2i pos, const A13FactoryTilema
     return terrain + "\n" + tile;
 }
 
-void A13FactoryBuildingRocketFactory::onActivate(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&)
+bool A13FactoryTilemap::onPlace(EGE::Vec2i pos, EGE::SharedPtr<A13FactoryBuildingPart> part)
+{
+    // TODO: Check resources
+    return part->part->onPlace(this, pos);
+}
+
+CanPlaceHere A13FactoryTilemap::canPlaceHere(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
+{
+    if(state.obj)
+        return state.obj->part->canPlaceHere(pos, state);
+    return CanPlaceHere::Yes;
+}
+
+void A13FactoryBuildingRocketFactory::onActivate(A13FactoryTilemap* tmap, EGE::Vec2i, const A13FactoryTilemap::StateType&)
 {
     log() << "Open ProjectBuilder!";
+    auto gui = Apollo13::instance().getCurrentGUIScreen().get();
+    gui->openDialog(make<A13GUIProjectBuilder>(gui));
 }

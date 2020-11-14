@@ -1,19 +1,19 @@
 #pragma once
 
 #include "A13GUIAbstractBuilder.h"
-#include "BuilderItem.h"
-#include "BuilderPart.h"
+#include "Builder/BuilderItem.h"
+#include "Builder/BuilderPart.h"
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
 
 class A13RocketPart;
 
-struct A13RocketPartTile : public BuilderPart
+struct A13RocketPartPart : public BuilderPart
 {
     A13RocketPart* part;
 
-    A13RocketPartTile(A13RocketPart* _part)
+    A13RocketPartPart(A13RocketPart* _part)
     : part(_part) {}
 
     virtual EGE::Vec2d getAtlasPosition() const;
@@ -34,9 +34,9 @@ public:
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
 };
 
-typedef Aliases::A13FixedTilemapForPart<A13RocketPartTile, 32, 64> A13GUIProjectBuilder_Tilemap;
+typedef Aliases::A13FixedTilemapForPart<A13RocketPartPart, 32, 64> A13GUIProjectBuilder_Tilemap;
 
-class A13ProjectTilemap : public A13GUIProjectBuilder_Tilemap, public A13BuilderTilemap<A13RocketPartTile, 0>
+class A13ProjectTilemap : public A13GUIProjectBuilder_Tilemap, public A13BuilderTilemap<A13RocketPartPart, 0>
 {
 public:
     void onActivate(EGE::Vec2i, const StateType&) {}
@@ -53,7 +53,7 @@ public:
         return m_tile->getItemAtlasPosition();
     }
 
-    virtual EGE::SharedPtr<A13RocketPartTile> getPart() const;
+    virtual EGE::SharedPtr<A13RocketPartPart> getPart() const;
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}

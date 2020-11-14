@@ -32,6 +32,9 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     // Tiles
     registerFactoryBuilding(new A13FactoryBuildingRocketFactory());
     registerFactoryBuilding(new A13FactoryBuildingStartPlatform());
+    registerFactoryBuilding(new A13FactoryBuildingMine(0));
+    registerFactoryBuilding(new A13FactoryBuildingMine(1));
+    registerFactoryBuilding(new A13FactoryBuildingMine(2));
 
     // Items
     registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(0, TERRAIN_FANCY_GRASS)); // grass

@@ -5,124 +5,14 @@
 #include <ege/gui/Label.h>
 #include <ege/scene/CameraObject2D.h>
 #include <ege/scene/Scene2D.h>
-#include <ege/scene/TilemapRenderer2D.h>
 #include <ege/tilemap/ChunkedTileMap2D.h>
 #include <ege/tilemap/FixedTileMap2D.h>
 
-template<class _PartType, EGE::Size _AddLayerCount>
-struct TilemapObjectState
-{
-    typedef _PartType PartType;
-
-    static const EGE::Size AdditionalLayerCount = _AddLayerCount;
-
-    // Pointer to object saved in m_objects, or nullptr (no object).
-    EGE::FlatPtr<_PartType> obj = nullptr;
-
-    // Additional layers (e.g shadows or base terrain) that can be only 1x1.
-    EGE::Uint64 addObjs[AdditionalLayerCount] = {};
-
-    // `obj` distance from corner. (0,0 - left top)
-    EGE::Vec2u cornerPos;
-};
-
-template <class _PartType, EGE::Size _AddLayerCount>
-class A13BuilderTilemap
-{
-public:
-    typedef TilemapObjectState<_PartType, _AddLayerCount> StateType;
-
-    virtual bool useEnsure() { return false; }
-
-    virtual void onActivate(EGE::Vec2i pos, const StateType& state) {}
-    virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) { return ""; }
-};
-
-// TileMap for Builder
-template<class _Tilemap>
-class TileMapObject : public EGE::SceneObject2D
-{
-public:
-    TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1>& atlasTextureNames, EGE::SharedPtr<_Tilemap> tilemap);
-
-    void placePart(EGE::Vec2i pos, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part);
-    void removePart(EGE::Vec2i pos);
-
-    void onActivate(EGE::Vec2i pos);
-    std::string getTooltip(EGE::Vec2i pos);
-
-    EGE::Vec2i mapTilePosition(sf::Vector2f scenePos) const;
-
-    // Use ensureTile() instead of getTile(). The tilemap will be resized
-    // if possible and necessary. DO NOT USE IT WITH FIXED TILEMAPS!
-    void setUseEnsure(bool ensure = true) { m_useEnsure = ensure; ((EGE::TilemapRenderer2D<_Tilemap>*)m_renderer.get())->setUseEnsure(m_useEnsure); }
-
-    // Check if any object is placed in rect [position] of size [range].
-    bool isObjectInArea(EGE::Vec2i position, EGE::Vec2u range) const;
-
-    bool canPartBePlacedHere(EGE::Vec2i pos, EGE::Vec2u partSize) const;
-    void setHighlight(EGE::Vec2i offset, EGE::Vec2u size);
-
-    // Function bool canPartBePlacedHere(_Tilemap* tilemap, EGE::Vec2i pos);
-    // Can be used to handle e.g additional layers.
-    void setCanPartBePlacedHere(std::function<bool(_Tilemap*, EGE::Vec2i)> predicate) { m_placePredicate = predicate; }
-
-    EGE::Vec2d callCustomLayerAtlasMapper(const typename _Tilemap::TileType& tile, EGE::Size layer)
-    {
-        return m_atlasMapper(m_tilemap.get(), tile, layer);
-    }
-
-    void setAtlasMapper(std::function<EGE::Vec2d(_Tilemap*, const typename _Tilemap::TileType&, EGE::Size)> mapper) { m_atlasMapper = mapper; }
-
-    void render(sf::RenderTarget& target, const EGE::RenderStates& states) const;
-
-    EGE::SharedPtr<_Tilemap> m_tilemap = nullptr;
-    std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1> m_builderPartAtlasTextureNames;
-
-private:
-    sf::Vector2f m_highlightPosScreen;
-    EGE::Vec2i m_highlightPos;
-
-    // TODO: change rendering of highlight to mark every tile differently
-    EGE::Vec2u m_highlightSize;
-
-    std::function<bool(_Tilemap*, EGE::Vec2i)> m_placePredicate;
-    std::function<EGE::Vec2d(_Tilemap*, const typename _Tilemap::TileType&, EGE::Size)> m_atlasMapper;
-    std::function<void(EGE::Vec2i, const typename _Tilemap::TileType&)> m_onActivate;
-    EGE::Map<EGE::Vec2i, EGE::SharedPtr<typename _Tilemap::TileType::PartType>> m_objects;
-    bool m_useEnsure = false;
-};
-
-// Widget for Part Selection (left panel)
-template<class _Tilemap, class _Item>
-class PartSelectWidget : public EGE::Widget
-{
-public:
-    PartSelectWidget(EGE::Widget* parent, TileMapObject<_Tilemap>* tmObj)
-    : EGE::Widget(parent), m_tmObject(tmObj)
-    {
-    }
-
-    void onLoad();
-    void onMouseButtonRelease(sf::Event::MouseButtonEvent& event);
-    void renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states = {});
-
-    EGE::Vec2u getPartSize() const { if(m_index == -1) return {}; return m_items[m_index]->getSize(); }
-
-    // -1 for no item
-    void setCurrentItemIndex(int index) { m_index = index; }
-    _Item* getCurrentItem() { return m_index == -1 ? nullptr : m_items[m_index]; }
-    int* getCurrentItemIndex() { return m_index; }
-
-    std::string m_partAtlasTextureName;
-    EGE::GameplayObjectRegistry<EGE::String, _Item>* m_gpo = nullptr;
-
-private:
-    EGE::Vector<_Item*> m_items;
-    sf::Texture* m_atlas = nullptr;
-    TileMapObject<_Tilemap>* m_tmObject;
-    int m_index = -1;
-};
+#include "Builder/TilemapObjectState.h"
+#include "Builder/CanPlaceHere.h"
+#include "Builder/A13BuilderTilemap.h"
+#include "Builder/TileMapObject.h"
+#include "Builder/PartSelectWidget.h"
 
 // _Tilemap must be derived from A13BuilderTilemap<BuilderPart, ...> and A13*TilemapForPart<BuilderPart, ...>
 // _Item must be derived from BuilderItem
@@ -157,6 +47,9 @@ public:
     A13GUIAbstractBuilder(EGE::GUIGameLoop* loop, EGE::SharedPtr<_Tilemap> tilemap)
     : EGE::GUIScreen(loop), m_tilemap(tilemap) {}
 
+    A13GUIAbstractBuilder(EGE::GUIScreen* screen, EGE::SharedPtr<_Tilemap> tilemap)
+    : EGE::GUIScreen(screen), m_tilemap(tilemap) {}
+
     virtual void onLoad();
     virtual void onResize(sf::Event::SizeEvent& event);
     virtual void onMouseButtonPress(sf::Event::MouseButtonEvent& event);
@@ -183,6 +76,9 @@ public:
     // Args: tilemap, tilePos, part (part is from GPO)
     virtual bool placePart(_Tilemap*, EGE::Vec2i, typename _Tilemap::TileType::PartType*) { return false; }
     virtual bool removePart(_Tilemap*, EGE::Vec2i, typename _Tilemap::TileType::PartType*) { return false; }
+
+    CanPlaceHere canPlaceHere(EGE::Vec2i);
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const typename _Tilemap::TileType& tile, _Item* item) { return CanPlaceHere::NotLoaded; }
 
     // Returns atlas position for specific layer.
     // Args: tilemap, tileState, layer

@@ -2,15 +2,15 @@
 
 int main()
 {
-    // Create a new loop.
-    Apollo13 game;
+    // Create an instance of game by referring to it.
+    Apollo13::instance();
 
     // Open window.
-    game.setWindow(make<EGE::SFMLSystemWindow>(sf::VideoMode(500, 500), "Apollo13"));
+    Apollo13::instance().setWindow(make<EGE::SFMLSystemWindow>(sf::VideoMode(500, 500), "Apollo13"));
 
     // Set bg color
-    game.setBackgroundColor(sf::Color(192, 228, 237));
+    Apollo13::instance().setBackgroundColor(sf::Color(192, 228, 237));
 
     // Run game.
-    return game.run();
+    return Apollo13::instance().run();
 }

@@ -15,6 +15,7 @@ public:
         setBuilderAtlas("gui/factory_builder/builder_atlas.png");
         // additional layers
         setBuilderAtlas("gui/factory_builder/terrain.png", FACTORY_BUILDER_LAYER_TERRAIN);
+        setBuilderAtlas("gui/factory_builder/ores.png", FACTORY_BUILDER_LAYER_ORES);
         setBuilderAtlas("gui/factory_builder/shadows.png", FACTORY_BUILDER_LAYER_SHADOWS);
 
         setSelectorAtlas("gui/factory_builder/items.png");
@@ -35,13 +36,23 @@ public:
         );
     }
 
-    virtual EGE::Vec2d atlasMapper(A13FactoryTilemap* tilemap, const A13FactoryTilemap::TileType& state, EGE::Size layer) override
+    virtual EGE::Vec2d atlasMapper(A13FactoryTilemap* tilemap, const A13FactoryTilemap::TileType& state, EGE::Size addLayer) override
     {
-        if(layer == FACTORY_BUILDER_LAYER_TERRAIN)
+        if(addLayer == FACTORY_BUILDER_LAYER_TERRAIN)
         {
-            EGE::Uint64 index = state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN];
+            EGE::Uint64 index = state.addObjs[addLayer];
             return EGE::Vec2d(0, index * 16);
         }
+        else if(addLayer == FACTORY_BUILDER_LAYER_ORES)
+        {
+            Ore* ore = &state.addObjs[addLayer];
+            return EGE::Vec2d(ore->type * 16, (ore->count * 8 / MAX_ORE_COUNT) * 16);
+        }
         return EGE::Vec2d(0, 0);
+    }
+
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile, A13FactoryBuildingItem* item)
+    {
+        return item->canPlaceHere(tileRel, tile);
     }
 };
