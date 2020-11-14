@@ -43,6 +43,7 @@ class A13FactoryTilemap : public A13GUIFactoryBuilder_Tilemap, public A13Builder
 {
 public:
     virtual void onActivate(EGE::Vec2i pos, const StateType& tile);
+    virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state);
 };
 
 class A13FactoryBuilding : public EGE::GameplayObject, public BuilderPart
@@ -62,8 +63,9 @@ public:
     virtual bool isTerrainLayer() { return false; }
 
     // Called when left-clicking on object.
-    // Args: tilemap, tilePos, tile
+    // Args: tilemap, partPos, tile
     virtual void onActivate(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&) { log() << "onActivate"; }
+    virtual std::string getTooltip(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&) { return getId(); }
 };
 
 class A13FactoryBuildingItem : public EGE::GameplayObject, public BuilderItem<A13GUIFactoryBuilder_Tilemap>
@@ -98,6 +100,10 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {1, 0}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 1}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual void onActivate(A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&);
+    virtual std::string getTooltip(A13FactoryTilemap*, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
+        { return getId() + "\nClick to open Project Builder"; }
 };
 
 class A13FactoryBuildingStartPlatform : public A13FactoryBuilding
@@ -114,8 +120,8 @@ public:
 class A13FactoryBuildingItemRoad : public A13FactoryBuildingItem
 {
 public:
-    A13FactoryBuildingItemRoad(EGE::Size index)
-    : A13FactoryBuildingItem("a13:building_road:" + std::to_string(index)), m_index(index) {}
+    A13FactoryBuildingItemRoad(EGE::Size index, EGE::Size placedTerrain)
+    : A13FactoryBuildingItem("a13:building_road:" + std::to_string(index)), m_index(index), m_placed(placedTerrain) {}
 
     struct Tile : public A13FactoryBuildingTile
     {
@@ -134,7 +140,7 @@ public:
 
     virtual bool onPlace(A13GUIFactoryBuilder_Tilemap* tilemap, EGE::Vec2i tilePos) const
     {
-        tilemap->ensureTile(tilePos).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = m_index;
+        tilemap->ensureTile(tilePos).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = m_placed;
         return true;
     }
 
@@ -145,4 +151,5 @@ public:
 
 private:
     EGE::Size m_index;
+    EGE::Size m_placed;
 };

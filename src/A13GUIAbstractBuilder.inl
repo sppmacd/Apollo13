@@ -22,7 +22,6 @@ void PartSelectWidget<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::MouseBut
         if(event.x > 10 && event.x < getSize().x - 10)
         {
             size_t index = (event.y) / getSize().x;
-            log() << "partSelect " << index;
             if(index >= 0 && index < m_items.size())
             {
                 setCurrentItemIndex(index);
@@ -234,6 +233,9 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
     for(EGE::Uint32 y = 0; y < partSize.y; y++)
     {
         auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({x + objectPos.x, y + objectPos.y}) : m_tilemap->getTile({x + objectPos.x, y + objectPos.y}));
+        if(!tile)
+            return;
+
         tile->obj = nullptr;
         tile->cornerPos = {0, 0};
     }
@@ -243,7 +245,15 @@ template<class _Tilemap>
 void TileMapObject<_Tilemap>::onActivate(EGE::Vec2i pos)
 {
     auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({pos.x, pos.y}) : m_tilemap->getTile({pos.x, pos.y}));
-    m_tilemap->onActivate(pos, *tile);
+    if(tile)
+        m_tilemap->onActivate(pos, *tile);
+}
+
+template<class _Tilemap>
+std::string TileMapObject<_Tilemap>::getTooltip(EGE::Vec2i pos)
+{
+    auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({pos.x, pos.y}) : m_tilemap->getTile({pos.x, pos.y}));
+    return tile ? m_tilemap->getTooltip(pos, *tile) : "Not loaded";
 }
 
 template<class _Tilemap>
@@ -324,6 +334,11 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onLoad()
     m_partSelector->m_partAtlasTextureName = m_selectorAtlasTN;
     m_partSelector->m_gpo = m_gpo;
     addWidget(m_partSelector);
+
+    // Add tooltip label
+    m_toolTipLabel = make<EGE::Label>(this);
+    m_toolTipLabel->setPosition({90, 10});
+    addWidget(m_toolTipLabel);
 }
 
 template<class _Tilemap, class _Item>
@@ -398,13 +413,19 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
     }
 
     // Update highlight.
+    auto& wnd = *getWindow().lock().get();
+    sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(event.x, event.y), getView(wnd)) - m_tileMapObject->getPosition();
     if(m_partSelector->getCurrentItem())
     {
-        auto& wnd = *getWindow().lock().get();
-        sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(event.x, event.y), getView(wnd)) - m_tileMapObject->getPosition();
         EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
         m_tileMapObject->setHighlight(tileRel, m_partSelector->getCurrentItem()->getPart()->getSize());
     }
+
+    // Get tooltip and set it to current.
+    EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
+    m_tooltip = m_tileMapObject->getTooltip(tileRel);
+    log() << "tooltip = " << m_tooltip;
+    m_toolTipLabel->setString(m_tooltip);
 
     if(m_dragging)
     {
@@ -429,4 +450,14 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseWheelScroll(sf::Event::Mouse
     }
     m_camera->setZoom(m_zoom);
     log() << m_zoom;
+}
+
+template<class _Tilemap, class _Item>
+void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& event)
+{
+    if(event.code == sf::Keyboard::Escape)
+    {
+        m_partSelector->setCurrentItemIndex(-1);
+        m_tileMapObject->setHighlight({0, 0}, {0, 0});
+    }
 }

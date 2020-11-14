@@ -2,6 +2,7 @@
 
 #include <ege/gpo/GameplayObjectRegistry.h>
 #include <ege/gui/GUIScreen.h>
+#include <ege/gui/Label.h>
 #include <ege/scene/CameraObject2D.h>
 #include <ege/scene/Scene2D.h>
 #include <ege/scene/TilemapRenderer2D.h>
@@ -33,7 +34,8 @@ public:
 
     virtual bool useEnsure() { return false; }
 
-    virtual void onActivate(EGE::Vec2i pos, const StateType& state) = 0;
+    virtual void onActivate(EGE::Vec2i pos, const StateType& state) {}
+    virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) { return ""; }
 };
 
 // TileMap for Builder
@@ -47,6 +49,7 @@ public:
     void removePart(EGE::Vec2i pos);
 
     void onActivate(EGE::Vec2i pos);
+    std::string getTooltip(EGE::Vec2i pos);
 
     EGE::Vec2i mapTilePosition(sf::Vector2f scenePos) const;
 
@@ -160,6 +163,7 @@ public:
     virtual void onMouseButtonRelease(sf::Event::MouseButtonEvent& event);
     virtual void onMouseMove(sf::Event::MouseMoveEvent& event);
     virtual void onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event);
+    virtual void onKeyPress(sf::Event::KeyEvent& event);
 
     void setBuilderBackground(std::string name) { m_backgroundTN = name; }
 
@@ -202,10 +206,12 @@ protected:
 private:
     EGE::SharedPtr<EGE::Scene2D> m_scene;
     EGE::SharedPtr<EGE::CameraObject2D> m_camera;
+    EGE::SharedPtr<EGE::Label> m_toolTipLabel;
 
     std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1> m_builderAtlasTNs;
     std::string m_selectorAtlasTN;
     std::string m_backgroundTN;
+    std::string m_tooltip;
     EGE::GameplayObjectRegistry<EGE::String, _Item>* m_gpo = nullptr;
     bool m_useEnsure = false;
 
