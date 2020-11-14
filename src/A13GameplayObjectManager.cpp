@@ -34,9 +34,9 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     registerFactoryBuilding(new A13FactoryBuildingStartPlatform());
 
     // Items
-    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_FANCY_GRASS)); // grass
-    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_ASPHALT_ROAD)); // dark asphalt
-    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_ASPHALT_ROAD_LIGHT)); // light asphalt
-    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_TRAMPLED_GRASS)); // trampled grass
-    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_GRAVEL)); // trampled grass
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(0, TERRAIN_FANCY_GRASS)); // grass
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(1, TERRAIN_ASPHALT_ROAD)); // dark asphalt
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(2, TERRAIN_ASPHALT_ROAD_LIGHT)); // light asphalt
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(3, TERRAIN_TRAMPLED_GRASS)); // trampled grass
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(4, TERRAIN_GRAVEL)); // gravel
 }
