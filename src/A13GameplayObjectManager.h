@@ -25,6 +25,8 @@ public:
     void registerRocketPart(A13RocketPart* part);
     void registerFactoryBuilding(A13FactoryBuilding* part);
 
+    void registerFactoryBuildingItem(A13FactoryBuildingItem* part);
+
     bool clear()
     {
         rocketParts.clear();
@@ -32,6 +34,15 @@ public:
         return true;
     }
 
+    // Rocket parts (that are placed)
     EGE::GameplayObjectRegistry<EGE::String, A13RocketPart> rocketParts;
+
+    // Items for Rocket Parts (that are in left panel)
+    EGE::GameplayObjectRegistry<EGE::String, A13RocketPartItem> rocketPartItems;
+
+    // Factory Building (that are placed)
     EGE::GameplayObjectRegistry<EGE::String, A13FactoryBuilding> factoryBuildings;
+
+    // Items for Factory Buildings (that are in left panel)
+    EGE::GameplayObjectRegistry<EGE::String, A13FactoryBuildingItem> factoryBuildingItems;
 };

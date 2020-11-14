@@ -22,7 +22,9 @@ EGE::EventResult Apollo13::load()
 
     resMan->registerTexture("gui/factory_builder/background.png");
     resMan->registerTexture("gui/factory_builder/builder_atlas.png");
-    resMan->registerTexture("game/factory_buildings.png");
+    resMan->registerTexture("gui/factory_builder/items.png");
+    resMan->registerTexture("gui/factory_builder/terrain.png");
+    resMan->registerTexture("gui/factory_builder/shadows.png");
 
     setResourceManager(resMan);
 

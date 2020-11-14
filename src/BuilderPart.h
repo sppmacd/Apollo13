@@ -2,7 +2,8 @@
 
 #include <ege/util/Vector.h>
 
-// A part that can be used in Builder GUI.
+// A part that can be used in Builder GUI (on tilemap).
+// TODO: Make it Serializable to allow world saving!
 class BuilderPart
 {
 public:

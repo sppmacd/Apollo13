@@ -3,11 +3,18 @@
 void A13GameplayObjectManager::registerRocketPart(A13RocketPart* part)
 {
     rocketParts.add(part->getId(), part);
+    rocketPartItems.add(part->getId(), new A13RocketPartItem(part));
 }
 
 void A13GameplayObjectManager::registerFactoryBuilding(A13FactoryBuilding* part)
 {
     factoryBuildings.add(part->getId(), part);
+    factoryBuildingItems.add(part->getId(), new A13FactoryBuildingItem(part->getId(), part));
+}
+
+void A13GameplayObjectManager::registerFactoryBuildingItem(A13FactoryBuildingItem* part)
+{
+    factoryBuildingItems.add(part->getId(), part);
 }
 
 void A13GameplayObjectManager::registerRocketParts()
@@ -22,10 +29,14 @@ void A13GameplayObjectManager::registerRocketParts()
 
 void A13GameplayObjectManager::registerFactoryBuildings()
 {
+    // Tiles
     registerFactoryBuilding(new A13FactoryBuildingRocketFactory());
     registerFactoryBuilding(new A13FactoryBuildingStartPlatform());
-    registerFactoryBuilding(new A13FactoryBuildingRoad(0)); // dirt
-    registerFactoryBuilding(new A13FactoryBuildingRoad(1)); // light asphalt
-    registerFactoryBuilding(new A13FactoryBuildingRoad(2)); // dark asphalt
-    registerFactoryBuilding(new A13FactoryBuildingRoad(3)); // empty gray sth
+
+    // Items
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_FANCY_GRASS)); // grass
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_ASPHALT_ROAD)); // dark asphalt
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_ASPHALT_ROAD_LIGHT)); // light asphalt
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_TRAMPLED_GRASS)); // trampled grass
+    registerFactoryBuildingItem(new A13FactoryBuildingItemRoad(TERRAIN_GRAVEL)); // trampled grass
 }
