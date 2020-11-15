@@ -15,4 +15,7 @@ public:
 
     // returns part that corresponds to that item.
     virtual EGE::SharedPtr<typename _Tilemap::TileType::PartType> getPart() const = 0;
+
+    // returns string that appears when hovering item on left panel
+    virtual std::string getTooltip() { return "Generic Builder Item"; }
 };

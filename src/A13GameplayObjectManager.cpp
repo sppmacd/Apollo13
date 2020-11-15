@@ -20,9 +20,9 @@ void A13GameplayObjectManager::registerFactoryBuildingItem(A13FactoryBuildingIte
 void A13GameplayObjectManager::registerRocketParts()
 {
     registerRocketPart(new A13RocketPartEngine());
-    registerRocketPart(new A13RocketPartFuelTank(1));
-    registerRocketPart(new A13RocketPartFuelTank(2));
-    registerRocketPart(new A13RocketPartFuelTank(4));
+    registerRocketPart(new A13RocketPartFuelTank(0, 1));
+    registerRocketPart(new A13RocketPartFuelTank(1, 2));
+    registerRocketPart(new A13RocketPartFuelTank(2, 4));
     registerRocketPart(new A13RocketPartCone());
     registerRocketPart(new A13RocketPartCapsule());
 }

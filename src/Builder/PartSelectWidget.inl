@@ -8,6 +8,8 @@ void PartSelectWidget<_Tilemap, _Item>::onLoad()
     {
         m_items.push_back(part.second);
     }
+    m_font = getLoop()->getResourceManager().lock()->getDefaultFont().get();
+    ASSERT(m_font);
 }
 
 template<class _Tilemap, class _Item>
@@ -37,22 +39,31 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
     renderer.setStates(states);
     renderer.renderRectangle(0, 0, getSize().x, getSize().y, sf::Color(0, 0, 0, 127));
 
-    // Highlight (if rendering on window)
+    std::string tooltip;
+
+    // Highlight and tooltip (if rendering on window)
     sf::RenderWindow* wnd = (sf::RenderWindow*)&target;
+    sf::Vector2i mousePos;
     if(wnd)
     {
-        sf::Vector2i mousePos = sf::Mouse::getPosition(*wnd);
+        mousePos = sf::Mouse::getPosition(*wnd);
         if(mousePos.x < getSize().x)
         {
-            size_t index = (mousePos.y) / getSize().x;
+            size_t index = (mousePos.y) / (getSize().x);
             if(index >= 0 && index < m_items.size())
-                renderer.renderRectangle(0, getSize().x * index, getSize().x, getSize().x, sf::Color(0, 0, 0, 127));
+            {
+                // Highlight
+                renderer.renderRectangle(0, (getSize().x) * index, getSize().x, getSize().x, sf::Color(255, 255, 255, 127));
+
+                // Tooltip
+                tooltip = m_items[index]->getTooltip();
+            }
         }
     }
 
     // Permanent highlight (For active object)
     size_t index = m_index;
-    renderer.renderRectangle(0, getSize().x * index, getSize().x, getSize().x, sf::Color(0, 255, 0, 127));
+    renderer.renderRectangle(0, (getSize().x) * index, getSize().x, getSize().x, sf::Color(0, 255, 0, 127));
 
     // Objects
     size_t c = 0;
@@ -64,7 +75,22 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
         texRect.top = item->getAtlasPosition().y * 64;
         texRect.width = 64;
         texRect.height = 64;
-        renderer.renderTexturedRectangle(10, getSize().x * c + 10, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);
+        renderer.renderTexturedRectangle(10, (getSize().x) * c + 10, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);
         c++;
+    }
+
+    if(wnd && !tooltip.empty())
+    {
+        // TODO: EGE::Widget::enterGlobalView()
+        m_parent->setViewForWidget(target);
+
+        // Tooltip
+        EGE::Renderer::TextWithBackgroundSettings settings;
+        settings.background_color = sf::Color(0, 0, 0, 127);
+        settings.font_size = 12;
+        renderer.renderTextWithBackground(mousePos.x + 10, mousePos.y - 10, *m_font, tooltip, settings);
+
+        // we don't really need it
+        setViewForWidget(target);
     }
 }

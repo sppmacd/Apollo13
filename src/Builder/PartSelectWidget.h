@@ -33,6 +33,7 @@ private:
     EGE::Vector<_Item*> m_items;
     sf::Texture* m_atlas = nullptr;
     TileMapObject<_Tilemap>* m_tmObject;
+    sf::Font* m_font = nullptr;
     int m_index = -1;
 };
 

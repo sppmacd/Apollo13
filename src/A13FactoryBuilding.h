@@ -208,6 +208,13 @@ public:
 
     virtual bool isTerrainLayer() { return true; }
 
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state)
+    {
+        if(state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] == m_placed)
+            return CanPlaceHere::Restricted;
+        return CanPlaceHere::Yes;
+    }
+
     virtual bool onPlace(A13GUIFactoryBuilder_Tilemap* tilemap, EGE::Vec2i tilePos) const
     {
         tilemap->ensureTile(tilePos).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = m_placed;

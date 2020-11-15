@@ -10,4 +10,9 @@ public:
     A13GUIProjectBuilder(EGE::GUIScreen* loop);
 
     void onKeyPress(sf::Event::KeyEvent& event);
+
+    CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13ProjectTilemap::StateType& tile, A13RocketPartItem* item)
+    {
+        return item->canPlaceHere(tileRel, tile);
+    }
 };

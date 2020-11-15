@@ -7,7 +7,7 @@ A13GUIProjectBuilder::A13GUIProjectBuilder(EGE::GUIScreen* loop)
 {
     setBuilderBackground("gui/pb/background.png");
     setBuilderAtlas("gui/pb/rocket_parts.png");
-    setSelectorAtlas("gui/pb/rocket_parts.png");
+    setSelectorAtlas("gui/pb/items.png");
     setGPO(&A13GameplayObjectManager::instance().rocketPartItems);
     m_tilemap->setTileSize(EGE::Vec2u(16, 16));
 }

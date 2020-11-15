@@ -42,7 +42,7 @@ public:
     void onActivate(EGE::Vec2i, const StateType&) {}
 };
 
-class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13GUIProjectBuilder_Tilemap>
+class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>
 {
 public:
     A13RocketPartItem(A13RocketPart* createdTile)
@@ -55,8 +55,15 @@ public:
 
     virtual EGE::SharedPtr<A13RocketPartPart> getPart() const;
 
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i, const A13ProjectTilemap::StateType& tile)
+    {
+        return !tile.obj ? CanPlaceHere::Yes : CanPlaceHere::No;
+    }
+
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
+
+    virtual std::string getTooltip() { return m_tile->getId(); }
 
 private:
     A13RocketPart* m_tile;
@@ -76,15 +83,16 @@ public:
 class A13RocketPartFuelTank : public A13RocketPart
 {
 public:
-    A13RocketPartFuelTank(EGE::Size size)
-    : A13RocketPart("a13:fuel_tank:generic:" + std::to_string(size)), m_size(size) {}
+    A13RocketPartFuelTank(EGE::Size index, EGE::Size size)
+    : A13RocketPart("a13:fuel_tank:generic:" + std::to_string(size)), m_index(index), m_size(size) {}
 
     virtual EGE::Vec2d getAtlasPosition() const { return {2, 1}; }
-    virtual EGE::Vec2d getItemAtlasPosition() const { return {m_size, 3}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {m_index, 2}; }
     virtual EGE::Vec2u getSize() const { return {2, m_size}; }
 
 private:
     EGE::Size m_size;
+    EGE::Size m_index;
 };
 
 class A13RocketPartCone : public A13RocketPart
@@ -94,7 +102,7 @@ public:
     : A13RocketPart("a13:cone:generic") {}
 
     virtual EGE::Vec2d getAtlasPosition() const { return {0, 5}; }
-    virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 5}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 3}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
 
 private:
@@ -108,6 +116,6 @@ public:
     : A13RocketPart("a13:capsule:generic") {}
 
     virtual EGE::Vec2d getAtlasPosition() const { return {0, 3}; }
-    virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 7}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 4}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
 };

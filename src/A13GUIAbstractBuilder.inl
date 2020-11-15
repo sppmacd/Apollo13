@@ -68,6 +68,7 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onLoad()
     // Add tooltip label
     m_toolTipLabel = make<EGE::Label>(this);
     m_toolTipLabel->setPosition({90, 10});
+    m_toolTipLabel->setColor(sf::Color::White);
     addWidget(m_toolTipLabel);
 }
 
