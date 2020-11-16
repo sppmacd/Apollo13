@@ -131,7 +131,7 @@ Cost A13FactoryBuildingMine::getCost() const
     case 0:
         return {
             { A13GameplayObjectManager::items.iron, 75 },
-            { A13GameplayObjectManager::items.copper, 30 },
+            { A13GameplayObjectManager::items.copper, 30 }
         };
     case 1:
         return {
