@@ -44,7 +44,24 @@ public:
 
     static class _ResourceItems
     {
-
+    public:
+        ResourceItem* coal_ore;
+        ResourceItem* iron_ore;
+        ResourceItem* iron;
+        ResourceItem* copper_ore;
+        ResourceItem* copper;
+        ResourceItem* titanium_ore;
+        ResourceItem* titanium;
+        ResourceItem* silicon_sand;
+        ResourceItem* silicon;
+        ResourceItem* aluminum_ore;
+        ResourceItem* aluminum;
+        ResourceItem* diamond_ore;
+        ResourceItem* diamond;
+        ResourceItem* gold_ore;
+        ResourceItem* gold;
+        ResourceItem* silver_ore;
+        ResourceItem* silver;
     } items;
 
     // Rocket parts (that are placed)

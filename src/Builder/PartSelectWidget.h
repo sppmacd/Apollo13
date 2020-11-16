@@ -27,10 +27,15 @@ public:
     _Item* getCurrentItem() { return m_index == -1 ? nullptr : m_items[m_index]; }
     int* getCurrentItemIndex() { return m_index; }
 
+    void setCustomRenderer(std::function<void(sf::RenderTarget&, _Item*)> renderer) { m_customRenderer = renderer; }
+
     std::string m_partAtlasTextureName;
     EGE::GameplayObjectRegistry<EGE::String, _Item>* m_gpo = nullptr;
 
+    sf::Texture* getAtlas() { return m_atlas; }
+
 private:
+    std::function<void(sf::RenderTarget&, _Item*)> m_customRenderer;
     EGE::Vector<_Item*> m_items;
     sf::Texture* m_atlas = nullptr;
     TileMapObject<_Tilemap>* m_tmObject;

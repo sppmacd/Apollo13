@@ -28,6 +28,9 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onLoad()
 {
     EGE::GUIScreen::onLoad();
 
+    // Load font.
+    m_font = getLoop()->getResourceManager().lock()->getDefaultFont().get();
+
     // Allocate scene.
     m_scene = make<EGE::Scene2D>(getLoop());
 
@@ -154,6 +157,7 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
     if(m_dialog)
         return;
 
+    // Do screen dragging.
     sf::Vector2f currentPos(event.x, event.y);
     auto diff = (currentPos - sf::Vector2f(m_dragStartPos));
 
@@ -172,8 +176,15 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
     }
 
     // Get tooltip and set it to current.
-    EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
-    m_tooltip = m_tileMapObject->getTooltip(tileRel);
+    if(currentPos.x > m_partSelector->getSize().x)
+    {
+        EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
+        m_tooltip = m_tileMapObject->getTooltip(tileRel);
+    }
+    else
+    {
+        m_tooltip.clear();
+    }
     m_toolTipLabel->setString(m_tooltip);
 
     if(m_dragging)

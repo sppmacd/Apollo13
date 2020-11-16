@@ -14,6 +14,8 @@ public:
     virtual void onLoad();
     virtual void renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states = {});
 
+    sf::Texture* getAtlas() { return m_atlas; }
+
 private:
     sf::Texture* m_atlas = nullptr;
     sf::Font* m_font = nullptr;

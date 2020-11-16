@@ -57,69 +57,81 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(4, TERRAIN_GRAVEL)); // gravel
 }
 
+A13GameplayObjectManager::_ResourceItems A13GameplayObjectManager::items;
+
 void A13GameplayObjectManager::registerResourceItems()
 {
-    // TODO: Eventually add EGE::TextureAtlas !!!
+    // TODO: Finally add EGE::TextureAtlas !!!
 
     // Ore resources
     EGE::UniquePtr<ResourceItem> item;
 
     // Coal
     item = std::make_unique<ResourceItem>("a13:coal:ore");
+    items.coal_ore = item.get();
     registerResourceItem(std::move(item));
 
     // Iron
     item = std::make_unique<ResourceItem>("a13:iron:ore");
+    items.iron_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:iron");
+    items.iron = item.get();
     registerResourceItem(std::move(item));
 
     // Copper
     item = std::make_unique<ResourceItem>("a13:copper:ore");
+    items.copper_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:copper");
+    items.copper = item.get();
     registerResourceItem(std::move(item));
 
     // Titanium
     item = std::make_unique<ResourceItem>("a13:titanium:ore");
+    items.titanium_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:titanium");
+    items.titanium = item.get();
     registerResourceItem(std::move(item));
 
     // Sand & Silicon
     item = std::make_unique<ResourceItem>("a13:silicon:sand");
+    items.silicon_sand = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:silicon");
+    items.silicon = item.get();
     registerResourceItem(std::move(item));
-
-    /*
-    #define ORE_ALUMINUM 6
-    #define ORE_DIAMOND 7
-    #define ORE_GOLD 8
-    #define ORE_SILVER 9
-    */
 
     // Aluminum
     item = std::make_unique<ResourceItem>("a13:aluminum:ore");
+    items.aluminum_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:aluminum");
+    items.aluminum = item.get();
     registerResourceItem(std::move(item));
 
     // Diamond
     item = std::make_unique<ResourceItem>("a13:diamond:ore");
+    items.diamond_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:diamond");
+    items.diamond = item.get();
     registerResourceItem(std::move(item));
 
     // Gold
     item = std::make_unique<ResourceItem>("a13:gold:ore");
+    items.gold_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:gold");
+    items.gold = item.get();
     registerResourceItem(std::move(item));
 
     // Silver
     item = std::make_unique<ResourceItem>("a13:silver:ore");
+    items.silver_ore = item.get();
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:silver");
+    items.silver = item.get();
     registerResourceItem(std::move(item));
 }

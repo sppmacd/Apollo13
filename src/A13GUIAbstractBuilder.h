@@ -99,6 +99,9 @@ protected:
         return m_scene->mapScreenToScene(wnd, sf::Vector2i(pos.x, pos.y), getView(wnd));
     }
 
+protected:
+    sf::Font* m_font = nullptr;
+
 private:
     EGE::SharedPtr<EGE::Scene2D> m_scene;
     EGE::SharedPtr<EGE::CameraObject2D> m_camera;

@@ -78,6 +78,16 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
 
                 // Tooltip
                 tooltip = m_items[index]->getTooltip();
+
+                m_parent->setViewForWidget(target);
+
+                // Custom info
+                if(m_customRenderer)
+                {
+                    m_customRenderer(target, m_items[index]);
+                }
+
+                setViewForWidget(target);
             }
         }
     }
@@ -97,10 +107,11 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
         texRect.width = 64;
         texRect.height = 64;
         renderer.renderTexturedRectangle(10, (getSize().x) * c + 10 - scrollPos, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);
+
         c++;
     }
 
-    if(wnd && !tooltip.empty())
+    /*if(wnd && !tooltip.empty())
     {
         // TODO: EGE::Widget::enterGlobalView()
         m_parent->setViewForWidget(target);
@@ -113,5 +124,5 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
 
         // we don't really need it
         setViewForWidget(target);
-    }
+    }*/
 }

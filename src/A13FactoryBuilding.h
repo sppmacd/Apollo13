@@ -134,13 +134,15 @@ public:
 
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile)
     {
-        return m_building ? m_building->canPlaceHere(tileRel, tile) : CanPlaceHere::Yes;
+        return m_building ? m_building->canPlaceHere(tileRel, tile) : CanPlaceHere::NotLoaded;
     }
 
     virtual Cost getCost() const
     {
-        return m_building->getCost();
+        return m_building ? m_building->getCost() : Cost();
     }
+
+    virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i partPos);
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; };
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {};
@@ -172,10 +174,7 @@ public:
         }
     };
 
-    virtual Cost getCost() const
-    {
-        return { {} };
-    }
+    virtual Cost getCost() const;
 
     A13_CUSTOM_FACTORY_PART(Part);
 };
@@ -189,6 +188,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {5, 0}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 2}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual Cost getCost() const;
 };
 
 class A13FactoryBuildingMine : public A13FactoryBuilding
@@ -231,6 +232,9 @@ public:
 
         virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i partPos)
         {
+            if(!A13FactoryBuildingPart::onPlace(tilemap, partPos))
+                return false;
+
             for(EGE::Size x = 0; x < getSize().x; x++)
             for(EGE::Size y = 0; y < getSize().y; y++)
             {
@@ -254,6 +258,8 @@ public:
     };
 
     A13_CUSTOM_FACTORY_PART(Part);
+
+    virtual Cost getCost() const;
 
 private:
     EGE::Size m_level;
@@ -285,7 +291,7 @@ public:
         return CanPlaceHere::Yes;
     }
 
-    virtual bool onPlace(A13GUIFactoryBuilder_Tilemap* tilemap, EGE::Vec2i tilePos) const
+    virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i tilePos) const
     {
         tilemap->ensureTile(tilePos).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = m_placed;
         return true;
@@ -300,6 +306,8 @@ public:
     {
         return make<Part>();
     }
+
+    virtual Cost getCost() const;
 
 private:
     EGE::Size m_index;

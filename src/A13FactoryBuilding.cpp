@@ -2,6 +2,7 @@
 
 #include "Apollo13.h"
 #include "A13GUIProjectBuilder.h"
+#include "A13GameplayObjectManager.h"
 #include "PlayerStats.h"
 
 EGE::Vec2d A13FactoryBuildingPart::getAtlasPosition() const
@@ -27,6 +28,33 @@ std::string A13FactoryTilemap::getTooltip(EGE::Vec2i pos, const A13FactoryTilema
     std::string ore = _ore->id ? ("Ore: " + std::to_string(_ore->count) + "x #" + std::to_string(_ore->id) + "\n") : "";
     std::string tile = state.part ? state.part->getTooltip(this, pos - EGE::Vec2i(state.cornerPos), state) : "No object";
     return terrain + ore + tile;
+}
+
+bool A13FactoryBuildingItem::onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i partPos)
+{
+    if(!m_building)
+        return true;
+
+    // Check resources in player inventory.
+    Cost cost = getCost();
+
+    for(ResourceItemStack& stack: cost)
+    {
+        if(PlayerStats::instance().resourceItems[stack.getItem()->getId()] < stack.getItemCount())
+        {
+            // We inform Builder that we placed object,
+            // but we didn't do that.
+            return true;
+        }
+    }
+
+    // Remove resources from player inventory.
+    for(ResourceItemStack& stack: cost)
+    {
+        PlayerStats::instance().resourceItems[stack.getItem()->getId()] -= stack.getItemCount();
+    }
+
+    return false;
 }
 
 void A13FactoryBuildingRocketFactory::Part::onActivate(A13FactoryTilemap* tmap, EGE::Vec2i)
@@ -75,4 +103,54 @@ void A13FactoryBuildingMine::Part::onUpdate(A13FactoryTilemap* tilemap, EGE::Vec
             nextRandomTime = EGE::Random::fastRandom().nextIntRanged(60 / orePos.size(), 90 / orePos.size()) / multiplier;
         }
     }
+}
+
+// RECIPES
+Cost A13FactoryBuildingRocketFactory::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.aluminum, 50 },
+        { A13GameplayObjectManager::items.iron, 150 }
+    };
+}
+
+Cost A13FactoryBuildingStartPlatform::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.silicon_sand, 200 },
+        { A13GameplayObjectManager::items.iron, 75 },
+        { A13GameplayObjectManager::items.titanium, 25 }
+    };
+}
+
+Cost A13FactoryBuildingMine::getCost() const
+{
+    switch(m_level)
+    {
+    case 0:
+        return {
+            { A13GameplayObjectManager::items.iron, 50 },
+        };
+    case 1:
+        return {
+            { A13GameplayObjectManager::items.iron, 75 },
+            { A13GameplayObjectManager::items.copper, 50 },
+            { A13GameplayObjectManager::items.titanium, 25 }
+        };
+    case 2:
+        return {
+            { A13GameplayObjectManager::items.iron, 100 },
+            { A13GameplayObjectManager::items.copper, 75 },
+            { A13GameplayObjectManager::items.diamond, 25 }
+        };
+    default:
+        return {};
+    }
+}
+
+Cost A13FactoryBuildingItemRoad::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.silicon_sand, 10 }
+    };
 }
