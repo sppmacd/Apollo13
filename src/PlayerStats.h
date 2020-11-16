@@ -12,5 +12,6 @@ public:
 
     void initialize();
 
-    EGE::IdMap<int> resourceItems;
+    // maps ResourceItem ID to count
+    EGE::StringMap<int> resourceItems;
 };

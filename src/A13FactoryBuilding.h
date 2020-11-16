@@ -3,6 +3,7 @@
 #include "A13GUIAbstractBuilder.h"
 #include "Builder/BuilderItem.h"
 #include "Builder/BuilderPart.h"
+#include "ResourceItem.h"
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
@@ -77,6 +78,8 @@ public:
     virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) const;
 };
 
+typedef EGE::Vector<ResourceItemStack> Cost;
+
 class A13FactoryBuilding : public EGE::GameplayObject
 {
 public:
@@ -93,6 +96,11 @@ public:
     virtual EGE::SharedPtr<A13FactoryBuildingPart> makePart() const
     {
         return make<A13FactoryBuildingPart>(this);
+    }
+
+    virtual Cost getCost() const
+    {
+        return {};
     }
 
     // Returns if object can be placed here.
@@ -129,6 +137,11 @@ public:
         return m_building ? m_building->canPlaceHere(tileRel, tile) : CanPlaceHere::Yes;
     }
 
+    virtual Cost getCost() const
+    {
+        return m_building->getCost();
+    }
+
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; };
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {};
 
@@ -158,6 +171,11 @@ public:
             return A13FactoryBuildingPart::getTooltip(tilemap, pos, state) + "\nClick to open Project Builder";
         }
     };
+
+    virtual Cost getCost() const
+    {
+        return { {} };
+    }
 
     A13_CUSTOM_FACTORY_PART(Part);
 };
@@ -195,6 +213,11 @@ public:
         return cph == CanPlaceHere::Yes ? CanPlaceHere::Restricted : CanPlaceHere::No;
     }
 
+    virtual double getMultiplier()
+    {
+        return m_level + 1;
+    }
+
     struct Part : public A13FactoryBuildingPart
     {
         Part(const A13FactoryBuilding* bld)
@@ -206,10 +229,28 @@ public:
                 + "\nLevel " + std::to_string(((A13FactoryBuildingMine*)building)->m_level);
         }
 
-        virtual void onUpdate(A13FactoryTilemap*, EGE::Vec2i, EGE::TickCount tickCount)
+        virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i partPos)
         {
+            for(EGE::Size x = 0; x < getSize().x; x++)
+            for(EGE::Size y = 0; y < getSize().y; y++)
+            {
+                auto& tile = tilemap->ensureTile({x + partPos.x, y + partPos.y});
+                Ore* ore = (Ore*)&tile.addObjs[FACTORY_BUILDER_LAYER_ORES];
+                if(ore->id != ORE_NONE && ore->count > 0)
+                    orePos.push_back({x + partPos.x, y + partPos.y});
+            }
 
+            multiplier = ((A13FactoryBuildingMine*)building)->getMultiplier();
+
+            return true;
         }
+
+        virtual void onUpdate(A13FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount);
+
+        EGE::Vector<EGE::Vec2i> orePos;
+        int nextRandomTime = 0;
+        EGE::TickCount lastOre = 0;
+        double multiplier = 1;
     };
 
     A13_CUSTOM_FACTORY_PART(Part);

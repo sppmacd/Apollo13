@@ -12,7 +12,7 @@ public:
     void setNumericId(EGE::IdType id) { if(!m_numericId) m_numericId = id; }
     EGE::IdType getNumericId() { return m_numericId; }
 
-    virtual EGE::Vec2d getAtlasPosition() { int index = m_numericId - 1; return {index / 256 + index % 16, index / 16}; }
+    virtual EGE::Vec2d getAtlasPosition() { int index = m_numericId - 1; return {(double)(index / 256 + index % 16), (double)(index / 16)}; }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}

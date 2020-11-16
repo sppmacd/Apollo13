@@ -91,4 +91,35 @@ void A13GameplayObjectManager::registerResourceItems()
     registerResourceItem(std::move(item));
     item = std::make_unique<ResourceItem>("a13:silicon");
     registerResourceItem(std::move(item));
+
+    /*
+    #define ORE_ALUMINUM 6
+    #define ORE_DIAMOND 7
+    #define ORE_GOLD 8
+    #define ORE_SILVER 9
+    */
+
+    // Aluminum
+    item = std::make_unique<ResourceItem>("a13:aluminum:ore");
+    registerResourceItem(std::move(item));
+    item = std::make_unique<ResourceItem>("a13:aluminum");
+    registerResourceItem(std::move(item));
+
+    // Diamond
+    item = std::make_unique<ResourceItem>("a13:diamond:ore");
+    registerResourceItem(std::move(item));
+    item = std::make_unique<ResourceItem>("a13:diamond");
+    registerResourceItem(std::move(item));
+
+    // Gold
+    item = std::make_unique<ResourceItem>("a13:gold:ore");
+    registerResourceItem(std::move(item));
+    item = std::make_unique<ResourceItem>("a13:gold");
+    registerResourceItem(std::move(item));
+
+    // Silver
+    item = std::make_unique<ResourceItem>("a13:silver:ore");
+    registerResourceItem(std::move(item));
+    item = std::make_unique<ResourceItem>("a13:silver");
+    registerResourceItem(std::move(item));
 }

@@ -17,5 +17,5 @@ public:
 private:
     sf::Texture* m_atlas = nullptr;
     sf::Font* m_font = nullptr;
-    EGE::IdMap<ResourceItem*> m_items;
+    EGE::StringMap<ResourceItem*> m_items;
 };

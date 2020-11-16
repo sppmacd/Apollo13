@@ -34,6 +34,9 @@ EGE::EventResult Apollo13::load()
 
     setResourceManager(resMan);
 
+    // Setup window
+    getWindow().lock()->setFramerateLimit(60);
+
     // Set GUI
     setCurrentGUIScreen(make<A13GUIFactoryBuilder>(this));
 

@@ -170,7 +170,7 @@ template<class _Tilemap>
 void TileMapObject<_Tilemap>::onActivate(EGE::Vec2i pos)
 {
     auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({pos.x, pos.y}) : m_tilemap->getTile({pos.x, pos.y}));
-    if(tile)
+    if(tile && tile->part)
         tile->part->onActivate(m_tilemap.get(), pos);
 }
 

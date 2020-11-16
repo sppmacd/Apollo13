@@ -42,6 +42,11 @@ public:
         return true;
     }
 
+    static class _ResourceItems
+    {
+
+    } items;
+
     // Rocket parts (that are placed)
     EGE::GameplayObjectRegistry<EGE::String, A13RocketPart> rocketParts;
 

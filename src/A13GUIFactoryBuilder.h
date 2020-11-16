@@ -78,7 +78,7 @@ public:
     {
         A13GUIAbstractBuilder::onResize(event);
 
-        EGE::Size RESOURCE_STATS_SIZE = 80;
+        EGE::Size RESOURCE_STATS_SIZE = 90;
         m_resourceStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE, 0});
         m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
     }
