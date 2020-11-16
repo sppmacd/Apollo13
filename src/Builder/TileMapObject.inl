@@ -13,10 +13,10 @@ public:
         {
         case _Tilemap::TileType::AdditionalLayerCount:
             {
-                if(!state.obj)
+                if(!state.part)
                     return EGE::Vec2d(0, 0);
 
-                EGE::Vec2d atlasPos = state.obj->getAtlasPosition();
+                EGE::Vec2d atlasPos = state.part->getAtlasPosition();
                 auto tileSize = m_tileMapObj->m_tilemap->getTileSize();
                 return {atlasPos.x * tileSize.x + state.cornerPos.x * tileSize.x,
                         atlasPos.y * tileSize.y + state.cornerPos.y * tileSize.y};
@@ -59,7 +59,7 @@ bool TileMapObject<_Tilemap>::isObjectInArea(EGE::Vec2i position, EGE::Vec2u ran
         auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({x + position.x, y + position.y}) : m_tilemap->getTile({x + position.x, y + position.y}));
         if(!tile)
             return true; // Out of bounds!
-        if(tile->obj)
+        if(tile->part)
             return true; // Something is already here :(
     }
     return false;
@@ -107,7 +107,7 @@ void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, EGE::SharedPtr<typen
     EGE::Vec2u partSize = part->getSize();
 
     // Check if part can be placed here
-    if(!canPartBePlacedHere(tileRel, partSize) || !m_tilemap->onPlace(tileRel, part))
+    if(!canPartBePlacedHere(tileRel, partSize) || !part->onPlace(m_tilemap.get(), tileRel))
         return;
 
     auto it = m_objects.insert(std::make_pair(EGE::Vec2i(tileRel.x, tileRel.y), part));
@@ -120,7 +120,7 @@ void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, EGE::SharedPtr<typen
         // Sanity check
         ASSERT(tile);
 
-        tile->obj = it.first->second.get();
+        tile->part = it.first->second.get();
         tile->cornerPos = {x, y};
     }
 }
@@ -133,7 +133,7 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
     if(!tile)
         return; // Out of bounds!
 
-    EGE::FlatPtr<typename _Tilemap::TileType::PartType> part = tile->obj;
+    EGE::FlatPtr<typename _Tilemap::TileType::PartType> part = tile->part;
     if(!part)
         return; // Nothing is here!
 
@@ -148,7 +148,7 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
         return;
     }
 
-    EGE::Vec2u partSize = tile->obj->getSize();
+    EGE::Vec2u partSize = tile->part->getSize();
 
     // Remove that object
     m_objects.erase(it);
@@ -161,7 +161,7 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
         if(!tile)
             return;
 
-        tile->obj = nullptr;
+        tile->part = nullptr;
         tile->cornerPos = {0, 0};
     }
 }
@@ -171,7 +171,7 @@ void TileMapObject<_Tilemap>::onActivate(EGE::Vec2i pos)
 {
     auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({pos.x, pos.y}) : m_tilemap->getTile({pos.x, pos.y}));
     if(tile)
-        m_tilemap->onActivate(pos, *tile);
+        tile->part->onActivate(m_tilemap.get(), pos);
 }
 
 template<class _Tilemap>
@@ -220,15 +220,16 @@ void TileMapObject<_Tilemap>::render(sf::RenderTarget& target, const EGE::Render
         rs.setOutlineThickness(1);
         target.draw(rs);
     }
+}
 
-
-    /*
-    std::string debugInfo = "Debug Info\n";
-    for(auto obj: m_objects)
-        debugInfo += std::to_string(obj.first.x) + "," + std::to_string(obj.first.y) + ": " + obj.second->getId() + "\n";
-
-    renderer.renderText(0, 0, *getOwner()->getLoop()->getResourceManager().lock()->getDefaultFont().get(), debugInfo, 8);
-    */
+template<class _Tilemap>
+void TileMapObject<_Tilemap>::onUpdate(long long tickCounter)
+{
+    EGE::SceneObject::onUpdate(tickCounter);
+    for(auto& pr: m_objects)
+    {
+        pr.second->onUpdate(m_tilemap.get(), pr.first, tickCounter);
+    }
 }
 
 template<class _Tilemap>

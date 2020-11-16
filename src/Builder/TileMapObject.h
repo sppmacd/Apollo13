@@ -45,6 +45,7 @@ public:
     void setAtlasMapper(std::function<EGE::Vec2d(_Tilemap*, const typename _Tilemap::TileType&, EGE::Size)> mapper) { m_atlasMapper = mapper; }
 
     void render(sf::RenderTarget& target, const EGE::RenderStates& states) const;
+    void onUpdate(long long tickCounter);
 
     EGE::SharedPtr<_Tilemap> m_tilemap = nullptr;
     std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1> m_builderPartAtlasTextureNames;

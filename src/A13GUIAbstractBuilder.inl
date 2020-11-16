@@ -191,6 +191,8 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseWheelScroll(sf::Event::Mouse
 
     if(m_dialog)
         return;
+    if(event.x < m_partSelector->getSize().x)
+        return;
 
     if(event.delta > 0)
     {

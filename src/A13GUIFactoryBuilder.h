@@ -2,6 +2,7 @@
 
 #include "A13GameplayObjectManager.h"
 #include "A13FactoryBuilding.h"
+#include "ResourceStatsWidget.h"
 
 class A13GUIFactoryBuilder : public A13GUIAbstractBuilder<A13FactoryTilemap, A13FactoryBuildingItem>
 {
@@ -64,4 +65,24 @@ public:
     {
         return item->canPlaceHere(tileRel, tile);
     }
+
+    virtual void onLoad()
+    {
+        A13GUIAbstractBuilder::onLoad();
+
+        m_resourceStatsWidget = make<ResourceStatsWidget>(this);
+        addWidget(m_resourceStatsWidget);
+    }
+
+    virtual void onResize(sf::Event::SizeEvent& event)
+    {
+        A13GUIAbstractBuilder::onResize(event);
+
+        EGE::Size RESOURCE_STATS_SIZE = 80;
+        m_resourceStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE, 0});
+        m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
+    }
+
+private:
+    EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
 };

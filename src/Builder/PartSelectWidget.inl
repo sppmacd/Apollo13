@@ -6,7 +6,7 @@ void PartSelectWidget<_Tilemap, _Item>::onLoad()
     ASSERT(m_gpo);
     for(auto& part : *m_gpo)
     {
-        m_items.push_back(part.second);
+        m_items.push_back(part.second.get());
     }
     m_font = getLoop()->getResourceManager().lock()->getDefaultFont().get();
     ASSERT(m_font);
@@ -19,7 +19,11 @@ void PartSelectWidget<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::MouseBut
     {
         if(event.x > 10 && event.x < getSize().x - 10)
         {
-            size_t index = (event.y) / getSize().x;
+            // Clamp scroll position
+            double ymax = -getSize().y + getSize().x * m_items.size();
+            double scrollPos = std::max(0.0, std::min(m_scrollPos, ymax));
+
+            size_t index = (event.y + (int)scrollPos) / getSize().x;
             if(index >= 0 && index < m_items.size())
             {
                 setCurrentItemIndex(index);
@@ -29,10 +33,27 @@ void PartSelectWidget<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::MouseBut
 }
 
 template<class _Tilemap, class _Item>
+void PartSelectWidget<_Tilemap, _Item>::onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event)
+{
+    if(event.x < getSize().x)
+    {
+        m_scrollPos -= event.delta * getSize().x / 2;
+
+        // Clamp scroll position
+        double ymax = -getSize().y + getSize().x * m_items.size();
+        m_scrollPos = std::max(0.0, std::min(m_scrollPos, ymax));
+    }
+}
+
+template<class _Tilemap, class _Item>
 void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states)
 {
     if(!m_atlas)
         m_atlas = getLoop()->getResourceManager().lock()->getTexture(m_partAtlasTextureName).get();
+
+    // Clamp scroll position
+    double ymax = -getSize().y + getSize().x * m_items.size();
+    double scrollPos = std::max(0.0, std::min(m_scrollPos, ymax));
 
     // Background
     EGE::Renderer renderer(target);
@@ -49,11 +70,11 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
         mousePos = sf::Mouse::getPosition(*wnd);
         if(mousePos.x < getSize().x)
         {
-            size_t index = (mousePos.y) / (getSize().x);
+            size_t index = (mousePos.y + (int)scrollPos) / (getSize().x);
             if(index >= 0 && index < m_items.size())
             {
                 // Highlight
-                renderer.renderRectangle(0, (getSize().x) * index, getSize().x, getSize().x, sf::Color(255, 255, 255, 127));
+                renderer.renderRectangle(0, (getSize().x) * index - scrollPos, getSize().x, getSize().x, sf::Color(255, 255, 255, 127));
 
                 // Tooltip
                 tooltip = m_items[index]->getTooltip();
@@ -63,7 +84,7 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
 
     // Permanent highlight (For active object)
     size_t index = m_index;
-    renderer.renderRectangle(0, (getSize().x) * index, getSize().x, getSize().x, sf::Color(0, 255, 0, 127));
+    renderer.renderRectangle(0, (getSize().x) * index - scrollPos, getSize().x, getSize().x, sf::Color(0, 255, 0, 127));
 
     // Objects
     size_t c = 0;
@@ -75,7 +96,7 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
         texRect.top = item->getAtlasPosition().y * 64;
         texRect.width = 64;
         texRect.height = 64;
-        renderer.renderTexturedRectangle(10, (getSize().x) * c + 10, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);
+        renderer.renderTexturedRectangle(10, (getSize().x) * c + 10 - scrollPos, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);
         c++;
     }
 

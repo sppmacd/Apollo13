@@ -17,6 +17,7 @@ public:
 
     void onLoad();
     void onMouseButtonRelease(sf::Event::MouseButtonEvent& event);
+    void onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event);
     void renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states = {});
 
     EGE::Vec2u getPartSize() const { if(m_index == -1) return {}; return m_items[m_index]->getSize(); }
@@ -35,6 +36,7 @@ private:
     TileMapObject<_Tilemap>* m_tmObject;
     sf::Font* m_font = nullptr;
     int m_index = -1;
+    double m_scrollPos = 0;
 };
 
 #include "PartSelectWidget.inl"

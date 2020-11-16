@@ -2,6 +2,7 @@
 #include "A13GameplayObjectManager.h"
 #include "A13GUIProjectBuilder.h"
 #include "A13GUIFactoryBuilder.h"
+#include "PlayerStats.h"
 
 #include <ege/gui/GUIResourceManager.h>
 
@@ -11,10 +12,14 @@ EGE::EventResult Apollo13::load()
     if(!A13GameplayObjectManager::instance().reload())
         return EGE::EventResult::Failure;
 
+    PlayerStats::instance().initialize();
+
     // Setup ResourceManager
     auto resMan = make<EGE::GUIResourceManager>();
 
     resMan->registerDefaultFont("font.ttf");
+
+    resMan->registerTexture("game/resource_items.png");
 
     // GUI
     resMan->registerTexture("gui/pb/rocket_parts.png");

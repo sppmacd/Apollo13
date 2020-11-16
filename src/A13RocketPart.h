@@ -8,8 +8,9 @@
 #include <ege/util/Vector.h>
 
 class A13RocketPart;
+class A13ProjectTilemap;
 
-struct A13RocketPartPart : public BuilderPart
+struct A13RocketPartPart : public BuilderPart<A13ProjectTilemap>
 {
     A13RocketPart* part;
 
@@ -57,7 +58,7 @@ public:
 
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i, const A13ProjectTilemap::StateType& tile)
     {
-        return !tile.obj ? CanPlaceHere::Yes : CanPlaceHere::No;
+        return !tile.part ? CanPlaceHere::Yes : CanPlaceHere::No;
     }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
