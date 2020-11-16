@@ -27,7 +27,7 @@ public:
 
         m_tilemap->setTileSize(EGE::Vec2u(16, 16));
         m_tilemap->setGenerator(
-            [](EGE::Vec2i chunkPos, A13FactoryTilemap::ChunkType& chunk)
+            [this](EGE::Vec2i chunkPos, A13FactoryTilemap::ChunkType& chunk)
             {
                 // TODO: replace it by better generator
                 for(EGE::Size x = 0; x < 16; x++)
@@ -35,13 +35,37 @@ public:
                 {
                     A13FactoryTilemap::StateType& state = chunk.getTile({x, y});
                     state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = EGE::Random::fastRandom().nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
+                }
 
-                    // ores
-                    if(EGE::Random::fastRandom().nextInt(21) == 1)
+                // ores
+                if(EGE::Random::fastRandom().nextInt(21) == 1)
+                {
+                    int id = EGE::Random::fastRandom().nextIntRanged(1, 10);
+
+                    EGE::Vec2i pos(EGE::Random::fastRandom().nextInt(16),
+                        EGE::Random::fastRandom().nextInt(16));
+
+                    for(int s = EGE::Random::fastRandom().nextIntRanged(20, 50); s >= 0; s--)
                     {
+                        switch(EGE::Random::fastRandom().nextInt(4))
+                        {
+                            case 0: pos.x++; break;
+                            case 1: pos.x--; break;
+                            case 2: pos.y++; break;
+                            case 3: pos.y--; break;
+                        }
+
+                        const A13FactoryTilemap::StateType& state = m_tilemap->ensureTile({chunkPos.x * 16 + pos.x, chunkPos.y * 16 + pos.y});
                         Ore* ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
-                        ore->id = EGE::Random::fastRandom().nextInt(40) / 4;
-                        ore->count = EGE::Random::fastRandom().nextIntRanged(1024, MAX_ORE_COUNT);
+
+                        if(ore->id != ORE_NONE)
+                        {
+                            s++;
+                            continue;
+                        }
+
+                        ore->id = id;
+                        ore->count = EGE::Random::fastRandom().nextIntRanged(512, MAX_ORE_COUNT);
                     }
                 }
             }
@@ -77,9 +101,11 @@ public:
             EGE::Renderer renderer(target);
             const unsigned HEIGHT = 40;
 
+            // Background
+            renderer.renderRectangle(m_partSelector->getSize().x, 0, 230, m_partSelector->getSize().y, sf::Color(0, 0, 0, 127));
+
             // Item name
-            renderer.renderRectangle(m_partSelector->getSize().x, 100, 230, HEIGHT * 2, sf::Color(0, 0, 0, 127));
-            renderer.renderText(m_partSelector->getSize().x + 10, 120, *m_font, item->getId(), 16);
+            renderer.renderText(m_partSelector->getSize().x + 10, 20, *m_font, item->getId(), 16);
 
             // Cost
             Cost cost = item->getCost();
@@ -87,26 +113,26 @@ public:
             EGE::Size s = 0;
             for(ResourceItemStack& stack: cost)
             {
-                std::string str = "x" + std::to_string(stack.getItemCount());
-
-                // Background
-                renderer.renderRectangle(m_partSelector->getSize().x, HEIGHT * (s + 2) + 100, 230, HEIGHT, sf::Color(0, 0, 0, 127));
+                std::string str = stack.getItem()->getId() + " x" + std::to_string(stack.getItemCount());
 
                 // Text
                 sf::Color color = PlayerStats::instance().resourceItems[stack.getItem()->getId()] < stack.getItemCount() ? sf::Color::Red : sf::Color::White;
-                renderer.renderText(m_partSelector->getSize().x + 47, HEIGHT * (s + 2) + 100, *m_font, str, 12, color);
+                renderer.renderText(m_partSelector->getSize().x + 47, HEIGHT * (s + 1) + 20, *m_font, str, 11, color);
 
                 // Icon
                 sf::IntRect texRect;
-                // TODO: Name that '64' somehow
+                // TODO: Name that '16' somehow
                 texRect.left = stack.getItem()->getAtlasPosition().x * 16;
                 texRect.top = stack.getItem()->getAtlasPosition().y * 16;
                 texRect.width = 16;
                 texRect.height = 16;
-                renderer.renderTexturedRectangle(m_partSelector->getSize().x + 10, HEIGHT * (s + 2) + 95, 32, 32, *m_resourceStatsWidget->getAtlas(), texRect);
+                renderer.renderTexturedRectangle(m_partSelector->getSize().x + 10, HEIGHT * (s + 1) + 10, 32, 32, *m_resourceStatsWidget->getAtlas(), texRect);
 
                 s++;
             }
+
+            // Description
+            renderer.renderText(m_partSelector->getSize().x + 10, HEIGHT * (s + 1) + 20, *m_font, item->getDescription(), 10, sf::Color(200, 200, 200));
         });
 
         m_resourceStatsWidget = make<ResourceStatsWidget>(this);

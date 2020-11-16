@@ -6,4 +6,6 @@ void PlayerStats::initialize()
     {
         resourceItems[pr.first.baseId] = 0;
     }
+    resourceItems[A13GameplayObjectManager::items.iron->getId()] = 100;
+    resourceItems[A13GameplayObjectManager::items.copper->getId()] = 100;
 }

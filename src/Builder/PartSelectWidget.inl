@@ -17,7 +17,7 @@ void PartSelectWidget<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::MouseBut
 {
     if(m_leftClicked)
     {
-        if(event.x > 10 && event.x < getSize().x - 10)
+        if(event.x && event.x < getSize().x)
         {
             // Clamp scroll position
             double ymax = -getSize().y + getSize().x * m_items.size();

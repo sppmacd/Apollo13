@@ -98,6 +98,16 @@ public:
         return make<A13FactoryBuildingPart>(this);
     }
 
+    virtual std::string getTooltip(const A13FactoryTilemap*, EGE::Vec2i, const A13FactoryTilemap::StateType&) const
+    {
+        return getId() + "\n";
+    }
+
+    virtual std::string getDescription()
+    {
+        return "(No description)";
+    }
+
     virtual Cost getCost() const
     {
         return {};
@@ -132,7 +142,7 @@ public:
         return m_building ? m_building->makePart() : nullptr;
     }
 
-    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile)
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile) const
     {
         return m_building ? m_building->canPlaceHere(tileRel, tile) : CanPlaceHere::NotLoaded;
     }
@@ -140,6 +150,11 @@ public:
     virtual Cost getCost() const
     {
         return m_building ? m_building->getCost() : Cost();
+    }
+
+    virtual std::string getDescription()
+    {
+        return m_building ? m_building->getDescription() : "(No building assigned)";
     }
 
     virtual bool onPlace(A13FactoryTilemap* tilemap, EGE::Vec2i partPos);
@@ -168,11 +183,20 @@ public:
 
         virtual void onActivate(A13FactoryTilemap*, EGE::Vec2i);
 
-        virtual std::string getTooltip(A13FactoryTilemap* tilemap, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state) const
+        virtual std::string getTooltip(const A13FactoryTilemap* tilemap, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state) const
         {
             return A13FactoryBuildingPart::getTooltip(tilemap, pos, state) + "\nClick to open Project Builder";
         }
     };
+
+    virtual std::string getDescription()
+    {
+        return
+        "Rocket Factory is needed to\n"
+        "create rocket project. Launching\n"
+        "a Rocket gives you many coins,\n"
+        "which you can use to buy resources.";
+    }
 
     virtual Cost getCost() const;
 
@@ -190,6 +214,13 @@ public:
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 
     virtual Cost getCost() const;
+
+    virtual std::string getDescription()
+    {
+        return
+        "Use Start Platform to launch your\n"
+        "rockets!";
+    }
 };
 
 class A13FactoryBuildingMine : public A13FactoryBuilding
@@ -202,7 +233,7 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {m_level, 4}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 
-    virtual std::string getTooltip(A13FactoryTilemap*, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state) const
+    virtual std::string getTooltip(const A13FactoryTilemap*, EGE::Vec2i pos, const A13FactoryTilemap::StateType& state) const
         { return getId() + "\nLevel " + std::to_string(m_level); }
 
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i pos, const A13FactoryTilemap::StateType& state) const
@@ -261,6 +292,14 @@ public:
 
     virtual Cost getCost() const;
 
+    virtual std::string getDescription()
+    {
+        return
+        "Mines allows you to get resources.\n"
+        "The higher is level, the more\n"
+        "resources it mines.";
+    }
+
 private:
     EGE::Size m_level;
 };
@@ -308,6 +347,14 @@ public:
     }
 
     virtual Cost getCost() const;
+
+    virtual std::string getDescription()
+    {
+        return
+        "Roads are decorative items which\n"
+        "you can place on terrain, below\n"
+        "regular buildings.";
+    }
 
 private:
     EGE::Size m_index;

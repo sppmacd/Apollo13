@@ -6,7 +6,7 @@ int main()
     Apollo13::instance();
 
     // Open window.
-    Apollo13::instance().setWindow(make<EGE::SFMLSystemWindow>(sf::VideoMode(500, 500), "Apollo13"));
+    Apollo13::instance().setWindow(make<EGE::SFMLSystemWindow>(sf::VideoMode(750, 750), "Apollo 13"));
 
     // Set bg color
     Apollo13::instance().setBackgroundColor(sf::Color(192, 228, 237));
