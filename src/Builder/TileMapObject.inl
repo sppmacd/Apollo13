@@ -137,6 +137,10 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
 
     EGE::Vec2u partSize = tile->part->getSize();
 
+    // Check if we want it object to be removed
+    if(!it->second->onRemove(m_tilemap.get(), objectPos))
+        return;
+
     // Remove that object
     m_objects.erase(it);
 

@@ -18,6 +18,11 @@ public:
     // Args: tilemap, partPos
     virtual bool onPlace(_Tilemap*, EGE::Vec2i) { return true; }
 
+    // Called before object is removed.
+    // Return false if object shouldn't be removed.
+    // Args: tilemap, partPos
+    virtual bool onRemove(_Tilemap*, EGE::Vec2i) { return true; }
+
     // Called on right-click of part.
     // Args: tilemap, partPos
     virtual void onActivate(_Tilemap*, EGE::Vec2i) {}

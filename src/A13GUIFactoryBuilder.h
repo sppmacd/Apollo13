@@ -6,11 +6,11 @@
 #include "PlayerStats.h"
 #include "ResourceStatsWidget.h"
 
-class A13GUIFactoryBuilder : public A13GUIAbstractBuilder<A13FactoryTilemap, A13FactoryBuildingItem>
+class A13GUIFactoryBuilder : public A13GUIAbstractBuilder<A13::FactoryTilemap, A13FactoryBuildingItem>
 {
 public:
     A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
-    : A13GUIAbstractBuilder(loop, make<A13FactoryTilemap>(Apollo13::instance().getSeed()))
+    : A13GUIAbstractBuilder(loop, make<A13::FactoryTilemap>(Apollo13::instance().getSeed()))
     {
         setBuilderBackground("gui/factory_builder/background.png");
 
@@ -28,7 +28,7 @@ public:
 
         m_tilemap->setTileSize(EGE::Vec2u(16, 16));
         m_tilemap->setGenerator(
-            [this](EGE::Vec2i chunkPos, A13FactoryTilemap::ChunkType& chunk)
+            [this](EGE::Vec2i chunkPos, A13::FactoryTilemap::ChunkType& chunk)
             {
                 EGE::Random random(chunkPos.x * 1024 * 1024 + chunkPos.y * 1024 + m_tilemap->seed);
 
@@ -36,7 +36,7 @@ public:
                 for(EGE::Size x = 0; x < 16; x++)
                 for(EGE::Size y = 0; y < 16; y++)
                 {
-                    A13FactoryTilemap::StateType& state = chunk.getTile({x, y});
+                    A13::FactoryTilemap::StateType& state = chunk.getTile({x, y});
                     state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = random.nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
                 }
 
@@ -58,8 +58,8 @@ public:
                             case 3: pos.y--; break;
                         }
 
-                        const A13FactoryTilemap::StateType& state = m_tilemap->ensureTile({chunkPos.x * 16 + pos.x, chunkPos.y * 16 + pos.y});
-                        Ore* ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
+                        const A13::FactoryTilemap::StateType& state = m_tilemap->ensureTile({chunkPos.x * 16 + pos.x, chunkPos.y * 16 + pos.y});
+                        A13::Ore* ore = (A13::Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
 
                         if(ore->id != ORE_NONE)
                         {
@@ -75,7 +75,7 @@ public:
         );
     }
 
-    virtual EGE::Vec2d atlasMapper(A13FactoryTilemap* tilemap, const A13FactoryTilemap::TileType& state, EGE::Size addLayer) override
+    virtual EGE::Vec2d atlasMapper(A13::FactoryTilemap* tilemap, const A13::FactoryTilemap::TileType& state, EGE::Size addLayer) override
     {
         if(addLayer == FACTORY_BUILDER_LAYER_TERRAIN)
         {
@@ -84,13 +84,13 @@ public:
         }
         else if(addLayer == FACTORY_BUILDER_LAYER_ORES)
         {
-            Ore* ore = (Ore*)&state.addObjs[addLayer];
+            A13::Ore* ore = (A13::Ore*)&state.addObjs[addLayer];
             return ore->id != ORE_NONE ? EGE::Vec2d(ore->id * 16, ((ore->count * 7 / MAX_ORE_COUNT) + 1) * 16) : EGE::Vec2d(0, 0);
         }
         return EGE::Vec2d(0, 0);
     }
 
-    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13FactoryTilemap::TileType& tile, A13FactoryBuildingItem* item)
+    virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const A13::FactoryTilemap::TileType& tile, A13FactoryBuildingItem* item)
     {
         return item->canPlaceHere(tileRel, tile);
     }
