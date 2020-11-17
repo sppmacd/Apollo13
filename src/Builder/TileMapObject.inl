@@ -1,36 +1,6 @@
 // INLINE
 
 template<class _Tilemap>
-class AtlasMapper
-{
-public:
-    AtlasMapper(TileMapObject<_Tilemap>* tmObj)
-    : m_tileMapObj(tmObj) {}
-
-    EGE::Vec2d operator()(const typename _Tilemap::TileType& state, EGE::Size layer)
-    {
-        switch(layer)
-        {
-        case _Tilemap::TileType::AdditionalLayerCount:
-            {
-                if(!state.part)
-                    return EGE::Vec2d(0, 0);
-
-                EGE::Vec2d atlasPos = state.part->getAtlasPosition();
-                auto tileSize = m_tileMapObj->m_tilemap->getTileSize();
-                return {atlasPos.x * tileSize.x + state.cornerPos.x * tileSize.x,
-                        atlasPos.y * tileSize.y + state.cornerPos.y * tileSize.y};
-            } break;
-        default:
-            return m_tileMapObj->callCustomLayerAtlasMapper(state, layer);
-        }
-    }
-
-private:
-    TileMapObject<_Tilemap>* m_tileMapObj;
-};
-
-template<class _Tilemap>
 TileMapObject<_Tilemap>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1>& texs,  EGE::SharedPtr<_Tilemap> tilemap)
 : EGE::SceneObject2D(scene, "a13:builder:tilemap"), m_builderPartAtlasTextureNames(texs), m_tilemap(tilemap)
 {
@@ -44,7 +14,24 @@ TileMapObject<_Tilemap>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::ar
     for(EGE::Size s = 0; s < texs.size(); s++)
         renderer->setAtlasTextureName(m_builderPartAtlasTextureNames[s], s);
 
-    renderer->setTileAtlasMapper(AtlasMapper<_Tilemap>(this));
+    renderer->setTileAtlasMapper([this](const typename _Tilemap::TileType& state, EGE::Size layer)->EGE::Vec2d
+    {
+        switch(layer)
+        {
+        case _Tilemap::TileType::AdditionalLayerCount:
+            {
+                if(!state.part)
+                    return EGE::Vec2d(0, 0);
+
+                EGE::Vec2d atlasPos = state.part->getAtlasPosition();
+                auto tileSize = m_tilemap->getTileSize();
+                return EGE::Vec2d(atlasPos.x * tileSize.x + state.cornerPos.x * tileSize.x,
+                        atlasPos.y * tileSize.y + state.cornerPos.y * tileSize.y);
+            } break;
+        default:
+            return callCustomLayerAtlasMapper(state, layer);
+        }
+    });
     setRenderer(renderer);
 
     setPosition({0, 0});
