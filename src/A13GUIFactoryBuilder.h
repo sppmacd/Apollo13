@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Apollo13.h"
 #include "A13GameplayObjectManager.h"
 #include "A13FactoryBuilding.h"
 #include "PlayerStats.h"
@@ -9,7 +10,7 @@ class A13GUIFactoryBuilder : public A13GUIAbstractBuilder<A13FactoryTilemap, A13
 {
 public:
     A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
-    : A13GUIAbstractBuilder(loop, make<A13FactoryTilemap>())
+    : A13GUIAbstractBuilder(loop, make<A13FactoryTilemap>(Apollo13::instance().getSeed()))
     {
         setBuilderBackground("gui/factory_builder/background.png");
 
@@ -29,25 +30,27 @@ public:
         m_tilemap->setGenerator(
             [this](EGE::Vec2i chunkPos, A13FactoryTilemap::ChunkType& chunk)
             {
+                EGE::Random random(chunkPos.x * 1024 * 1024 + chunkPos.y * 1024 + m_tilemap->seed);
+
                 // TODO: replace it by better generator
                 for(EGE::Size x = 0; x < 16; x++)
                 for(EGE::Size y = 0; y < 16; y++)
                 {
                     A13FactoryTilemap::StateType& state = chunk.getTile({x, y});
-                    state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = EGE::Random::fastRandom().nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
+                    state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = random.nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
                 }
 
                 // ores
-                if(EGE::Random::fastRandom().nextInt(21) == 1)
+                if(random.nextInt(21) == 1)
                 {
-                    int id = EGE::Random::fastRandom().nextIntRanged(1, 10);
+                    int id = random.nextIntRanged(1, 10);
 
-                    EGE::Vec2i pos(EGE::Random::fastRandom().nextInt(16),
-                        EGE::Random::fastRandom().nextInt(16));
+                    EGE::Vec2i pos(random.nextInt(16),
+                        random.nextInt(16));
 
-                    for(int s = EGE::Random::fastRandom().nextIntRanged(20, 50); s >= 0; s--)
+                    for(int s = random.nextIntRanged(20, 50); s >= 0; s--)
                     {
-                        switch(EGE::Random::fastRandom().nextInt(4))
+                        switch(random.nextInt(4))
                         {
                             case 0: pos.x++; break;
                             case 1: pos.x--; break;
@@ -65,7 +68,7 @@ public:
                         }
 
                         ore->id = id;
-                        ore->count = EGE::Random::fastRandom().nextIntRanged(512, MAX_ORE_COUNT);
+                        ore->count = random.nextIntRanged(512, MAX_ORE_COUNT);
                     }
                 }
             }
