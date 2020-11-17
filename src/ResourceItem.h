@@ -27,8 +27,9 @@ public:
     ResourceItemStack(ResourceItem* item = nullptr, int count = 1)
     : m_item(item), m_count(count) {}
 
-    ResourceItem* getItem() { return m_item; }
+    ResourceItemStack(std::string itemId = "a13:!", int count = 1);
 
+    ResourceItem* getItem() { return m_item; }
     int getItemCount() { return m_count; }
 
     // Returns false if decrement failed (there

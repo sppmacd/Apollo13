@@ -12,7 +12,7 @@ EGE::EventResult Apollo13::load()
     if(!A13GameplayObjectManager::instance().reload())
         return EGE::EventResult::Failure;
 
-    PlayerStats::instance().initialize();
+    A13::PlayerStats::instance().initialize();
 
     // Setup ResourceManager
     auto resMan = make<EGE::GUIResourceManager>();

@@ -15,7 +15,7 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, EGE::Vec2i pa
 
     for(ResourceItemStack& stack: cost)
     {
-        if(PlayerStats::instance().resourceItems[stack.getItem()->getId()] < stack.getItemCount())
+        if(!A13::PlayerStats::instance().resourceItems.canRemoveItems(stack))
         {
             // We inform Builder that we placed object,
             // but we didn't do that.
@@ -26,7 +26,7 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, EGE::Vec2i pa
     // Remove resources from player inventory.
     for(ResourceItemStack& stack: cost)
     {
-        PlayerStats::instance().resourceItems[stack.getItem()->getId()] -= stack.getItemCount();
+        A13::PlayerStats::instance().resourceItems.tryRemoveItems(stack);
     }
 
     return false;
@@ -64,7 +64,7 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 case ORE_SILVER: id = "a13:silver:ore"; break;
                 default: break;
             }
-            PlayerStats::instance().resourceItems[id]++;
+            A13::PlayerStats::instance().resourceItems.tryAddItems({id, 1});
 
             lastOre = tickCount;
             ore->count--;

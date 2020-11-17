@@ -2,8 +2,12 @@
 
 #include "A13GameplayObjectManager.h"
 #include "ResourceItem.h"
+#include "ResourceItems/Container.h"
 
 #include <ege/util.h>
+
+namespace A13
+{
 
 class PlayerStats
 {
@@ -13,5 +17,7 @@ public:
     void initialize();
 
     // maps ResourceItem ID to count
-    EGE::StringMap<int> resourceItems;
+    Container resourceItems;
 };
+
+}
