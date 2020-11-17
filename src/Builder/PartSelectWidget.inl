@@ -68,7 +68,7 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
     if(wnd)
     {
         mousePos = sf::Mouse::getPosition(*wnd);
-        if(mousePos.x < getSize().x)
+        if(mousePos.x < getSize().x && mousePos.x > 0)
         {
             size_t index = (mousePos.y + (int)scrollPos) / (getSize().x);
             if(index >= 0 && index < m_items.size())
@@ -82,7 +82,7 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
                 m_parent->setViewForWidget(target);
 
                 // Custom info
-                if(m_customRenderer)
+                if(m_customRenderer && !(sf::Mouse::isButtonPressed(sf::Mouse::Left) ^ m_leftClicked))
                 {
                     m_customRenderer(target, m_items[index]);
                 }
