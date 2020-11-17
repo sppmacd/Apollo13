@@ -45,6 +45,7 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     // Tiles
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingRocketFactory>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingStartPlatform>());
+    registerFactoryBuilding(std::make_unique<A13FactoryBuildingFactory>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(0));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(1));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(2));

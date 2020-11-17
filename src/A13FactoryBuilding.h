@@ -75,7 +75,12 @@ typedef Aliases::A13ChunkedTilemapForPart<A13FactoryBuildingPart, 16, 16, 3> A13
 class A13FactoryTilemap : public A13GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<A13FactoryBuildingPart, 3>
 {
 public:
+    A13FactoryTilemap(EGE::MaxInt _seed)
+    : seed(_seed) {}
+
     virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) const;
+
+    EGE::MaxInt seed;
 };
 
 typedef EGE::Vector<ResourceItemStack> Cost;
@@ -220,6 +225,26 @@ public:
         return
         "Use Start Platform to launch your\n"
         "rockets!";
+    }
+};
+
+class A13FactoryBuildingFactory : public A13FactoryBuilding
+{
+public:
+    A13FactoryBuildingFactory()
+    : A13FactoryBuilding("a13:factory") {}
+
+    virtual EGE::Vec2d getAtlasPosition() const { return {1, 4}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {1, 1}; }
+    virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual Cost getCost() const;
+
+    virtual std::string getDescription()
+    {
+        return
+        "Factory is a building used to\n"
+        "create new items!";
     }
 };
 

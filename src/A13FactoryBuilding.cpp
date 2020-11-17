@@ -124,6 +124,14 @@ Cost A13FactoryBuildingStartPlatform::getCost() const
     };
 }
 
+Cost A13FactoryBuildingFactory::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.copper, 50 },
+        { A13GameplayObjectManager::items.iron, 100 }
+    };
+}
+
 Cost A13FactoryBuildingMine::getCost() const
 {
     switch(m_level)
