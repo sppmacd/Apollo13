@@ -102,8 +102,9 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
     {
         sf::IntRect texRect;
         // TODO: Name that '64' somehow
-        texRect.left = item->getAtlasPosition().x * 64;
-        texRect.top = item->getAtlasPosition().y * 64;
+        auto ap = item->getAtlasPosition(0);
+        texRect.left = ap.x * 64;
+        texRect.top = ap.y * 64;
         texRect.width = 64;
         texRect.height = 64;
         renderer.renderTexturedRectangle(10, (getSize().x) * c + 10 - scrollPos, getSize().x - 20, getSize().x - 20, *m_atlas, texRect);

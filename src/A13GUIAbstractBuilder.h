@@ -71,12 +71,6 @@ public:
 
     void setUseEnsure(bool ensure = true) { m_useEnsure = ensure; }
 
-    // Returns true if object was placed/removed by this user handler; false otherwise.
-    // If it returns false, the default handler (that for multi-tile parts) will be called.
-    // Args: tilemap, tilePos, part (part is from GPO)
-    virtual bool placePart(_Tilemap*, EGE::Vec2i, typename _Tilemap::TileType::PartType*) { return false; }
-    virtual bool removePart(_Tilemap*, EGE::Vec2i, typename _Tilemap::TileType::PartType*) { return false; }
-
     CanPlaceHere canPlaceHere(EGE::Vec2i);
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i tileRel, const typename _Tilemap::TileType& tile, _Item* item) { return CanPlaceHere::NotLoaded; }
 
@@ -92,6 +86,8 @@ public:
     EGE::SharedPtr<PartSelectWidget<_Tilemap, _Item>> m_partSelector;
     EGE::SharedPtr<_Tilemap> m_tilemap = nullptr;
 
+    void setMaxMeta(int meta) { m_maxMeta = meta; }
+
 protected:
     sf::Vector2f screenToScene(sf::Vector2i pos)
     {
@@ -103,6 +99,19 @@ protected:
     sf::Font* m_font = nullptr;
 
 private:
+    void updateHighlight(sf::Vector2i mousePos)
+    {
+        auto& wnd = *getWindow().lock().get();
+        sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(mousePos.x, mousePos.y), getView(wnd)) - m_tileMapObject->getPosition();
+        if(m_partSelector->getCurrentItem())
+        {
+            EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
+            auto item = m_partSelector->getCurrentItem();
+            auto part = item->getPart();
+            m_tileMapObject->setHighlight(tileRel, part->getSize(), part->getAtlasPosition(m_meta), part->getHighlightLayer());
+        }
+    }
+
     EGE::SharedPtr<EGE::Scene2D> m_scene;
     EGE::SharedPtr<EGE::CameraObject2D> m_camera;
     EGE::SharedPtr<EGE::Label> m_toolTipLabel;
@@ -119,6 +128,8 @@ private:
     sf::Vector2i m_dragStartPos;
     sf::Vector2f m_dragStartCamPos;
     float m_zoom = 4.f;
+    int m_meta = 0;
+    int m_maxMeta = 1;
 };
 
 namespace Aliases

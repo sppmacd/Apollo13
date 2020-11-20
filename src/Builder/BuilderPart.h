@@ -8,7 +8,7 @@ template<class _Tilemap>
 class BuilderPart
 {
 public:
-    virtual EGE::Vec2d getAtlasPosition() const = 0;
+    virtual EGE::Vec2d getAtlasPosition(int meta) const = 0;
     virtual EGE::Vec2u getSize() const = 0;
 
     // Called before object is placed.
@@ -29,4 +29,9 @@ public:
 
     // Called every tick.
     virtual void onUpdate(_Tilemap*, EGE::Vec2i, EGE::TickCount) {}
+
+    // Returns atlas layer that is used to render highlight for that item
+    // Coords are got from getPart().
+    // Return -1 to use multipart (main) layer
+    virtual int getHighlightLayer() { return -1; }
 };

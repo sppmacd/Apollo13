@@ -5,10 +5,13 @@
 #include "A13GameplayObjectManager.h"
 #include "PlayerStats.h"
 
-bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos)
+bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE::Vec2i partPos) const
 {
     if(!m_building)
         return true;
+
+    return false;
+    // don't check resources for now
 
     // Check resources in player inventory.
     Cost cost = getCost();
@@ -39,6 +42,23 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
     gui->openDialog(make<A13GUIProjectBuilder>(gui));
 }
 
+void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2i)
+{
+    log() << "Open Crafting Selector!";
+    auto gui = Apollo13::instance().getCurrentGUIScreen().get();
+    //gui->openDialog(make<A13GUICraftingSelector>(gui));
+}
+
+void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
+{
+    const int CRAFTING_TIME = 60;
+    if(tickCount - lastCrafting > CRAFTING_TIME)
+    {
+        log() << "craft item";
+        lastCrafting = tickCount;
+    }
+}
+
 void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
     if(!orePos.empty() && tickCount >= lastOre + nextRandomTime)
@@ -64,7 +84,16 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 case ORE_SILVER: id = "a13:silver:ore"; break;
                 default: break;
             }
-            A13::PlayerStats::instance().resourceItems.tryAddItems({id, 1});
+            if(!container->getInventory().tryAddItems({id, 1}))
+            {
+                log() << "container full";
+                auto carrier = make<A13::EntityItemCarrier>(tilemap->scene, tilemap);
+                carrier->setPosition(sf::Vector2f((partPos.x + 3) * 16 + 8, (partPos.y + 3) * 16 + 8));
+                carrier->loadItemsFrom(container.get());
+                tilemap->scene->addObject(carrier);
+                nextRandomTime = EGE::Random::fastRandom().nextIntRanged(120 / std::sqrt(orePos.size()), 180 / std::sqrt(orePos.size())) / multiplier;
+                return;
+            }
 
             lastOre = tickCount;
             ore->count--;
@@ -74,6 +103,7 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 orePos.erase(orePos.begin() + index);
                 return;
             }
+            log() << "mine";
 
             nextRandomTime = EGE::Random::fastRandom().nextIntRanged(120 / std::sqrt(orePos.size()), 180 / std::sqrt(orePos.size())) / multiplier;
         }

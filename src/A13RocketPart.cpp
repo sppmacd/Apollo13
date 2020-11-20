@@ -1,7 +1,7 @@
 #include "A13RocketPart.h"
 #include "A13GameplayObjectManager.h"
 
-EGE::Vec2d A13RocketPartPart::getAtlasPosition() const
+EGE::Vec2d A13RocketPartPart::getAtlasPosition(int) const
 {
     return part->getAtlasPosition();
 }

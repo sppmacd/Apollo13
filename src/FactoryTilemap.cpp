@@ -6,22 +6,22 @@
 namespace A13
 {
 
-EGE::Vec2d A13::FactoryBuildingPart::getAtlasPosition() const
+EGE::Vec2d FactoryBuildingPart::getAtlasPosition(int) const
 {
     return building ? building->getAtlasPosition() : EGE::Vec2d(0, 0);
 }
 
-EGE::Vec2u A13::FactoryBuildingPart::getSize() const
+EGE::Vec2u FactoryBuildingPart::getSize() const
 {
     return building ? building->getSize() : EGE::Vec2u(0, 0);
 }
 
-std::string A13::FactoryBuildingPart::getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryBuildingPart::StateType& state) const
+std::string FactoryBuildingPart::getTooltip(const FactoryTilemap* tilemap, EGE::Vec2i pos, const FactoryBuildingPart::StateType& state) const
 {
     return building ? building->getTooltip(tilemap, pos, state) + "\n" : "???\n";
 }
 
-bool A13::FactoryBuildingPart::onRemove(A13::FactoryTilemap*, EGE::Vec2i)
+bool FactoryBuildingPart::onRemove(FactoryTilemap*, EGE::Vec2i)
 {
     if(building)
     {
@@ -37,14 +37,27 @@ bool A13::FactoryBuildingPart::onRemove(A13::FactoryTilemap*, EGE::Vec2i)
     return true;
 }
 
-std::string A13::FactoryTilemap::getTooltip(EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
+std::string FactoryTilemap::getTooltip(EGE::Vec2i pos, const FactoryTilemap::StateType& state) const
 {
     // TODO: use localization!
     std::string terrain = "Terrain: " + std::to_string(state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN]) + "\n";
     Ore* _ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
     std::string ore = _ore->id ? ("Ore: " + std::to_string(_ore->count) + "x #" + std::to_string(_ore->id) + "\n") : "";
-    std::string tile = state.part ? state.part->getTooltip(this, pos - EGE::Vec2i(state.cornerPos), state) : "No object";
-    return terrain + ore + tile;
+    EGE::Uint8 _logistic = state.addObjs[FACTORY_BUILDER_LAYER_LOGISTIC];
+    std::string logistic = _logistic ? ("Logistic: " + std::to_string(_logistic) + "\n") : "";
+    std::string tile = (state.part ? state.part->getTooltip(this, pos - EGE::Vec2i(state.cornerPos), state) : "No object") + "\n";
+    return terrain + ore + tile + logistic;
+}
+
+bool FactoryTilemap::onRemove(EGE::Vec2i partPos)
+{
+    auto& tile = ensureTile(partPos);
+    if(tile.addObjs[FACTORY_BUILDER_LAYER_LOGISTIC])
+    {
+        tile.addObjs[FACTORY_BUILDER_LAYER_LOGISTIC] = 0;
+        return true;
+    }
+    return false;
 }
 
 }

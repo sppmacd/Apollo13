@@ -15,7 +15,7 @@ class TileMapObject : public EGE::SceneObject2D
 public:
     TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1>& atlasTextureNames, EGE::SharedPtr<_Tilemap> tilemap);
 
-    void placePart(EGE::Vec2i pos, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part);
+    void placePart(EGE::Vec2i pos, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part);
     void removePart(EGE::Vec2i pos);
 
     void onActivate(EGE::Vec2i pos);
@@ -31,7 +31,7 @@ public:
     bool isObjectInArea(EGE::Vec2i position, EGE::Vec2u range) const;
 
     bool canPartBePlacedHere(EGE::Vec2i pos, EGE::Vec2u partSize) const;
-    void setHighlight(EGE::Vec2i offset, EGE::Vec2u size);
+    void setHighlight(EGE::Vec2i offset, EGE::Vec2u size, EGE::Vec2i atlasPos, int layer);
 
     // Function CanPlaceHere canPartBePlacedHere(EGE::Vec2i pos, const typename _Tilemap::TileType& tile);
     // Can be used to handle e.g additional layers.
@@ -44,6 +44,9 @@ public:
 
     void setAtlasMapper(std::function<EGE::Vec2d(_Tilemap*, const typename _Tilemap::TileType&, EGE::Size)> mapper) { m_atlasMapper = mapper; }
 
+    // args: pos, part, target
+    void setPartRenderer(std::function<void(EGE::Vec2i, typename _Tilemap::TileType::PartType&, sf::RenderTarget&)> renderer) { m_partRenderer = renderer; }
+
     void render(sf::RenderTarget& target, const EGE::RenderStates& states) const;
     void onUpdate(long long tickCounter);
 
@@ -53,14 +56,16 @@ public:
 private:
     sf::Vector2f m_highlightPosScreen;
     EGE::Vec2i m_highlightPos;
-
-    // TODO: change rendering of highlight to mark every tile differently
     EGE::Vec2u m_highlightSize;
+    EGE::Vec2u m_highlightAtlasPos;
+    int m_highlightAtlasLayer = -1;
+    sf::Texture* m_mainLayerTexture = nullptr;
+    EGE::TilemapRenderer2D<_Tilemap>* m_tmRenderer;
 
     std::function<CanPlaceHere(EGE::Vec2i)> m_placePredicate;
     std::function<EGE::Vec2d(_Tilemap*, const typename _Tilemap::TileType&, EGE::Size)> m_atlasMapper;
     std::function<void(EGE::Vec2i, const typename _Tilemap::TileType&)> m_onActivate;
-    EGE::Map<EGE::Vec2i, EGE::SharedPtr<typename _Tilemap::TileType::PartType>> m_objects;
+    std::function<void(EGE::Vec2i, typename _Tilemap::TileType::PartType&, sf::RenderTarget&)> m_partRenderer;
     bool m_useEnsure = false;
 };
 

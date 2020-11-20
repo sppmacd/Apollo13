@@ -6,9 +6,11 @@ TileMapObject<_Tilemap>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::ar
 {
     // Set tilemap
     m_tilemap = tilemap;
+    m_tilemap->scene = scene;
 
     // Set renderer
     auto renderer = make<EGE::TilemapRenderer2D<_Tilemap>>(scene, m_tilemap);
+    m_tmRenderer = renderer.get();
 
     renderer->setLayerCount(_Tilemap::TileType::AdditionalLayerCount + 1);
     for(EGE::Size s = 0; s < texs.size(); s++)
@@ -23,7 +25,7 @@ TileMapObject<_Tilemap>::TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::ar
                 if(!state.part)
                     return EGE::Vec2d(0, 0);
 
-                EGE::Vec2d atlasPos = state.part->getAtlasPosition();
+                EGE::Vec2d atlasPos = state.part->getAtlasPosition(state.meta);
                 auto tileSize = m_tilemap->getTileSize();
                 return EGE::Vec2d(atlasPos.x * tileSize.x + state.cornerPos.x * tileSize.x,
                         atlasPos.y * tileSize.y + state.cornerPos.y * tileSize.y);
@@ -89,7 +91,7 @@ bool TileMapObject<_Tilemap>::canPartBePlacedHere(EGE::Vec2i tileRel, EGE::Vec2u
 }
 
 template<class _Tilemap>
-void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part)
+void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part)
 {
     EGE::Vec2u partSize = part->getSize();
 
@@ -97,7 +99,7 @@ void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, EGE::SharedPtr<typen
     if(!canPartBePlacedHere(tileRel, partSize) || !part->onPlace(m_tilemap.get(), tileRel))
         return;
 
-    auto it = m_objects.insert(std::make_pair(EGE::Vec2i(tileRel.x, tileRel.y), part));
+    auto it = m_tilemap->getParts().insert(std::make_pair(EGE::Vec2i(tileRel.x, tileRel.y), part));
 
     for(EGE::Uint32 x = 0; x < partSize.x; x++)
     for(EGE::Uint32 y = 0; y < partSize.y; y++)
@@ -109,12 +111,17 @@ void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, EGE::SharedPtr<typen
 
         tile->part = it.first->second.get();
         tile->cornerPos = {x, y};
+        tile->meta = meta;
     }
 }
 
 template<class _Tilemap>
 void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
 {
+    // Check if tilemap doesn't have its own remove handler for that tile
+    if(m_tilemap->onRemove(tileRel))
+        return;
+
     // Check which object is here
     auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({tileRel.x, tileRel.y}) : m_tilemap->getTile({tileRel.x, tileRel.y}));
     if(!tile)
@@ -128,8 +135,8 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
     EGE::Vec2i objectPos = tileRel - EGE::Vec2i(tile->cornerPos);
 
     // Get object iterator
-    auto it = m_objects.find(objectPos);
-    if(it == m_objects.end())
+    auto it = m_tilemap->getParts().find(objectPos);
+    if(it == m_tilemap->getParts().end())
     {
         err() << "Can't find object at " << objectPos.x << "," << objectPos.y;
         return;
@@ -142,7 +149,7 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
         return;
 
     // Remove that object
-    m_objects.erase(it);
+    m_tilemap->getParts().erase(it);
 
     // Clear tilemap
     for(EGE::Uint32 x = 0; x < partSize.x; x++)
@@ -180,8 +187,16 @@ void TileMapObject<_Tilemap>::render(sf::RenderTarget& target, const EGE::Render
     // Tilemap
     EGE::SceneObject::render(target, states);
 
-    // Highlight
+    // Custom renderer for parts
+    if(m_partRenderer)
+    {
+        for(auto& pr: m_tilemap->getParts())
+        {
+            m_partRenderer(pr.first, *pr.second.get(), target);
+        }
+    }
 
+    // Highlight
     // TODO: optimize it
     for(int x = m_highlightPos.x; x < m_highlightPos.x + (int)m_highlightSize.x; x++)
     for(int y = m_highlightPos.y; y < m_highlightPos.y + (int)m_highlightSize.y; y++)
@@ -203,12 +218,16 @@ void TileMapObject<_Tilemap>::render(sf::RenderTarget& target, const EGE::Render
         else
             bc = canPartBePlacedHere({x, y}, m_highlightSize) ? sf::Color::White : sf::Color(128, 128, 128);
 
-        sf::RectangleShape rs(sf::Vector2f(14, 14));
+        sf::RectangleShape rs(sf::Vector2f(16, 16));
         sf::Vector2f screenPos = sf::Vector2f(x * (int)m_tilemap->getTileSize().x, y * (int)m_tilemap->getTileSize().y) + getPosition();
-        rs.setPosition(screenPos + sf::Vector2f(1, 1));
-        rs.setFillColor(sf::Color(bc.r, bc.g, bc.b, 64));
-        rs.setOutlineColor(sf::Color(bc.r, bc.g, bc.b, 128));
-        rs.setOutlineThickness(1);
+        rs.setPosition(screenPos);
+        rs.setTexture(m_tmRenderer->getTextureForLayer(m_highlightAtlasLayer == -1 ? _Tilemap::TileType::AdditionalLayerCount : m_highlightAtlasLayer).get());
+        rs.setTextureRect(sf::IntRect((m_highlightAtlasPos.x + x - m_highlightPos.x) * 16,
+                                      (m_highlightAtlasPos.y + y - m_highlightPos.y) * 16, 16, 16));
+        target.draw(rs);
+
+        rs.setFillColor(sf::Color(bc.r, bc.g, bc.b, 70));
+        rs.setTexture(nullptr);
         target.draw(rs);
     }
 }
@@ -217,15 +236,17 @@ template<class _Tilemap>
 void TileMapObject<_Tilemap>::onUpdate(long long tickCounter)
 {
     EGE::SceneObject::onUpdate(tickCounter);
-    for(auto& pr: m_objects)
+    for(auto& pr: m_tilemap->getParts())
     {
         pr.second->onUpdate(m_tilemap.get(), pr.first, tickCounter);
     }
 }
 
 template<class _Tilemap>
-void TileMapObject<_Tilemap>::setHighlight(EGE::Vec2i offset, EGE::Vec2u size)
+void TileMapObject<_Tilemap>::setHighlight(EGE::Vec2i offset, EGE::Vec2u size, EGE::Vec2i atlasPos, int layer)
 {
     m_highlightPos = offset;
     m_highlightSize = size;
+    m_highlightAtlasPos = atlasPos;
+    m_highlightAtlasLayer = layer;
 }

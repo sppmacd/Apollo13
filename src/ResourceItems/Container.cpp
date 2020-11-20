@@ -1,60 +1,64 @@
 #include "Container.h"
 
-#include "../A13GameplayObjectManager.h"
+#include <algorithm>
 
 namespace A13
 {
 
-int Container::getItemCount() const
+bool Container::loadItemsFrom(Container* other, int maxCount)
 {
-    int ic = 0;
-    for(auto& stack: m_stacks)
-        ic += stack.second;
-    return ic;
-}
+    // If maxCount is infinite, set it to size of other inventory
+    if(maxCount == -1)
+        maxCount = other->m_inventory.getItemCount();
 
-bool Container::canAddItems(ResourceItemStack stack) const
-{
-    return getMaxItemCount() == -1 || stack.getItemCount() + getItemCount() < getMaxItemCount();
-}
-
-bool Container::tryAddItems(ResourceItemStack stack)
-{
-    if(!canAddItems(stack))
+    // Do nothing if other inventory is empty
+    if(other->m_inventory.getItemCount() == 0)
         return false;
 
-    m_stacks[stack.getItem()] += stack.getItemCount();
+    // Make a copy of other inventory
+    std::vector<ResourceItemStack> sortedInv;
+    for(auto& pr: other->m_inventory)
+        sortedInv.push_back({pr.first, pr.second});
+
+    // Sort item stacks by item count.
+    std::stable_sort(sortedInv.begin(), sortedInv.end(), [](const ResourceItemStack& l, const ResourceItemStack& r)
+    {
+        return l.getItemCount() > r.getItemCount();
+    });
+
+    // Transfer items until there are no place in our inventory (break)
+    // or we run out of items in carrier (the loop finishes then)
+    for(ResourceItemStack& stack: sortedInv)
+    {
+        // Update stack by needed stack
+        stack = allowLoadItem(stack);
+
+        if(stack.getItemCount() == 0)
+            continue;
+
+        if(m_inventory.isFull() || maxCount == 0)
+            return false;
+
+        int remaining = m_inventory.getRemainingSpace();
+        if(remaining <= stack.getItemCount())
+        {
+            int maxCmin = std::min(remaining, maxCount);
+            other->m_inventory.tryRemoveItems({stack.getItem(), maxCmin});
+            m_inventory.tryAddItems({stack.getItem(), maxCmin});
+
+            if(remaining < stack.getItemCount())
+                return false;
+        }
+        else
+        {
+            int maxCmin = std::min(stack.getItemCount(), maxCount);
+            ResourceItemStack is2 = {stack.getItem(), maxCmin};
+            other->m_inventory.tryRemoveItems(is2);
+            m_inventory.tryAddItems(is2);
+            maxCount -= maxCmin;
+        }
+    }
     return true;
-}
-
-bool Container::canRemoveItems(ResourceItemStack stack) const
-{
-    auto it = m_stacks.find(stack.getItem());
-
-    int count = 0;
-    if(it != m_stacks.end())
-        count = it->second;
-
-    return count >= stack.getItemCount();
-}
-
-bool Container::tryRemoveItems(ResourceItemStack stack)
-{
-    if(!canAddItems(stack))
-        return false;
-
-    m_stacks[stack.getItem()] -= stack.getItemCount();
-    return true;
-}
-
-int& Container::operator[](ResourceItem* type)
-{
-    return m_stacks[type];
-}
-
-int& Container::operator[](std::string itemId)
-{
-    return (*this)[A13GameplayObjectManager::instance().resourceItems.findById(itemId)];
 }
 
 }

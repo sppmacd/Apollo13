@@ -1,42 +1,33 @@
 #pragma once
 
-#include "../ResourceItem.h"
+#include "Inventory.h"
 
 namespace A13
 {
 
-// The container can hold an user-specified
-// item count of any types.
 class Container
 {
 public:
-    typedef EGE::Map<ResourceItem*, int> ArrayType;
+    Container() {}
 
-    Container(const ArrayType& stacks = {})
-    : m_stacks(stacks) {}
+    // Get the internal storage.
+    virtual Inventory& getInventory() { return m_inventory; }
+    virtual const Inventory& getInventory() const { return m_inventory; }
 
-    // Set it to -1 for infinite storage.
-    void setMaxItemCount(int n) { m_maxItems = n; }
+    // Transfers items from carrier to internal storage
+    // and updates internal state.
+    // maxCount - The maximum count of items to transfer
+    // (-1 to transfer all items that carrier has and that
+    // are needed)
+    // Returns - some unstable bool for now, don't rely on it!
+    virtual bool loadItemsFrom(Container* carrier, int maxCount = -1);
 
-    int getMaxItemCount() const { return m_maxItems; }
+    // Returns stack that is a "part" of input stack, or
+    // %stack if the stack can be fully placed in container.
+    virtual ResourceItemStack allowLoadItem(ResourceItemStack stack) { return stack; }
 
-    int getItemCount() const;
-
-    // TODO: Add these for Cost
-    bool canAddItems(ResourceItemStack stack) const;
-    bool tryAddItems(ResourceItemStack stack);
-    bool canRemoveItems(ResourceItemStack stack) const;
-    bool tryRemoveItems(ResourceItemStack stack);
-
-    const ArrayType::const_iterator begin() const { return m_stacks.begin(); }
-    const ArrayType::const_iterator end() const { return m_stacks.end(); }
-
-    int& operator[](ResourceItem* item);
-    int& operator[](std::string itemId);
-
-private:
-    int m_maxItems = 0;
-    ArrayType m_stacks;
+protected:
+    Inventory m_inventory;
 };
 
 }

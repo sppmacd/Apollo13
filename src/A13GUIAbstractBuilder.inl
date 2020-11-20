@@ -98,6 +98,9 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonPress(sf::Event::Mouse
         m_dragStartPos = sf::Vector2i(event.x, event.y);
         m_dragStartCamPos = m_camera->getEyePosition();
         m_mousePressed = true;
+
+        if(event.x < m_partSelector->getSize().x)
+            m_meta = 0;
     }
 }
 
@@ -129,12 +132,11 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
 
             if(m_partSelector->getCurrentItem())
             {
-                if(!m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), tilePos))
-                    m_tileMapObject->placePart(tilePos, m_partSelector->getCurrentItem()->getPart());
+                if(!m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
+                    m_tileMapObject->placePart(tilePos, m_meta, m_partSelector->getCurrentItem()->getPart());
             }
             else
             {
-                // TODO: Try to "activate" currently hovered tile
                 // TODO: BuilderPart::contextMenu() - right click
                 m_tileMapObject->onActivate(tilePos);
             }
@@ -167,13 +169,10 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
     }
 
     // Update highlight.
+    updateHighlight(sf::Vector2i(event.x, event.y));
+
     auto& wnd = *getWindow().lock().get();
     sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(event.x, event.y), getView(wnd)) - m_tileMapObject->getPosition();
-    if(m_partSelector->getCurrentItem())
-    {
-        EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
-        m_tileMapObject->setHighlight(tileRel, m_partSelector->getCurrentItem()->getPart()->getSize());
-    }
 
     // Get tooltip and set it to current.
     if(currentPos.x > m_partSelector->getSize().x)
@@ -227,6 +226,12 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& eve
     if(event.code == sf::Keyboard::Escape)
     {
         m_partSelector->setCurrentItemIndex(-1);
-        m_tileMapObject->setHighlight({0, 0}, {0, 0});
+        m_tileMapObject->setHighlight({0, 0}, {0, 0}, {0, 0}, -1);
+    }
+    else if(event.code == sf::Keyboard::R)
+    {
+        m_meta++;
+        log() << "meta: " << m_meta;
+        updateHighlight(sf::Mouse::getPosition(*getWindow().lock().get()));
     }
 }

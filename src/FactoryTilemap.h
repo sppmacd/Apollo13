@@ -3,6 +3,7 @@
 #include "A13GUIAbstractBuilder.h"
 #include "Builder/BuilderPart.h"
 #include "Builder/TilemapObjectState.h"
+#include "ResourceItems/Container.h"
 
 #include <ege/util.h>
 
@@ -14,6 +15,7 @@ namespace A13
 #define FACTORY_BUILDER_LAYER_TERRAIN 0
 #define FACTORY_BUILDER_LAYER_ORES 1
 #define FACTORY_BUILDER_LAYER_SHADOWS 2
+#define FACTORY_BUILDER_LAYER_LOGISTIC 3
 
 #define TERRAIN_GRASS 0
 #define TERRAIN_ASPHALT_ROAD 1
@@ -41,13 +43,14 @@ class FactoryTilemap;
 struct FactoryBuildingPart : public BuilderPart<FactoryTilemap>
 {
     const A13FactoryBuilding* building;
+    EGE::UniquePtr<A13::Container> container;
 
-    typedef TilemapObjectState<FactoryBuildingPart, 3> StateType;
+    typedef TilemapObjectState<FactoryBuildingPart, 4> StateType;
 
-    FactoryBuildingPart(const A13FactoryBuilding* _building)
-    : building(_building) {}
+    FactoryBuildingPart(const A13FactoryBuilding* _building, EGE::UniquePtr<A13::Container>&& _container = nullptr)
+    : building(_building), container(std::move(_container)) {}
 
-    virtual EGE::Vec2d getAtlasPosition() const;
+    virtual EGE::Vec2d getAtlasPosition(int meta) const;
     virtual EGE::Vec2u getSize() const;
 
     virtual bool onRemove(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos);
@@ -66,22 +69,37 @@ struct Ore
     EGE::Uint32 count = 0;
 };
 
-// Layers
-// Multi-size object layer
+// --------
+//  Layers
+// --------
+//
+// == Multi-size object layer ==
+//
 //   - Buildings
-// Additional layers
+//
+// == Additional layers ==
+//
 //   - 0 - Terrain (Terrain structure)
 //   - 1 - Ores (Ore structure)
 //   - 2 - Shadows (bitmap)
-typedef Aliases::A13ChunkedTilemapForPart<A13::FactoryBuildingPart, 16, 16, 3> GUIFactoryBuilder_Tilemap;
+//   - 3 - Logistic connection flag (bitmap)
+//
+// == Logistic connections ==
+//
+//   l d r u  l d r u
+//   0 0 0 0  0 0 0 0
+//     input   output
+//
+typedef Aliases::A13ChunkedTilemapForPart<A13::FactoryBuildingPart, 16, 16, 4> GUIFactoryBuilder_Tilemap;
 
-class FactoryTilemap : public GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<FactoryBuildingPart, 3>
+class FactoryTilemap : public GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<FactoryBuildingPart, 4>
 {
 public:
     FactoryTilemap(EGE::MaxInt _seed)
     : seed(_seed) {}
 
     virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) const;
+    virtual bool onRemove(EGE::Vec2i partPos);
 
     EGE::MaxInt seed;
 };

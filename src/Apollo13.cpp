@@ -20,6 +20,7 @@ EGE::EventResult Apollo13::load()
     resMan->registerDefaultFont("font.ttf");
 
     resMan->registerTexture("game/resource_items.png");
+    resMan->registerTexture("game/entities.png");
 
     // GUI
     resMan->registerTexture("gui/pb/rocket_parts.png");
@@ -31,6 +32,7 @@ EGE::EventResult Apollo13::load()
     resMan->registerTexture("gui/factory_builder/terrain.png");
     resMan->registerTexture("gui/factory_builder/ores.png");
     resMan->registerTexture("gui/factory_builder/shadows.png");
+    resMan->registerTexture("gui/factory_builder/logistic.png");
 
     setResourceManager(resMan);
 

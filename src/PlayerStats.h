@@ -17,7 +17,7 @@ public:
     void initialize();
 
     // maps ResourceItem ID to count
-    Container resourceItems;
+    Inventory resourceItems;
 };
 
 }

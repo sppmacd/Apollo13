@@ -17,7 +17,7 @@ struct A13RocketPartPart : public BuilderPart<A13ProjectTilemap>
     A13RocketPartPart(A13RocketPart* _part)
     : part(_part) {}
 
-    virtual EGE::Vec2d getAtlasPosition() const;
+    virtual EGE::Vec2d getAtlasPosition(int meta) const;
     virtual EGE::Vec2u getSize() const;
 };
 
@@ -49,7 +49,7 @@ public:
     A13RocketPartItem(A13RocketPart* createdTile)
     : EGE::GameplayObject(createdTile->getId()), m_tile(createdTile) {}
 
-    virtual EGE::Vec2d getAtlasPosition() const
+    virtual EGE::Vec2d getAtlasPosition(int) const
     {
         return m_tile->getItemAtlasPosition();
     }
