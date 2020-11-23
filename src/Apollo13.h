@@ -9,6 +9,8 @@ public:
 
     virtual EGE::EventResult load() override;
 
+    virtual void logicTick(long long tickCount);
+
     EGE::MaxInt getSeed() { return m_seed; }
 
 private:

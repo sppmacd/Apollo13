@@ -8,7 +8,15 @@ namespace A13
 class Container
 {
 public:
-    Container() {}
+    enum _NR
+    {
+        NoRegisterInQueue
+    };
+
+    Container();
+    Container(_NR) {}
+
+    virtual ~Container();
 
     // Get the internal storage.
     virtual Inventory& getInventory() { return m_inventory; }

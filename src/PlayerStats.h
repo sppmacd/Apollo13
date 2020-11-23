@@ -9,15 +9,34 @@
 namespace A13
 {
 
-class PlayerStats
+class PlayerStats : public Container
 {
 public:
+    PlayerStats()
+    : Container(Container::NoRegisterInQueue) {}
+
     EGE_SINGLETON(PlayerStats);
 
     void initialize();
 
-    // maps ResourceItem ID to count
-    Inventory resourceItems;
+    void registerContainer(Container* container);
+    void unregisterContainer(Container* container);
+
+    void addResourceItemRequest(ResourceItemStack stack, Container* requester);
+
+    void update();
+
+private:
+    struct ResourceRequest
+    {
+        ResourceItemStack stack;
+        Container* requester;
+    };
+
+    bool process(ResourceRequest& request);
+
+    EGE::Set<Container*> m_registeredContainers;
+    std::queue<ResourceRequest> m_requests;
 };
 
 }

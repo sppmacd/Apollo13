@@ -169,10 +169,7 @@ public:
     public:
         virtual ResourceItemStack allowLoadItem(ResourceItemStack stack)
         {
-            log() << "check if item needed for crafting";
-            if(stack.getItem() && stack.getItem()->getId() == "a13:coal_ore")
-                return {stack.getItem(), std::min(5, stack.getItemCount())};
-            return {};
+            return stack;
         }
     };
 
@@ -231,9 +228,6 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {m_level, 4}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 
-    virtual std::string getTooltip(const A13::FactoryTilemap*, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
-        { return getId() + "\nLevel " + std::to_string(m_level); }
-
     virtual CanPlaceHere canPlaceHere(EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
     {
         A13::Ore* ore = (A13::Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
@@ -248,16 +242,28 @@ public:
         return m_level + 1;
     }
 
+    struct Container : public A13::Container
+    {
+    public:
+        virtual ResourceItemStack allowLoadItem(ResourceItemStack stack)
+        {
+            log() << "check if item needed";
+            if(stack.getItem() && stack.getItem()->getId() == "a13:coal_ore")
+                return stack;
+            return {};
+        }
+    };
+
     struct Part : public A13::FactoryBuildingPart
     {
         Part(const A13FactoryBuilding* bld)
-        : A13::FactoryBuildingPart(bld, std::make_unique<A13::Container>()) {}
+        : A13::FactoryBuildingPart(bld, std::make_unique<Container>()) {}
 
-        virtual std::string getTooltip(A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
+        virtual std::string getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
         {
             return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
                 + "\nLevel " + std::to_string(((A13FactoryBuildingMine*)building)->m_level) + "\n"
-                + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n";
+                + std::to_string(fuelContainer.getInventory().getItemCount()) + " items in internal storage\n";
         }
 
         virtual bool onPlace(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos)
@@ -287,6 +293,48 @@ public:
         int nextRandomTime = 0;
         EGE::TickCount lastOre = 0;
         double multiplier = 1;
+        int m_fuel = 0;
+        A13::Container fuelContainer;
+    };
+
+    A13_CUSTOM_FACTORY_PART(Part);
+
+    virtual Cost getCost() const;
+
+    virtual std::string getDescription()
+    {
+        return
+        "Mines allows you to get resources.\n"
+        "The higher is level, the more\n"
+        "resources it mines.";
+    }
+
+private:
+    EGE::Size m_level;
+};
+
+class A13FactoryBuildingPortal : public A13FactoryBuilding
+{
+public:
+    A13FactoryBuildingPortal(EGE::Size level)
+    : A13FactoryBuilding("a13:mine:" + std::to_string(level)), m_level(level) {}
+
+    virtual EGE::Vec2d getAtlasPosition() const { return {9 + m_level * 4, 0}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const { return {m_level, 4}; }
+    virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    struct Part : public A13::FactoryBuildingPart
+    {
+        Part(const A13FactoryBuilding* bld)
+        : A13::FactoryBuildingPart(bld, std::make_unique<A13::Container>()) {}
+
+        virtual std::string getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
+        {
+            return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
+                + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n";
+        }
+
+        //virtual void onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount);
     };
 
     A13_CUSTOM_FACTORY_PART(Part);

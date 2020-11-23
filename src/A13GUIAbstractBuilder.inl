@@ -171,21 +171,6 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
     // Update highlight.
     updateHighlight(sf::Vector2i(event.x, event.y));
 
-    auto& wnd = *getWindow().lock().get();
-    sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(event.x, event.y), getView(wnd)) - m_tileMapObject->getPosition();
-
-    // Get tooltip and set it to current.
-    if(currentPos.x > m_partSelector->getSize().x)
-    {
-        EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
-        m_tooltip = m_tileMapObject->getTooltip(tileRel);
-    }
-    else
-    {
-        m_tooltip.clear();
-    }
-    m_toolTipLabel->setString(m_tooltip);
-
     if(m_dragging)
     {
         // Move camera.
@@ -231,7 +216,27 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& eve
     else if(event.code == sf::Keyboard::R)
     {
         m_meta++;
-        log() << "meta: " << m_meta;
         updateHighlight(sf::Mouse::getPosition(*getWindow().lock().get()));
     }
+}
+
+template<class _Tilemap, class _Item>
+void A13GUIAbstractBuilder<_Tilemap, _Item>::onUpdate(long long tickCount)
+{
+    EGE::GUIScreen::onUpdate(tickCount);
+
+    // Get tooltip and set it to current.
+    auto& wnd = *getWindow().lock().get();
+    sf::Vector2f currentPos = (sf::Vector2f)sf::Mouse::getPosition();
+    if(currentPos.x > m_partSelector->getSize().x)
+    {
+        sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(currentPos), getView(wnd)) - m_tileMapObject->getPosition();
+        EGE::Vec2i tileRel = m_tileMapObject->m_tilemap->getTileAlignedPos({mouseScenePos.x, mouseScenePos.y});
+        m_tooltip = m_tileMapObject->getTooltip(tileRel);
+    }
+    else
+    {
+        m_tooltip.clear();
+    }
+    m_toolTipLabel->setString(m_tooltip);
 }

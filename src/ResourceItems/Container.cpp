@@ -1,9 +1,22 @@
 #include "Container.h"
+#include "../PlayerStats.h"
 
 #include <algorithm>
 
 namespace A13
 {
+
+Container::Container()
+{
+    if(this != &A13::PlayerStats::instance())
+        A13::PlayerStats::instance().registerContainer(this);
+}
+
+Container::~Container()
+{
+    if(this != &A13::PlayerStats::instance())
+        A13::PlayerStats::instance().unregisterContainer(this);
+}
 
 bool Container::loadItemsFrom(Container* other, int maxCount)
 {

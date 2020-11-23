@@ -57,6 +57,7 @@ public:
     virtual void onMouseMove(sf::Event::MouseMoveEvent& event);
     virtual void onMouseWheelScroll(sf::Event::MouseWheelScrollEvent& event);
     virtual void onKeyPress(sf::Event::KeyEvent& event);
+    virtual void onUpdate(long long tickCount);
 
     void setBuilderBackground(std::string name) { m_backgroundTN = name; }
 

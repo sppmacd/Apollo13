@@ -92,7 +92,7 @@ void A13GUIFactoryBuilder::onLoad()
             std::string str = stack.getItem()->getId() + " x" + std::to_string(stack.getItemCount());
 
             // Text
-            sf::Color color = A13::PlayerStats::instance().resourceItems[stack.getItem()->getId()] < stack.getItemCount() ? sf::Color::Red : sf::Color::White;
+            sf::Color color = A13::PlayerStats::instance().getInventory()[stack.getItem()] < stack.getItemCount() ? sf::Color::Red : sf::Color::White;
             renderer.renderText(m_partSelector->getSize().x + 47, HEIGHT * (s + 1) + 20, *m_font, str, 11, color);
 
             // Icon

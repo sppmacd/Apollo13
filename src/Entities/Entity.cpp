@@ -150,10 +150,6 @@ void EntityItemCarrier::doUpdate(EGE::TickCount tickCounter)
             }
             if(neigh.part && (neigh.part == tile.part || neigh.part->container))
             {
-                if(neigh.part->building->getId() == "a13:factory")
-                {
-                    std::cout << "io";
-                }
                 allowedDirsPart.push_back(dir);
             }
         }

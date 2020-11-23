@@ -47,3 +47,8 @@ EGE::EventResult Apollo13::load()
 
     return EGE::EventResult::Success;
 }
+
+void Apollo13::logicTick(long long tickCount)
+{
+    A13::PlayerStats::instance().update();
+}

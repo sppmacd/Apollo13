@@ -40,3 +40,5 @@ private:
     int m_count;
     ResourceItem* m_item;
 };
+
+std::ostream& operator<<(std::ostream& os, const ResourceItemStack& stack);

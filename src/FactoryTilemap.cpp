@@ -31,7 +31,7 @@ bool FactoryBuildingPart::onRemove(FactoryTilemap*, EGE::Vec2i)
         Cost cost = building->getCost();
         for(ResourceItemStack& stack: cost)
         {
-            PlayerStats::instance().resourceItems[stack.getItem()->getId()] += stack.getItemCount() * RESOURCE_GIVEBACK_FACTOR;
+            PlayerStats::instance().getInventory()[stack.getItem()->getId()] += stack.getItemCount() * RESOURCE_GIVEBACK_FACTOR;
         }
     }
     return true;

@@ -18,7 +18,7 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE
 
     for(ResourceItemStack& stack: cost)
     {
-        if(!A13::PlayerStats::instance().resourceItems.canRemoveItems(stack))
+        if(!A13::PlayerStats::instance().getInventory().canRemoveItems(stack))
         {
             // We inform Builder that we placed object,
             // but we didn't do that.
@@ -29,7 +29,7 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE
     // Remove resources from player inventory.
     for(ResourceItemStack& stack: cost)
     {
-        A13::PlayerStats::instance().resourceItems.tryRemoveItems(stack);
+        A13::PlayerStats::instance().getInventory().tryRemoveItems(stack);
     }
 
     return false;
@@ -84,17 +84,34 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 case ORE_SILVER: id = "a13:silver:ore"; break;
                 default: break;
             }
+
+            // Remove a coal from player inventory (every 5 items)
+            if(m_fuel == 0)
+            {
+                if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}))
+                {
+                    A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", 5}, &fuelContainer);
+                    return;
+                }
+                else
+                {
+                    m_fuel += 5;
+                }
+            }
+
+            // Remove fuel
+            m_fuel--;
+
+            // Add an ore to player inventory
             if(!container->getInventory().tryAddItems({id, 1}))
             {
                 log() << "container full";
-                auto carrier = make<A13::EntityItemCarrier>(tilemap->scene, tilemap);
-                carrier->setPosition(sf::Vector2f((partPos.x + 3) * 16 + 8, (partPos.y + 3) * 16 + 8));
-                carrier->loadItemsFrom(container.get());
-                tilemap->scene->addObject(carrier);
+                A13::PlayerStats::instance().loadItemsFrom(container.get());
                 nextRandomTime = EGE::Random::fastRandom().nextIntRanged(120 / std::sqrt(orePos.size()), 180 / std::sqrt(orePos.size())) / multiplier;
                 return;
             }
 
+            // Mine an ore
             lastOre = tickCount;
             ore->count--;
             if(ore->count == 0)

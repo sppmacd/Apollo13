@@ -58,7 +58,7 @@ void ResourceStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::Render
     for(auto pr: m_items)
     {
         // Count
-        int count = A13::PlayerStats::instance().resourceItems[pr.first];
+        int count = A13::PlayerStats::instance().getInventory()[pr.first];
 
         if(count == 0)
             continue;
