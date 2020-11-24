@@ -2,6 +2,7 @@
 
 #include "Apollo13.h"
 #include "A13GUIProjectBuilder.h"
+#include "GUICraftingSelector.h"
 #include "A13GameplayObjectManager.h"
 #include "PlayerStats.h"
 
@@ -42,20 +43,93 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
     gui->openDialog(make<A13GUIProjectBuilder>(gui));
 }
 
+std::string A13FactoryBuildingFactory::Part::getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
+{
+    return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
+        + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n";
+        + "Recipe: " + (m_recipe ? ("output: " + m_recipe->output.getItem()->getId()) : "none") + "\n";
+}
+
 void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2i)
 {
     log() << "Open Crafting Selector!";
     auto gui = Apollo13::instance().getCurrentGUIScreen().get();
-    //gui->openDialog(make<A13GUICraftingSelector>(gui));
+    gui->openDialog(make<A13::GUICraftingSelector>(gui, this));
 }
 
 void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
     const int CRAFTING_TIME = 60;
-    if(tickCount - lastCrafting > CRAFTING_TIME)
-    {
-        log() << "craft item";
+    const int FAILED_REQUEST_RETRY_TIME = 30;
+    const int PREPARATION_TIME = 5;
+
+    if(tickCount - lastCrafting > CRAFTING_TIME + PREPARATION_TIME + 1)
         lastCrafting = tickCount;
+
+    if(m_recipe)
+    {
+        log(LogLevel::Verbose) << tickCount - lastCrafting;
+        if(tickCount - lastCrafting == CRAFTING_TIME + PREPARATION_TIME)
+        {
+            // It's the tick after items were loaded. Try craft.
+            log() << "Craft items";
+
+            m_error = false;
+
+            // Check if every item from input can be removed (exists) from internal storage.
+            for(auto item: m_recipe->input)
+            {
+                if(!container->getInventory().canRemoveItems(item))
+                {
+                    // It means that player probably doesn't have that item in PI.
+                    log(LogLevel::Warning) << "Missing needed item " << item;
+
+                    m_error = true;
+                }
+            }
+
+            if(!A13::PlayerStats::instance().getInventory().canAddItems(m_recipe->output))
+            {
+                log(LogLevel::Warning) << "No space in PI for (" << m_recipe->output << ")";
+                m_error = true;
+            }
+
+            if(m_error)
+            {
+                log(LogLevel::Error) << "Failed to craft item";
+                lastCrafting = tickCount - CRAFTING_TIME;
+                return;
+            }
+
+            // We are sure that we have the items loaded. Let's remove them.
+            for(auto item: m_recipe->input)
+            {
+                if(!container->getInventory().tryRemoveItems(item))
+                {
+                    CRASH();
+                }
+            }
+
+            // We have successfully removed items. Add the result to player inventory.
+            if(!A13::PlayerStats::instance().getInventory().tryAddItems(m_recipe->output))
+            {
+                CRASH();
+            }
+
+            lastCrafting = tickCount;
+        }
+        else if(tickCount - lastCrafting == CRAFTING_TIME)
+        {
+            log() << "Load items from PI";
+
+            // Add request for each item in input.
+            // TODO: requests for multiple items at once
+            if(!m_error)
+            {
+                for(auto item: m_recipe->input)
+                    A13::PlayerStats::instance().addResourceItemRequest(item, container.get());
+            }
+        }
     }
 }
 
@@ -86,16 +160,19 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             }
 
             // Remove a coal from player inventory (every 5 items)
+            // TODO: add other fuels (oil) and depend FUEL_UNITS_PER
+            const int FUEL_UNITS_PER_FUEL_ITEM = 5;
+            const int FUEL_BUFFER_SIZE = 5;
             if(m_fuel == 0)
             {
                 if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}))
                 {
-                    A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", 5}, &fuelContainer);
+                    A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", FUEL_BUFFER_SIZE}, &fuelContainer);
                     return;
                 }
                 else
                 {
-                    m_fuel += 5;
+                    m_fuel += FUEL_UNITS_PER_FUEL_ITEM;
                 }
             }
 

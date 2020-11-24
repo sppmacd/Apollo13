@@ -28,6 +28,16 @@ void PlayerStats::addResourceItemRequest(ResourceItemStack stack, Container* req
 
 void PlayerStats::update()
 {
+    // Debug
+    if(!m_requests.empty())
+    {
+        log() << "--------------------------------";
+        log() << "Request queue size: " << m_requests.size();
+        auto& i = m_requests.back();
+        log() << "  FIRST: " << i.stack << " for " << i.requester;
+        log() << "--------------------------------";
+    }
+
     // Process half of the requests in the queue.
     // It allows later added processes also to be requested.
     if(m_requests.empty())
@@ -53,8 +63,8 @@ bool PlayerStats::process(ResourceRequest& request)
     {
         if(!getInventory().canRemoveItems(request.stack))
         {
-            log() << "Failed to process resource request: Not enough resources in player inventory";
-            log() << "   for stack " << request.stack;
+            /*log() << "Failed to process resource request: Not enough resources in player inventory";
+            log() << "   for stack " << request.stack;*/
             return false;
         }
         if(!request.requester->getInventory().canAddItems(request.stack))

@@ -158,6 +158,11 @@ public:
     }
 };
 
+namespace A13
+{
+    class Recipe;
+}
+
 class A13FactoryBuildingFactory : public A13FactoryBuilding
 {
 public:
@@ -178,12 +183,7 @@ public:
         Part(const A13FactoryBuilding* bld)
         : A13::FactoryBuildingPart(bld, std::make_unique<Container>()) {}
 
-        virtual std::string getTooltip(A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
-        {
-            return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
-                + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n";
-        }
-
+        virtual std::string getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const;
         virtual void onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount);
 
         virtual bool onPlace(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos)
@@ -191,15 +191,23 @@ public:
             if(!A13::FactoryBuildingPart::onPlace(tilemap, partPos))
                 return false;
 
+            // TODO: maybe separate storage for each input?
             container->getInventory().setMaxItemCount(100);
 
             return true;
+        }
+
+        virtual void setRecipe(A13::Recipe* recipe)
+        {
+            m_recipe = recipe;
         }
 
         virtual void onActivate(A13::FactoryTilemap*, EGE::Vec2i);
 
         int nextRandomTime = 0;
         EGE::TickCount lastCrafting = 0;
+        A13::Recipe* m_recipe = nullptr;
+        bool m_error = false;
     };
 
     A13_CUSTOM_FACTORY_PART(Part);
@@ -214,7 +222,7 @@ public:
     {
         return
         "Factory is a building used to\n"
-        "create new items!";
+        "craft new items!";
     }
 };
 
@@ -293,7 +301,7 @@ public:
         int nextRandomTime = 0;
         EGE::TickCount lastOre = 0;
         double multiplier = 1;
-        int m_fuel = 0;
+        int m_fuel = 1;
         A13::Container fuelContainer;
     };
 

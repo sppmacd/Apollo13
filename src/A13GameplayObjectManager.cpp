@@ -30,6 +30,12 @@ void A13GameplayObjectManager::registerResourceItem(EGE::UniquePtr<ResourceItem>
     ptr->setNumericId(nid);
 }
 
+void A13GameplayObjectManager::registerRecipe(EGE::UniquePtr<A13::Recipe> recipe)
+{
+    auto item = recipe->output.getItem();
+    recipes.add(item, std::move(recipe));
+}
+
 void A13GameplayObjectManager::registerRocketParts()
 {
     registerRocketPart(std::make_unique<A13RocketPartEngine>());
@@ -140,4 +146,17 @@ void A13GameplayObjectManager::registerResourceItems()
     item = std::make_unique<ResourceItem>("a13:silver");
     items.silver = item.get();
     registerResourceItem(std::move(item));
+}
+
+void A13GameplayObjectManager::registerRecipes()
+{
+    // Smelting
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.iron_ore, 4}     }, {items.iron, 3}      )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.copper_ore, 4}   }, {items.copper, 3}    )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.titanium_ore, 3} }, {items.titanium, 2}  )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silicon_sand, 5} }, {items.silicon, 3}   )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.aluminum_ore, 4} }, {items.aluminum, 3}  )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.diamond_ore, 2}  }, {items.diamond, 1}   )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.gold_ore, 2}     }, {items.gold, 1}      )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silver_ore, 2}   }, {items.silver, 1}    )));
 }

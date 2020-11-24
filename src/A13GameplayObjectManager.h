@@ -8,6 +8,18 @@
 #include <ege/gpo/GameplayObjectRegistry.h>
 #include <ege/util/Types.h>
 
+namespace A13
+{
+    struct Recipe
+    {
+        EGE::Vector<ResourceItemStack> input;
+        ResourceItemStack output;
+
+        Recipe(EGE::Vector<ResourceItemStack> _input, ResourceItemStack _output)
+        : input(_input), output(_output) {}
+    };
+}
+
 class A13GameplayObjectManager : public EGE::GameplayObjectManager
 {
 public:
@@ -15,15 +27,18 @@ public:
 
     bool load()
     {
+        log() << "[A13GameplayObjectManager] Loaded";
         registerRocketParts();
         registerFactoryBuildings();
         registerResourceItems();
+        registerRecipes();
         return true;
     }
 
     void registerRocketParts();
     void registerFactoryBuildings();
     void registerResourceItems();
+    void registerRecipes();
 
     void registerRocketPart(EGE::UniquePtr<A13RocketPart> part);
     void registerFactoryBuilding(EGE::UniquePtr<A13FactoryBuilding> part);
@@ -32,6 +47,8 @@ public:
 
     void registerResourceItem(EGE::UniquePtr<ResourceItem> item);
 
+    void registerRecipe(EGE::UniquePtr<A13::Recipe> recipe);
+
     bool clear()
     {
         rocketParts.clear();
@@ -39,6 +56,7 @@ public:
         factoryBuildings.clear();
         factoryBuildingItems.clear();
         resourceItems.clear();
+        recipes.clear();
         return true;
     }
 
@@ -78,4 +96,7 @@ public:
 
     // Resource Items (stone, coal, wood etc.)
     EGE::GameplayObjectRegistry<EGE::String, ResourceItem> resourceItems;
+
+    // Recipes for Factory FB
+    EGE::GameplayObjectRegistry<ResourceItem*, A13::Recipe> recipes;
 };

@@ -26,17 +26,19 @@ public:
 
     void update();
 
-private:
+    // TODO: make it private
     struct ResourceRequest
     {
         ResourceItemStack stack;
         Container* requester;
     };
 
+    std::queue<ResourceRequest> m_requests;
+private:
+
     bool process(ResourceRequest& request);
 
     EGE::Set<Container*> m_registeredContainers;
-    std::queue<ResourceRequest> m_requests;
 };
 
 }

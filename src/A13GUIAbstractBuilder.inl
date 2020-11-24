@@ -227,7 +227,7 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onUpdate(long long tickCount)
 
     // Get tooltip and set it to current.
     auto& wnd = *getWindow().lock().get();
-    sf::Vector2f currentPos = (sf::Vector2f)sf::Mouse::getPosition();
+    sf::Vector2f currentPos = (sf::Vector2f)sf::Mouse::getPosition(wnd);
     if(currentPos.x > m_partSelector->getSize().x)
     {
         sf::Vector2f mouseScenePos = m_scene->mapScreenToScene(wnd, sf::Vector2i(currentPos), getView(wnd)) - m_tileMapObject->getPosition();

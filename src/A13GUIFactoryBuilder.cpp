@@ -1,5 +1,7 @@
 #include "A13GUIFactoryBuilder.h"
 
+#include "PlayerStats.h"
+
 A13GUIFactoryBuilder::A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
 : A13GUIAbstractBuilder(loop, make<A13::FactoryTilemap>(Apollo13::instance().getSeed()))
 {
