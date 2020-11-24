@@ -33,7 +33,7 @@ public:
         Container* requester;
     };
 
-    std::queue<ResourceRequest> m_requests;
+    EGE::Map<ResourceItem*, std::queue<ResourceRequest>> m_requestQueues;
 private:
 
     bool process(ResourceRequest& request);

@@ -56,7 +56,7 @@ void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2
 
 void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
-    const int CRAFTING_TIME = 60;
+    const int CRAFTING_TIME = ((A13FactoryBuildingFactory*)building)->getCraftingDuration();
     const int PREPARATION_TIME = 5;
 
     if(tickCount - lastCrafting > CRAFTING_TIME + PREPARATION_TIME + 1)
@@ -64,7 +64,6 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
 
     if(m_recipe)
     {
-        log(LogLevel::Verbose) << tickCount - lastCrafting;
         if(tickCount - lastCrafting == CRAFTING_TIME + PREPARATION_TIME)
         {
             // It's the tick after items were loaded. Try craft.
@@ -152,14 +151,17 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             const int FUEL_BUFFER_SIZE = 5;
             if(m_fuel == 0)
             {
-                if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}))
+                // Try remove coal from coal inventory and internal inventory (for coal mines)
+                if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}) && !container->getInventory().tryRemoveItems({"a13:coal:ore", 1}) && !m_requestedCoal)
                 {
                     A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", FUEL_BUFFER_SIZE}, &fuelContainer);
+                    m_requestedCoal = true;
                     return;
                 }
                 else
                 {
                     m_fuel += FUEL_UNITS_PER_FUEL_ITEM;
+                    m_requestedCoal = false;
                 }
             }
 
@@ -169,7 +171,6 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             // Add an ore to player inventory
             if(!container->getInventory().tryAddItems({id, 1}))
             {
-                log() << "container full";
                 A13::PlayerStats::instance().loadItemsFrom(container.get());
                 nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
                 return;
@@ -184,7 +185,6 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 orePos.erase(orePos.begin() + index);
                 return;
             }
-            log() << "mine";
 
             nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
         }
@@ -213,8 +213,16 @@ Cost A13FactoryBuildingStartPlatform::getCost() const
 Cost A13FactoryBuildingFactory::getCost() const
 {
     return {
-        { A13GameplayObjectManager::items.copper, 50 },
-        { A13GameplayObjectManager::items.iron, 100 }
+        { A13GameplayObjectManager::items.iron, 100 },
+        { A13GameplayObjectManager::items.copper, 50 }
+    };
+}
+
+Cost A13FactoryBuildingQuickFactory::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.iron_ore, 10 },
+        { A13GameplayObjectManager::items.copper_ore, 10 }
     };
 }
 

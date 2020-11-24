@@ -166,8 +166,8 @@ namespace A13
 class A13FactoryBuildingFactory : public A13FactoryBuilding
 {
 public:
-    A13FactoryBuildingFactory()
-    : A13FactoryBuilding("a13:factory") {}
+    A13FactoryBuildingFactory(std::string suffix = "generic")
+    : A13FactoryBuilding("a13:factory:" + suffix) {}
 
     struct Container : public A13::Container
     {
@@ -215,6 +215,7 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {1, 4}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {1, 1}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
+    virtual EGE::TickCount getCraftingDuration() const { return 60; }
 
     virtual Cost getCost() const;
 
@@ -223,6 +224,29 @@ public:
         return
         "Factory is a building used to\n"
         "craft new items!";
+    }
+};
+
+class A13FactoryBuildingQuickFactory : public A13FactoryBuildingFactory
+{
+public:
+    A13FactoryBuildingQuickFactory()
+    : A13FactoryBuildingFactory("quick") {}
+
+    virtual EGE::Vec2d getAtlasPosition() const override { return {0, 3}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const override { return {3, 1}; }
+    virtual EGE::Vec2u getSize() const override { return {1, 1}; }
+    virtual EGE::TickCount getCraftingDuration() const override { return 180; }
+
+    virtual Cost getCost() const override;
+
+    virtual std::string getDescription() override
+    {
+        return
+        "The Quick Mine is a mine that you\n"
+        "place as the first building. It\n"
+        "can be used also when you don't\n"
+        "have resources";
     }
 };
 
@@ -308,6 +332,7 @@ public:
         double multiplier = 1;
         int m_fuel = 1;
         A13::Container fuelContainer;
+        bool m_requestedCoal = false;
     };
 
     A13_CUSTOM_FACTORY_PART(Part);
@@ -336,7 +361,7 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const override { return {2, 1}; }
     virtual EGE::Vec2u getSize() const override { return {1, 1}; }
     virtual EGE::Size getBufferSize() const override { return 2; }
-    virtual double getMultiplier() const override { return 0.1; }
+    virtual double getMultiplier() const override { return 1; }
 
     virtual Cost getCost() const override;
 

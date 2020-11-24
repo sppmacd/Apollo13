@@ -22,12 +22,13 @@ void PlayerStats::unregisterContainer(Container* container)
 
 void PlayerStats::addResourceItemRequest(ResourceItemStack stack, Container* requester)
 {
-    m_requests.push({stack, requester});
+    m_requestQueues[stack.getItem()].push({stack, requester});
 }
 
 void PlayerStats::update()
 {
     // Debug
+    /*
     if(!m_requests.empty())
     {
         log() << "--------------------------------";
@@ -35,24 +36,27 @@ void PlayerStats::update()
         auto& i = m_requests.back();
         log() << "  FIRST: " << i.stack << " for " << i.requester;
         log() << "--------------------------------";
-    }
+    }*/
 
-    // Process half of the requests in the queue.
-    // It allows later added processes also to be requested.
-    if(m_requests.empty())
-        return;
-
-    EGE::Size halfSize = (m_requests.size() + 1) / 2;
-    for(EGE::Size s = 0; s < halfSize; s++)
+    for(auto& q: m_requestQueues)
     {
-        if(!process(m_requests.front()))
-        {
-            // Save a copy of request on the back of queue.
-            // We will try process it later.
-            m_requests.push(m_requests.front());
-        }
+        // Process half of the requests in the queue.
+        // It allows later added requests also to be processes.
+        if(q.second.empty())
+            return;
 
-        m_requests.pop();
+        EGE::Size hsize = q.second.size();
+        for(EGE::Size s = 0; s < hsize; s++)
+        {
+            if(!process(q.second.front()))
+            {
+                // Save a copy of request on the back of queue.
+                // We will try process it later.
+                q.second.push(q.second.front());
+            }
+
+            q.second.pop();
+        }
     }
 }
 

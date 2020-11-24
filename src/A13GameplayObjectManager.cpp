@@ -48,21 +48,24 @@ void A13GameplayObjectManager::registerRocketParts()
 
 void A13GameplayObjectManager::registerFactoryBuildings()
 {
-    // Tiles
-    registerFactoryBuilding(std::make_unique<A13FactoryBuildingRocketFactory>());
-    registerFactoryBuilding(std::make_unique<A13FactoryBuildingStartPlatform>());
+    // Basic buildings
+    registerFactoryBuilding(std::make_unique<A13FactoryBuildingQuickFactory>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingFactory>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingQuickMine>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(0));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(1));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(2));
 
-    // Items
+    // Roads
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(0, TERRAIN_FANCY_GRASS)); // grass
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(1, TERRAIN_ASPHALT_ROAD)); // dark asphalt
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(2, TERRAIN_ASPHALT_ROAD_LIGHT)); // light asphalt
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(3, TERRAIN_TRAMPLED_GRASS)); // trampled grass
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(4, TERRAIN_GRAVEL)); // gravel
+
+    // Buildings for rocket
+    registerFactoryBuilding(std::make_unique<A13FactoryBuildingRocketFactory>());
+    registerFactoryBuilding(std::make_unique<A13FactoryBuildingStartPlatform>());
 
     /*registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRobotSpawner>()); // robot spawner
 
