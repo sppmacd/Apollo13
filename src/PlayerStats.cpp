@@ -6,9 +6,8 @@ namespace A13
 void PlayerStats::initialize()
 {
     getInventory().setMaxItemCount(-1);
-    getInventory()[A13GameplayObjectManager::items.coal_ore] = 50;
-    getInventory()[A13GameplayObjectManager::items.iron] = 100;
-    getInventory()[A13GameplayObjectManager::items.copper] = 100;
+    // items for 5 quick mines
+    getInventory()[A13GameplayObjectManager::items.iron] = 50;
 }
 
 void PlayerStats::registerContainer(Container* container)

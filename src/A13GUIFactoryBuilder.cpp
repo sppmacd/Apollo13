@@ -35,9 +35,35 @@ A13GUIFactoryBuilder::A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
             }
 
             // ores
-            if(random.nextInt(21) == 1)
+            if(random.nextInt(10) == 1)
             {
-                int id = random.nextIntRanged(1, 10);
+                EGE::Vector<int> ores;
+
+                while(ores.empty())
+                {
+                    // try each ore
+
+                    if(random.nextInt(5) == 0)
+                        ores.push_back(ORE_COAL);
+                    if(random.nextInt(6) == 0)
+                        ores.push_back(ORE_IRON);
+                    if(random.nextInt(6) == 0)
+                        ores.push_back(ORE_COPPER);
+                    if(random.nextInt(20) == 0)
+                        ores.push_back(ORE_TITANIUM);
+                    if(random.nextInt(10) == 0)
+                        ores.push_back(ORE_SILICON);
+                    if(random.nextInt(8) == 0)
+                        ores.push_back(ORE_ALUMINUM);
+                    if(random.nextInt(30) == 0)
+                        ores.push_back(ORE_DIAMOND);
+                    if(random.nextInt(35) == 0)
+                        ores.push_back(ORE_GOLD);
+                    if(random.nextInt(35) == 0)
+                        ores.push_back(ORE_SILVER);
+                }
+
+                int id = ores[random.nextInt(ores.size())];
 
                 EGE::Vec2i pos(random.nextInt(16),
                     random.nextInt(16));

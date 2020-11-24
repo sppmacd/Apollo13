@@ -245,9 +245,14 @@ public:
         return cph == CanPlaceHere::Yes ? CanPlaceHere::Restricted : CanPlaceHere::No;
     }
 
-    virtual double getMultiplier()
+    virtual double getMultiplier() const
     {
         return m_level + 1;
+    }
+
+    virtual EGE::Size getBufferSize() const
+    {
+        return 10;
     }
 
     struct Container : public A13::Container
@@ -279,7 +284,7 @@ public:
             if(!A13::FactoryBuildingPart::onPlace(tilemap, partPos))
                 return false;
 
-            container->getInventory().setMaxItemCount(10);
+            container->getInventory().setMaxItemCount(((A13FactoryBuildingMine*)building)->getBufferSize());
 
             for(EGE::Size x = 0; x < getSize().x; x++)
             for(EGE::Size y = 0; y < getSize().y; y++)
@@ -319,6 +324,30 @@ public:
 
 private:
     EGE::Size m_level;
+};
+
+class A13FactoryBuildingQuickMine : public A13FactoryBuildingMine
+{
+public:
+    A13FactoryBuildingQuickMine()
+    : A13FactoryBuildingMine(9999) {}
+
+    virtual EGE::Vec2d getAtlasPosition() const override { return {0, 2}; }
+    virtual EGE::Vec2d getItemAtlasPosition() const override { return {2, 1}; }
+    virtual EGE::Vec2u getSize() const override { return {1, 1}; }
+    virtual EGE::Size getBufferSize() const override { return 2; }
+    virtual double getMultiplier() const override { return 0.1; }
+
+    virtual Cost getCost() const override;
+
+    virtual std::string getDescription() override
+    {
+        return
+        "The Quick Mine is a mine that you\n"
+        "place as the first building. It\n"
+        "can be used also when you don't\n"
+        "have resources";
+    }
 };
 
 class A13FactoryBuildingPortal : public A13FactoryBuilding

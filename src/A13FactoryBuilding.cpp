@@ -11,9 +11,6 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE
     if(!m_building)
         return true;
 
-    return false;
-    // don't check resources for now
-
     // Check resources in player inventory.
     Cost cost = getCost();
 
@@ -46,7 +43,7 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
 std::string A13FactoryBuildingFactory::Part::getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
 {
     return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
-        + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n";
+        + std::to_string(container->getInventory().getItemCount()) + " items in internal storage\n"
         + "Recipe: " + (m_recipe ? ("output: " + m_recipe->output.getItem()->getId()) : "none") + "\n";
 }
 
@@ -60,7 +57,6 @@ void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2
 void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
     const int CRAFTING_TIME = 60;
-    const int FAILED_REQUEST_RETRY_TIME = 30;
     const int PREPARATION_TIME = 5;
 
     if(tickCount - lastCrafting > CRAFTING_TIME + PREPARATION_TIME + 1)
@@ -72,8 +68,6 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
         if(tickCount - lastCrafting == CRAFTING_TIME + PREPARATION_TIME)
         {
             // It's the tick after items were loaded. Try craft.
-            log() << "Craft items";
-
             m_error = false;
 
             // Check if every item from input can be removed (exists) from internal storage.
@@ -81,22 +75,17 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
             {
                 if(!container->getInventory().canRemoveItems(item))
                 {
-                    // It means that player probably doesn't have that item in PI.
-                    log(LogLevel::Warning) << "Missing needed item " << item;
-
                     m_error = true;
                 }
             }
 
             if(!A13::PlayerStats::instance().getInventory().canAddItems(m_recipe->output))
             {
-                log(LogLevel::Warning) << "No space in PI for (" << m_recipe->output << ")";
                 m_error = true;
             }
 
             if(m_error)
             {
-                log(LogLevel::Error) << "Failed to craft item";
                 lastCrafting = tickCount - CRAFTING_TIME;
                 return;
             }
@@ -120,8 +109,6 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
         }
         else if(tickCount - lastCrafting == CRAFTING_TIME)
         {
-            log() << "Load items from PI";
-
             // Add request for each item in input.
             // TODO: requests for multiple items at once
             if(!m_error)
@@ -184,7 +171,7 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             {
                 log() << "container full";
                 A13::PlayerStats::instance().loadItemsFrom(container.get());
-                nextRandomTime = EGE::Random::fastRandom().nextIntRanged(120 / std::sqrt(orePos.size()), 180 / std::sqrt(orePos.size())) / multiplier;
+                nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
                 return;
             }
 
@@ -199,7 +186,7 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             }
             log() << "mine";
 
-            nextRandomTime = EGE::Random::fastRandom().nextIntRanged(120 / std::sqrt(orePos.size()), 180 / std::sqrt(orePos.size())) / multiplier;
+            nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
         }
     }
 }
@@ -237,8 +224,8 @@ Cost A13FactoryBuildingMine::getCost() const
     {
     case 0:
         return {
-            { A13GameplayObjectManager::items.iron, 75 },
-            { A13GameplayObjectManager::items.copper, 30 }
+            { A13GameplayObjectManager::items.iron, 50 },
+            { A13GameplayObjectManager::items.copper, 60 }
         };
     case 1:
         return {
@@ -255,6 +242,13 @@ Cost A13FactoryBuildingMine::getCost() const
     default:
         return {};
     }
+}
+
+Cost A13FactoryBuildingQuickMine::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.iron, 10 }
+    };
 }
 
 Cost A13FactoryBuildingItemRoad::getCost() const

@@ -52,6 +52,7 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingRocketFactory>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingStartPlatform>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingFactory>());
+    registerFactoryBuilding(std::make_unique<A13FactoryBuildingQuickMine>());
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(0));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(1));
     registerFactoryBuilding(std::make_unique<A13FactoryBuildingMine>(2));
@@ -63,10 +64,10 @@ void A13GameplayObjectManager::registerFactoryBuildings()
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(3, TERRAIN_TRAMPLED_GRASS)); // trampled grass
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRoad>(4, TERRAIN_GRAVEL)); // gravel
 
-    registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRobotSpawner>()); // robot spawner
+    /*registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemRobotSpawner>()); // robot spawner
 
     registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemLogistic>(0)); // logistic planner - any
-    registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemLogistic>(1)); // logistic planner - belt mode
+    registerFactoryBuildingItem(std::make_unique<A13FactoryBuildingItemLogistic>(1)); // logistic planner - belt mode*/
 }
 
 A13GameplayObjectManager::_ResourceItems A13GameplayObjectManager::items;
