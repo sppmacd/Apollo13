@@ -24,11 +24,15 @@ public:
     bool isFull() { return getMaxItemCount() != -1 && getItemCount() >= getMaxItemCount(); }
     int getRemainingSpace() { return getMaxItemCount() == -1 ? (1<<30) : getMaxItemCount() - getItemCount(); }
 
-    // TODO: Add these for Cost
     bool canAddItems(ResourceItemStack stack) const;
     bool tryAddItems(ResourceItemStack stack);
     bool canRemoveItems(ResourceItemStack stack) const;
     bool tryRemoveItems(ResourceItemStack stack);
+
+    bool canAddItems(Cost cost) const;
+    bool tryAddItems(Cost cost);
+    bool canRemoveItems(Cost cost) const;
+    bool tryRemoveItems(Cost cost);
 
     const ArrayType::const_iterator begin() const { return m_stacks.begin(); }
     const ArrayType::const_iterator end() const { return m_stacks.end(); }

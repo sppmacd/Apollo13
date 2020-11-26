@@ -3,6 +3,8 @@
 #include "A13GUIAbstractBuilder.h"
 #include "Builder/BuilderItem.h"
 #include "Builder/BuilderPart.h"
+#include "ResourceItem.h"
+#include "ResourceItems/Inventory.h"
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
@@ -36,6 +38,8 @@ public:
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
+
+    virtual Cost getCost() const { return {}; }
 };
 
 typedef Aliases::A13FixedTilemapForPart<A13RocketPartPart, 32, 64> A13GUIProjectBuilder_Tilemap;
@@ -47,6 +51,17 @@ public:
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>);
+
+    void setTotalProjectCost(A13::Inventory& inv)
+    {
+        for(auto it: inv)
+        {
+            if(it.second > 0)
+                m_cost.push_back({it.first, it.second});
+        }
+    }
+
+    Cost m_cost;
 };
 
 class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>
@@ -85,6 +100,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {0, 1}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 1}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
+
+    virtual Cost getCost() const override;
 };
 
 class A13RocketPartFuelTank : public A13RocketPart
@@ -96,6 +113,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {2, 1}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {m_index, 2}; }
     virtual EGE::Vec2u getSize() const { return {2, m_size}; }
+
+    virtual Cost getCost() const override;
 
 private:
     EGE::Size m_size;
@@ -112,6 +131,8 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 3}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
 
+    virtual Cost getCost() const override;
+
 private:
     EGE::Size m_size;
 };
@@ -125,4 +146,6 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {0, 3}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 4}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
+
+    virtual Cost getCost() const override;
 };

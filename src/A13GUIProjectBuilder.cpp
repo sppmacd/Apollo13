@@ -11,6 +11,11 @@ A13GUIProjectBuilder::A13GUIProjectBuilder(EGE::GUIScreen* loop)
     setSelectorAtlas("gui/pb/items.png");
     setGPO(&A13GameplayObjectManager::instance().rocketPartItems);
     m_tilemap->setTileSize(EGE::Vec2u(16, 16));
+
+    for(auto it: m_tilemap->getParts())
+    {
+        m_totalItems.tryAddItems(it.second->part->getCost());
+    }
 }
 
 void A13GUIProjectBuilder::onKeyPress(sf::Event::KeyEvent& event)
@@ -21,4 +26,12 @@ void A13GUIProjectBuilder::onKeyPress(sf::Event::KeyEvent& event)
     }
 
     A13GUIAbstractBuilder::onKeyPress(event);
+}
+
+void A13GUIProjectBuilder::onLoad()
+{
+    A13GUIAbstractBuilder::onLoad();
+
+    m_resourceStatsWidget = make<ResourceStatsWidget>(this, m_totalItems);
+    addWidget(m_resourceStatsWidget);
 }

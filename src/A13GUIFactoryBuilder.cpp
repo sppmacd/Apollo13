@@ -91,6 +91,6 @@ void A13GUIFactoryBuilder::onLoad()
         part.render(this, pos, target);
     });
 
-    m_resourceStatsWidget = make<ResourceStatsWidget>(this);
+    m_resourceStatsWidget = make<ResourceStatsWidget>(this, A13::PlayerStats::instance().getInventory());
     addWidget(m_resourceStatsWidget);
 }

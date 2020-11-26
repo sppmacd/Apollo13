@@ -41,4 +41,6 @@ private:
     ResourceItem* m_item;
 };
 
+typedef EGE::Vector<ResourceItemStack> Cost;
+
 std::ostream& operator<<(std::ostream& os, const ResourceItemStack& stack);

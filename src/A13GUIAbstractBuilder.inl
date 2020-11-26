@@ -135,7 +135,10 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
                 auto part = m_partSelector->getCurrentItem()->getPart();
                 if(m_tileMapObject->canPartBePlacedHere(tilePos, part->getSize())
                    && !m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
+                {
                     m_tileMapObject->placePart(tilePos, m_meta, part);
+                    onPlace(tilePos, *part.get());
+                }
             }
             else
             {
@@ -149,6 +152,8 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
         if(event.x < m_partSelector->getSize().x)
             return;
         auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(event.x, event.y)));
+        auto tile = m_useEnsure ? &m_tileMapObject->m_tilemap->ensureTile(tilePos) : m_tileMapObject->m_tilemap->getTile(tilePos);
+        onRemove(tilePos, tile ? tile->part : nullptr);
         m_tileMapObject->removePart(tilePos);
     }
 }

@@ -12,8 +12,6 @@
 #include <ege/util/Vector.h>
 #include <algorithm>
 
-typedef EGE::Vector<ResourceItemStack> Cost;
-
 class A13GUIFactoryBuilder;
 
 class A13FactoryBuilding : public EGE::GameplayObject

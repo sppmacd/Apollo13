@@ -50,6 +50,9 @@ public:
     A13GUIAbstractBuilder(EGE::GUIScreen* screen, EGE::SharedPtr<_Tilemap> tilemap)
     : EGE::GUIScreen(screen), m_tilemap(tilemap) {}
 
+    virtual void onPlace(EGE::Vec2i tilePos, typename _Tilemap::TileType::PartType& part) {}
+    virtual void onRemove(EGE::Vec2i tilePos, typename _Tilemap::TileType::PartType* part) {}
+
     virtual void onLoad();
     virtual void onResize(sf::Event::SizeEvent& event);
     virtual void onMouseButtonPress(sf::Event::MouseButtonEvent& event);

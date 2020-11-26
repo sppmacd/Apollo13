@@ -3,6 +3,9 @@
 #include "A13GUIAbstractBuilder.h"
 #include "A13RocketPart.h"
 
+#include "ResourceStatsWidget.h"
+#include "ResourceItems/Inventory.h"
+
 // modal dialog
 class A13GUIProjectBuilder : public A13GUIAbstractBuilder<A13ProjectTilemap, A13RocketPartItem>
 {
@@ -15,4 +18,35 @@ public:
     {
         return item->canPlaceHere(tileRel, tile);
     }
+
+    virtual void onPlace(EGE::Vec2i tilePos, A13RocketPartPart& part) override
+    {
+        m_totalItems.tryAddItems(part.part->getCost());
+    }
+
+    virtual void onRemove(EGE::Vec2i tilePos, A13RocketPartPart* part) override
+    {
+        if(part)
+            m_totalItems.tryRemoveItems(part->part->getCost());
+    }
+
+    virtual void onResize(sf::Event::SizeEvent& event)
+    {
+        A13GUIAbstractBuilder::onResize(event);
+
+        EGE::Size RESOURCE_STATS_SIZE = 90;
+        m_resourceStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE, 0});
+        m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
+    }
+
+    virtual void onLoad() override;
+
+    virtual void onUnload() override
+    {
+        m_tilemap->setTotalProjectCost(m_totalItems);
+    }
+
+private:
+    EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
+    A13::Inventory m_totalItems;
 };

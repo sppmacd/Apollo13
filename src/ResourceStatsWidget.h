@@ -8,8 +8,8 @@
 class ResourceStatsWidget : public EGE::Widget
 {
 public:
-    ResourceStatsWidget(EGE::Widget* parent)
-    : EGE::Widget(parent) {}
+    ResourceStatsWidget(EGE::Widget* parent, A13::Inventory& inventory)
+    : EGE::Widget(parent), m_inventory(inventory) {}
 
     virtual void onLoad();
     virtual void renderOnly(sf::RenderTarget& target, const EGE::RenderStates& states = {});
@@ -19,5 +19,6 @@ public:
 private:
     sf::Texture* m_atlas = nullptr;
     sf::Font* m_font = nullptr;
+    A13::Inventory& m_inventory;
     EGE::StringMap<ResourceItem*> m_items;
 };

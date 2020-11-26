@@ -47,6 +47,52 @@ bool Inventory::tryRemoveItems(ResourceItemStack stack)
     return true;
 }
 
+bool Inventory::canAddItems(Cost cost) const
+{
+    for(auto& it: cost)
+    {
+        if(!canAddItems(it))
+            return false;
+    }
+    return true;
+}
+
+bool Inventory::tryAddItems(Cost cost)
+{
+    if(!canAddItems(cost))
+        return false;
+
+    for(auto& it: cost)
+    {
+        if(!tryAddItems(it))
+            return false;
+    }
+    return true;
+}
+
+bool Inventory::canRemoveItems(Cost cost) const
+{
+    for(auto& it: cost)
+    {
+        if(!canRemoveItems(it))
+            return false;
+    }
+    return true;
+}
+
+bool Inventory::tryRemoveItems(Cost cost)
+{
+    if(!canRemoveItems(cost))
+        return false;
+
+    for(auto& it: cost)
+    {
+        if(!tryRemoveItems(it))
+            return false;
+    }
+    return true;
+}
+
 int& Inventory::operator[](ResourceItem* type)
 {
     return m_stacks[type->getId()];

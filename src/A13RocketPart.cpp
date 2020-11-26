@@ -97,3 +97,43 @@ EGE::SharedPtr<A13RocketPartPart> A13RocketPartItem::getPart() const
 {
     return make<A13RocketPartPart>(m_tile);
 }
+
+
+Cost A13RocketPartEngine::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.aluminum, 100 },
+        { A13GameplayObjectManager::items.titanium, 50 },
+        { A13GameplayObjectManager::items.gold, 25 }
+    };
+}
+
+Cost A13RocketPartFuelTank::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.aluminum, 300 * (m_size - 0.1) },
+        { A13GameplayObjectManager::items.titanium, 25 * m_size },
+        { A13GameplayObjectManager::items.silicon, 10 * m_size }
+    };
+}
+
+Cost A13RocketPartCone::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.aluminum, 240 },
+        { A13GameplayObjectManager::items.titanium, 100 },
+        { A13GameplayObjectManager::items.copper, 50 }
+    };
+}
+
+Cost A13RocketPartCapsule::getCost() const
+{
+    return {
+        { A13GameplayObjectManager::items.aluminum, 300 },
+        { A13GameplayObjectManager::items.titanium, 300 },
+        { A13GameplayObjectManager::items.copper, 100 },
+        { A13GameplayObjectManager::items.gold, 50 },
+        { A13GameplayObjectManager::items.silver, 50 },
+        { A13GameplayObjectManager::items.diamond, 25 }
+    };
+}
