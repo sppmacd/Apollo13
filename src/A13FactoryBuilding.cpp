@@ -2,6 +2,7 @@
 
 #include "Apollo13.h"
 #include "A13GUIProjectBuilder.h"
+#include "A13GUIFactoryBuilder.h"
 #include "GUICraftingSelector.h"
 #include "A13GameplayObjectManager.h"
 #include "PlayerStats.h"
@@ -53,6 +54,12 @@ void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2
     auto gui = Apollo13::instance().getCurrentGUIScreen().get();
     gui->openDialog(make<A13::GUICraftingSelector>(gui, this));
 }
+
+void A13FactoryBuildingFactory::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const
+{
+    gui->renderItem({pos.x + 2, pos.y + 2}, m_recipe->output.getItem(), target);
+}
+
 
 void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
@@ -117,6 +124,39 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
             }
         }
     }
+}
+
+EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingFactory::Part::serialize()
+{
+    auto obj = A13::FactoryBuildingPart::serialize();
+    obj->addString("recipe", m_recipe->output.getItem()->getId());
+    obj->addInt("error", m_error);
+    return obj;
+}
+
+bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
+{
+    if(!A13::FactoryBuildingPart::deserialize(obj))
+        return false;
+
+    auto _recipe = obj->getObject("recipe");
+    if(_recipe.expired() || !_recipe.lock()->isString())
+        return false;
+    m_recipe = A13GameplayObjectManager::instance().recipes.findById(
+                    A13GameplayObjectManager::instance().resourceItems.findById(_recipe.lock()->asString())
+                                                                    );
+
+    auto _error = obj->getObject("error");
+    if(_error.expired() || !_recipe.lock()->isFloat())
+        return false;
+    m_error = _error.lock()->asInt();
+
+    return true;
+}
+
+void A13FactoryBuildingMine::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const
+{
+    gui->renderInventory({pos.x + 3, pos.y}, fuelContainer.getInventory(), target);
 }
 
 void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
@@ -189,6 +229,62 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
         }
     }
+}
+
+EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingMine::Part::serialize()
+{
+    auto obj = A13::FactoryBuildingPart::serialize();
+    auto _orePos = make<EGE::ObjectList>();
+    for(auto& it: orePos)
+    {
+        _orePos->addObject(EGE::Serializers::fromVector2(it));
+    }
+    obj->addObject("orePos", _orePos);
+    obj->addFloat("multiplier", multiplier);
+    obj->addInt("fuel", m_fuel);
+    obj->addObject("fuelContainer", fuelContainer.serialize());
+    obj->addInt("requestedCoal", m_requestedCoal);
+    return obj;
+}
+
+bool A13FactoryBuildingMine::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
+{
+    if(!A13::FactoryBuildingPart::deserialize(obj))
+        return false;
+
+    auto _orePos = obj->getObject("orePos");
+    if(_orePos.expired() || !_orePos.lock()->isList())
+        return false;
+
+    for(auto& it : _orePos.lock()->asList())
+    {
+        if(!it || !it->isMap())
+            return false;
+        orePos.push_back(EGE::Serializers::toVector2(std::dynamic_pointer_cast<EGE::ObjectMap>(it)));
+    }
+
+    auto _multiplier = obj->getObject("multiplier");
+    if(_multiplier.expired() || !_multiplier.lock()->isFloat())
+        return false;
+    multiplier = _multiplier.lock()->asFloat();
+
+    auto _fuel = obj->getObject("fuel");
+    if(_fuel.expired() || !_fuel.lock()->isFloat())
+        return false;
+    m_fuel = _fuel.lock()->asInt();
+
+    auto _fuelContainer = obj->getObject("fuelContainer");
+    if(_fuelContainer.expired() || !_fuelContainer.lock()->isMap())
+        return false;
+    if(!fuelContainer.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_fuelContainer.lock())))
+        return false;
+
+    auto _requestedCoal = obj->getObject("requestedCoal");
+    if(_requestedCoal.expired() || !_requestedCoal.lock()->isInt())
+        return false;
+    m_requestedCoal = _requestedCoal.lock()->asInt();
+
+    return true;
 }
 
 // RECIPES

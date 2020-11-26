@@ -5,7 +5,7 @@
 namespace A13
 {
 
-class Container
+class Container : public EGE::Serializable
 {
 public:
     enum _NR
@@ -14,7 +14,7 @@ public:
     };
 
     Container();
-    Container(_NR) {}
+    Container(_NR) : m_notInQueue(true) {}
 
     virtual ~Container();
 
@@ -34,8 +34,12 @@ public:
     // %stack if the stack can be fully placed in container.
     virtual ResourceItemStack allowLoadItem(ResourceItemStack stack) { return stack; }
 
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize() override;
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj) override;
+
 protected:
     Inventory m_inventory;
+    bool m_notInQueue = false;
 };
 
 }

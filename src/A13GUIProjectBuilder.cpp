@@ -1,6 +1,7 @@
 #include "A13GUIProjectBuilder.h"
 
 #include "A13GameplayObjectManager.h"
+#include "Apollo13.h"
 
 A13GUIProjectBuilder::A13GUIProjectBuilder(EGE::GUIScreen* loop)
 : A13GUIAbstractBuilder(loop, make<A13ProjectTilemap>())

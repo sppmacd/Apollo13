@@ -10,8 +10,11 @@
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
+#include <algorithm>
 
 typedef EGE::Vector<ResourceItemStack> Cost;
+
+class A13GUIFactoryBuilder;
 
 class A13FactoryBuilding : public EGE::GameplayObject
 {
@@ -24,8 +27,9 @@ public:
     virtual EGE::Vec2u getSize() const { return {1, 1}; }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
-    virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
+    // Used for deserialization.
     virtual EGE::SharedPtr<A13::FactoryBuildingPart> makePart() const
     {
         return make<A13::FactoryBuildingPart>(this);
@@ -95,7 +99,7 @@ public:
     virtual bool onPlace(A13::FactoryTilemap* tilemap, int meta, EGE::Vec2i partPos) const;
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; };
-    virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {};
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; };
 
 private:
     A13FactoryBuilding* m_building;
@@ -178,8 +182,9 @@ public:
         }
     };
 
-    struct Part : public A13::FactoryBuildingPart
+    class Part : public A13::FactoryBuildingPart
     {
+    public:
         Part(const A13FactoryBuilding* bld)
         : A13::FactoryBuildingPart(bld, std::make_unique<Container>()) {}
 
@@ -202,7 +207,17 @@ public:
             m_recipe = recipe;
         }
 
+        virtual A13::Recipe* getRecipe()
+        {
+            return m_recipe;
+        }
+
+        virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
+        virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj);
+
         virtual void onActivate(A13::FactoryTilemap*, EGE::Vec2i);
+
+        virtual void render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const override;
 
         int nextRandomTime = 0;
         EGE::TickCount lastCrafting = 0;
@@ -243,7 +258,7 @@ public:
     virtual std::string getDescription() override
     {
         return
-        "The Quick Mine is a mine that you\n"
+        "The Quick Factory is a factory that you\n"
         "place as the first building. It\n"
         "can be used also when you don't\n"
         "have resources";
@@ -291,8 +306,9 @@ public:
         }
     };
 
-    struct Part : public A13::FactoryBuildingPart
+    class Part : public A13::FactoryBuildingPart
     {
+    public:
         Part(const A13FactoryBuilding* bld)
         : A13::FactoryBuildingPart(bld, std::make_unique<Container>()) {}
 
@@ -324,7 +340,12 @@ public:
             return true;
         }
 
+        virtual void render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const override;
+
         virtual void onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount);
+
+        virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
+        bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj);
 
         EGE::Vector<EGE::Vec2i> orePos;
         int nextRandomTime = 0;
@@ -385,8 +406,9 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {m_level, 4}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 
-    struct Part : public A13::FactoryBuildingPart
+    class Part : public A13::FactoryBuildingPart
     {
+    public:
         Part(const A13FactoryBuilding* bld)
         : A13::FactoryBuildingPart(bld, std::make_unique<A13::Container>()) {}
 

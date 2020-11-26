@@ -47,6 +47,21 @@ public:
         m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
     }
 
+    // Item is centered to tilePos.
+    void renderItem(EGE::Vec2d tilePos, ResourceItem* item, sf::RenderTarget& target)
+    {
+        EGE::Renderer renderer(target);
+        sf::Vector2f scenePos(tilePos.x * 16, tilePos.y * 16);
+
+        sf::IntRect texRect;
+        // TODO: Name that '16' somehow
+        texRect.left = item->getAtlasPosition().x * 16;
+        texRect.top = item->getAtlasPosition().y * 16;
+        texRect.width = 16;
+        texRect.height = 16;
+        renderer.renderTexturedRectangle(scenePos.x - 4, scenePos.y - 4, 8, 8, *m_resourceStatsWidget->getAtlas(), texRect);
+    }
+
     void renderInventory(EGE::Vec2d tilePos, const A13::Inventory& inventory, sf::RenderTarget& target)
     {
         if(inventory.getItemCount() == 0)
@@ -60,7 +75,7 @@ public:
 
         for(auto& stack: inventory)
         {
-            if(!stack.first || !stack.second)
+            if(stack.first.empty() || !stack.second)
                 continue;
 
             std::string str = std::to_string(stack.second);
@@ -71,8 +86,9 @@ public:
             // Icon
             sf::IntRect texRect;
             // TODO: Name that '16' somehow
-            texRect.left = stack.first->getAtlasPosition().x * 16;
-            texRect.top = stack.first->getAtlasPosition().y * 16;
+            auto item = A13GameplayObjectManager::instance().resourceItems.findById(stack.first);
+            texRect.left = item->getAtlasPosition().x * 16;
+            texRect.top = item->getAtlasPosition().y * 16;
             texRect.width = 16;
             texRect.height = 16;
             renderer.renderTexturedRectangle(scenePos.x - 4, HEIGHT * s + scenePos.y - 6, 8, 8, *m_resourceStatsWidget->getAtlas(), texRect);

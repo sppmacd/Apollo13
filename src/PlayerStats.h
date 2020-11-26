@@ -15,7 +15,7 @@ public:
     PlayerStats()
     : Container(Container::NoRegisterInQueue) {}
 
-    EGE_SINGLETON(PlayerStats);
+    static PlayerStats& instance();
 
     void initialize();
 

@@ -74,4 +74,29 @@ bool Container::loadItemsFrom(Container* other, int maxCount)
     return true;
 }
 
+EGE::SharedPtr<EGE::ObjectMap> Container::serialize()
+{
+    auto obj = make<EGE::ObjectMap>();
+    obj->addObject("notInPSQueue", make<EGE::ObjectBoolean>(m_notInQueue));
+    obj->addObject("inventory", m_inventory.serialize());
+    return obj;
+}
+
+bool Container::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
+{
+    auto obj_notInPSQueue = obj->getObject("notInPSQueue");
+    if(obj_notInPSQueue.expired())
+        m_notInQueue = false;
+    m_notInQueue = obj_notInPSQueue.lock()->asBool();
+    if(!m_notInQueue)
+    {
+        PlayerStats::instance().registerContainer(this);
+    }
+    auto obj_inventory = obj->getObject("inventory");
+    if(obj_inventory.expired() || !obj_inventory.lock()->isMap())
+        return false;
+    if(!m_inventory.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(obj_inventory.lock())))
+        return false;
+    return true;
+}
 }

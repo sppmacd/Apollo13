@@ -21,6 +21,6 @@ public:
 
     EGE::SharedPtr<EGE::Scene> scene;
 
-private:
+protected:
     ObjectMap m_parts;
 };

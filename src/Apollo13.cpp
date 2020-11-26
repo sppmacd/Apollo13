@@ -12,7 +12,8 @@ EGE::EventResult Apollo13::load()
     if(!A13GameplayObjectManager::instance().reload())
         return EGE::EventResult::Failure;
 
-    A13::PlayerStats::instance().initialize();
+    // Load / create world
+    save.load("main");
 
     // Setup ResourceManager
     auto resMan = make<EGE::GUIResourceManager>();
@@ -39,13 +40,15 @@ EGE::EventResult Apollo13::load()
     // Setup window
     getWindow().lock()->setFramerateLimit(60);
 
-    // Setup world
-    m_seed = time(EGE::Time::Unit::Seconds);
-
     // Set GUI
     setCurrentGUIScreen(make<A13GUIFactoryBuilder>(this));
 
     return EGE::EventResult::Success;
+}
+
+EGE::EventResult Apollo13::onFinish(int exitCode)
+{
+    save.save("main");
 }
 
 void Apollo13::logicTick(long long tickCount)

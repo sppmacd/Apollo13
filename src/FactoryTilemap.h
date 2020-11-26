@@ -8,6 +8,7 @@
 #include <ege/util.h>
 
 class A13FactoryBuilding;
+class A13GUIFactoryBuilder;
 
 namespace A13
 {
@@ -40,7 +41,7 @@ namespace A13
 
 class FactoryTilemap;
 
-struct FactoryBuildingPart : public BuilderPart<FactoryTilemap>
+struct FactoryBuildingPart : public BuilderPart<FactoryTilemap>, public EGE::Serializable
 {
     const A13FactoryBuilding* building;
     EGE::UniquePtr<A13::Container> container;
@@ -55,6 +56,11 @@ struct FactoryBuildingPart : public BuilderPart<FactoryTilemap>
 
     virtual bool onRemove(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos);
     virtual std::string getTooltip(const FactoryTilemap*, EGE::Vec2i, const StateType&) const;
+
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize() override;
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) override;
+
+    virtual void render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const {}
 };
 
 struct Terrain
@@ -92,7 +98,7 @@ struct Ore
 //
 typedef Aliases::A13ChunkedTilemapForPart<A13::FactoryBuildingPart, 16, 16, 4> GUIFactoryBuilder_Tilemap;
 
-class FactoryTilemap : public GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<FactoryBuildingPart, 4>
+class FactoryTilemap : public GUIFactoryBuilder_Tilemap, public A13BuilderTilemap<FactoryBuildingPart, 4>,  public EGE::Serializable
 {
 public:
     FactoryTilemap(EGE::MaxInt _seed)
@@ -101,7 +107,22 @@ public:
     virtual std::string getTooltip(EGE::Vec2i pos, const StateType& state) const;
     virtual bool onRemove(EGE::Vec2i partPos);
 
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize() override;
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj) override;
+
+    // Read/write chunks from/to stream
+    virtual bool writeTo(EGE::Vec2i chunkCoord, ChunkType& chunk, std::ostream& buf);
+    virtual bool readFrom(EGE::Vec2i chunkCoord, ChunkType& chunk, std::istream& buf);
+
+    virtual bool writeTo(EGE::Vec2i chunkCoords, ChunkType& chunk, std::string name);
+    virtual bool readFrom(EGE::Vec2i chunkCoords, ChunkType& chunk, std::string name);
+
+    virtual bool flush(std::string worldName);
+
     EGE::MaxInt seed;
+
+private:
+    void generateChunk(EGE::Vec2i chunkPos, ChunkType& chunk);
 };
 
 }

@@ -32,7 +32,7 @@ public:
     virtual EGE::Vec2u getSize() const { return {1, 1}; }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
-    virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 };
 
 typedef Aliases::A13FixedTilemapForPart<A13RocketPartPart, 32, 64> A13GUIProjectBuilder_Tilemap;
@@ -62,7 +62,7 @@ public:
     }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
-    virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
     virtual std::string getTooltip() { return m_tile->getId(); }
 

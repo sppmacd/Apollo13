@@ -23,13 +23,13 @@ bool Inventory::tryAddItems(ResourceItemStack stack)
     if(!canAddItems(stack))
         return false;
 
-    m_stacks[stack.getItem()] += stack.getItemCount();
+    m_stacks[stack.getItem()->getId()] += stack.getItemCount();
     return true;
 }
 
 bool Inventory::canRemoveItems(ResourceItemStack stack) const
 {
-    auto it = m_stacks.find(stack.getItem());
+    auto it = m_stacks.find(stack.getItem()->getId());
 
     int count = 0;
     if(it != m_stacks.end())
@@ -43,18 +43,55 @@ bool Inventory::tryRemoveItems(ResourceItemStack stack)
     if(!canRemoveItems(stack))
         return false;
 
-    m_stacks[stack.getItem()] -= stack.getItemCount();
+    m_stacks[stack.getItem()->getId()] -= stack.getItemCount();
     return true;
 }
 
 int& Inventory::operator[](ResourceItem* type)
 {
-    return m_stacks[type];
+    return m_stacks[type->getId()];
 }
 
 int& Inventory::operator[](std::string itemId)
 {
-    return (*this)[A13GameplayObjectManager::instance().resourceItems.findById(itemId)];
+    return m_stacks[itemId];
+}
+
+EGE::SharedPtr<EGE::ObjectMap> Inventory::serialize()
+{
+    auto _map = make<EGE::ObjectMap>();
+    _map->addInt("maxItems", m_maxItems);
+    auto _items = make<EGE::ObjectMap>();
+
+    for(auto it: *this)
+    {
+        _items->addUnsignedInt(it.first, it.second);
+    }
+    _map->addObject("items", _items);
+    return _map;
+}
+
+bool Inventory::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
+{
+    auto _maxItems = obj->getObject("maxItems");
+    if(!_maxItems.expired() && _maxItems.lock()->isFloat())
+    {
+        m_maxItems = (int)_maxItems.lock()->asFloat();
+        log() << m_maxItems;
+    }
+
+    auto _items = obj->getObject("items");
+    if(!_items.expired() && _items.lock()->isMap())
+    {
+        for(auto& it: _items.lock()->asMap())
+        {
+            if(!it.second->isFloat())
+                return false;
+            m_stacks[it.first] = (int)it.second->asFloat();
+            log() << it.second->asFloat();
+        }
+    }
+    return true;
 }
 
 }

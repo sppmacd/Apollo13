@@ -3,7 +3,7 @@
 #include "PlayerStats.h"
 
 A13GUIFactoryBuilder::A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
-: A13GUIAbstractBuilder(loop, make<A13::FactoryTilemap>(Apollo13::instance().getSeed()))
+: A13GUIAbstractBuilder(loop, Apollo13::instance().save.tilemap())
 {
     setBuilderBackground("gui/factory_builder/background.png");
 
@@ -22,74 +22,10 @@ A13GUIFactoryBuilder::A13GUIFactoryBuilder(EGE::GUIGameLoop* loop)
 
     m_tilemap->setTileSize(EGE::Vec2u(16, 16));
     m_tilemap->setGenerator(
-        [this](EGE::Vec2i chunkPos, A13::FactoryTilemap::ChunkType& chunk)
-        {
-            EGE::Random random(chunkPos.x * 1024 * 1024 + chunkPos.y * 1024 + m_tilemap->seed);
-
-            // TODO: replace it by better generator
-            for(EGE::Size x = 0; x < 16; x++)
-            for(EGE::Size y = 0; y < 16; y++)
+        [this](EGE::Vec2i chunkPos, A13::FactoryTilemap::ChunkType& chunk) {
+            if(!m_tilemap->readFrom(chunkPos, chunk, Apollo13::instance().save.getFileName()))
             {
-                A13::FactoryTilemap::StateType& state = chunk.getTile({x, y});
-                state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = random.nextInt(5) ? TERRAIN_GRASS : TERRAIN_WILD_GRASS;
-            }
-
-            // ores
-            if(random.nextInt(10) == 1)
-            {
-                EGE::Vector<int> ores;
-
-                while(ores.empty())
-                {
-                    // try each ore
-
-                    if(random.nextInt(5) == 0)
-                        ores.push_back(ORE_COAL);
-                    if(random.nextInt(6) == 0)
-                        ores.push_back(ORE_IRON);
-                    if(random.nextInt(6) == 0)
-                        ores.push_back(ORE_COPPER);
-                    if(random.nextInt(20) == 0)
-                        ores.push_back(ORE_TITANIUM);
-                    if(random.nextInt(10) == 0)
-                        ores.push_back(ORE_SILICON);
-                    if(random.nextInt(8) == 0)
-                        ores.push_back(ORE_ALUMINUM);
-                    if(random.nextInt(30) == 0)
-                        ores.push_back(ORE_DIAMOND);
-                    if(random.nextInt(35) == 0)
-                        ores.push_back(ORE_GOLD);
-                    if(random.nextInt(35) == 0)
-                        ores.push_back(ORE_SILVER);
-                }
-
-                int id = ores[random.nextInt(ores.size())];
-
-                EGE::Vec2i pos(random.nextInt(16),
-                    random.nextInt(16));
-
-                for(int s = random.nextIntRanged(20, 50); s >= 0; s--)
-                {
-                    switch(random.nextInt(4))
-                    {
-                        case 0: pos.x++; break;
-                        case 1: pos.x--; break;
-                        case 2: pos.y++; break;
-                        case 3: pos.y--; break;
-                    }
-
-                    const A13::FactoryTilemap::StateType& state = m_tilemap->ensureTile({chunkPos.x * 16 + pos.x, chunkPos.y * 16 + pos.y});
-                    A13::Ore* ore = (A13::Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
-
-                    if(ore->id != ORE_NONE)
-                    {
-                        s++;
-                        continue;
-                    }
-
-                    ore->id = id;
-                    ore->count = random.nextIntRanged(512, MAX_ORE_COUNT);
-                }
+                log(LogLevel::Error) << "Failed to load chunk " << chunkPos.x << "," << chunkPos.y;
             }
         }
     );
@@ -150,6 +86,9 @@ void A13GUIFactoryBuilder::onLoad()
         // Inventory (if it's a Container)
         if(part.container)
             renderInventory(pos, part.container->getInventory(), target);
+
+        // Custom renderer
+        part.render(this, pos, target);
     });
 
     m_resourceStatsWidget = make<ResourceStatsWidget>(this);

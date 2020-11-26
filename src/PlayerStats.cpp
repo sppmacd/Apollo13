@@ -1,7 +1,14 @@
 #include "PlayerStats.h"
 
+#include "Apollo13.h"
+
 namespace A13
 {
+
+PlayerStats& PlayerStats::instance()
+{
+    return Apollo13::instance().save.playerStats();
+}
 
 void PlayerStats::initialize()
 {

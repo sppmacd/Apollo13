@@ -15,7 +15,7 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { int index = m_numericId - 1; return {(double)(index / 256 + index % 16), (double)(index / 16)}; }
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
-    virtual void deserialize(EGE::SharedPtr<EGE::ObjectMap>) {}
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
 private:
     EGE::IdType m_numericId = 0;
