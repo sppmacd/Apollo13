@@ -5,6 +5,7 @@
 #include "Builder/BuilderPart.h"
 #include "ResourceItem.h"
 #include "ResourceItems/Inventory.h"
+#include "ResourceItems/Container.h"
 
 #include <ege/gpo/GameplayObject.h>
 #include <ege/util/Vector.h>
@@ -40,6 +41,9 @@ public:
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
     virtual Cost getCost() const { return {}; }
+    virtual int getBuildTime() const { return 1200; } // 20 s
+
+    virtual std::string getDescription() { return "(No description provided)"; }
 };
 
 typedef Aliases::A13FixedTilemapForPart<A13RocketPartPart, 32, 64> A13GUIProjectBuilder_Tilemap;
@@ -52,27 +56,29 @@ public:
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>);
 
-    void setTotalProjectCost(A13::Inventory& inv)
-    {
-        for(auto it: inv)
-        {
-            if(it.second > 0)
-                m_cost.push_back({it.first, it.second});
-        }
-    }
+    A13::Inventory& getTotalCostInv() { return m_totalCostInv; }
 
-    Cost m_cost;
+    void onCloseProjectBuilder();
+
+    int getTotalProjectTime() { return m_totalProjectTime; }
+    int getCurrentProjectTime() { return m_currentProjectTime; }
+
+private:
+    A13::Container m_items;
+    A13::Inventory m_totalCostInv; // Total cost of project (rocket)
+    int m_totalProjectTime = 1;
+    int m_currentProjectTime = -1; // -2 - NOT STARTED, -1 - RESOURCES REQUESTED, >=0 - IN PROGRESS, TOTAL - FINISHED
 };
 
 class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>
 {
 public:
     A13RocketPartItem(A13RocketPart* createdTile)
-    : EGE::GameplayObject(createdTile->getId()), m_tile(createdTile) {}
+    : EGE::GameplayObject(createdTile->getId()), m_rocketPart(createdTile) {}
 
     virtual EGE::Vec2d getAtlasPosition(int) const
     {
-        return m_tile->getItemAtlasPosition();
+        return m_rocketPart->getItemAtlasPosition();
     }
 
     virtual EGE::SharedPtr<A13RocketPartPart> getPart() const;
@@ -82,13 +88,20 @@ public:
         return !tile.part ? CanPlaceHere::Yes : CanPlaceHere::No;
     }
 
+    A13RocketPart* getRocketPart()
+    {
+        return m_rocketPart;
+    }
+
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
-    virtual std::string getTooltip() { return m_tile->getId(); }
+    virtual std::string getTooltip() { return m_rocketPart->getId(); }
+
+    virtual std::string getDescription() { return m_rocketPart->getDescription(); }
 
 private:
-    A13RocketPart* m_tile;
+    A13RocketPart* m_rocketPart;
 };
 
 class A13RocketPartEngine : public A13RocketPart

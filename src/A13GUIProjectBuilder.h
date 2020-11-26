@@ -21,13 +21,13 @@ public:
 
     virtual void onPlace(EGE::Vec2i tilePos, A13RocketPartPart& part) override
     {
-        m_totalItems.tryAddItems(part.part->getCost());
+        m_tilemap->getTotalCostInv().tryAddItems(part.part->getCost());
     }
 
     virtual void onRemove(EGE::Vec2i tilePos, A13RocketPartPart* part) override
     {
         if(part)
-            m_totalItems.tryRemoveItems(part->part->getCost());
+            m_tilemap->getTotalCostInv().tryRemoveItems(part->part->getCost());
     }
 
     virtual void onResize(sf::Event::SizeEvent& event)
@@ -35,18 +35,21 @@ public:
         A13GUIAbstractBuilder::onResize(event);
 
         EGE::Size RESOURCE_STATS_SIZE = 90;
+        m_resourceStatsWidgetProject->setPosition({event.width - RESOURCE_STATS_SIZE * 2, 0});
+        m_resourceStatsWidgetProject->setSize({RESOURCE_STATS_SIZE, event.height});
+
         m_resourceStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE, 0});
         m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
     }
 
     virtual void onLoad() override;
 
-    virtual void onUnload() override
+    virtual void onUnload()
     {
-        m_tilemap->setTotalProjectCost(m_totalItems);
+        m_tilemap->onCloseProjectBuilder();
     }
 
 private:
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
-    A13::Inventory m_totalItems;
+    EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidgetProject;
 };

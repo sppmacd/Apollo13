@@ -1,6 +1,8 @@
 #include "A13RocketPart.h"
 #include "A13GameplayObjectManager.h"
 
+#include "PlayerStats.h"
+
 EGE::SharedPtr<EGE::ObjectMap> A13RocketPartPart::serialize()
 {
     // Empty for now
@@ -80,7 +82,42 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
             tile->part = ipart.get();
         }
     }
+
+    // Calculate total cost
+    for(auto it: getParts())
+    {
+        m_totalCostInv.tryAddItems(it.second->part->getCost());
+    }
+
     return true;
+}
+
+void A13ProjectTilemap::onCloseProjectBuilder()
+{
+    log() << "onCloseProjectBuilder";
+    if(m_currentProjectTime >= 0)
+        CRASH(); // We should NOT be able to open Project Builder while building rocket!
+
+    if(m_currentProjectTime == -1)
+    {
+        // Give back all resources
+        A13::PlayerStats::instance().loadItemsFrom(&m_items);
+    }
+
+    // TODO: Cancel resource requests
+
+    // Calculate project time and request resources
+    for(auto& it: getParts())
+    {
+        m_totalProjectTime += it.second->part->getBuildTime();
+        for(auto& stack : it.second->part->getCost())
+        {
+            A13::PlayerStats::instance().addResourceItemRequest(stack, &m_items);
+        }
+    }
+
+    // Set to RESOURCES REQUESTED state
+    m_currentProjectTime = -1;
 }
 
 EGE::Vec2d A13RocketPartPart::getAtlasPosition(int) const
@@ -95,7 +132,7 @@ EGE::Vec2u A13RocketPartPart::getSize() const
 
 EGE::SharedPtr<A13RocketPartPart> A13RocketPartItem::getPart() const
 {
-    return make<A13RocketPartPart>(m_tile);
+    return make<A13RocketPartPart>(m_rocketPart);
 }
 
 
