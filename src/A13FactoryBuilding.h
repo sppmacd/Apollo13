@@ -286,7 +286,7 @@ public:
 
     virtual double getMultiplier() const
     {
-        return m_level + 1;
+        return (m_level + 1) * 1.2;
     }
 
     virtual EGE::Size getBufferSize() const
@@ -382,7 +382,7 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const override { return {2, 1}; }
     virtual EGE::Vec2u getSize() const override { return {1, 1}; }
     virtual EGE::Size getBufferSize() const override { return 2; }
-    virtual double getMultiplier() const override { return 1; }
+    virtual double getMultiplier() const override { return 0.9; }
 
     virtual Cost getCost() const override;
 

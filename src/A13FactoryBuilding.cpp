@@ -57,7 +57,7 @@ void A13FactoryBuildingFactory::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2
 
 void A13FactoryBuildingFactory::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const
 {
-    gui->renderItem({pos.x + 2, pos.y + 2}, m_recipe->output.getItem(), target);
+    gui->renderItem({pos.x + getSize().x / 2.0, pos.y + getSize().y / 2.0}, m_recipe ? m_recipe->output.getItem() : nullptr, target);
 }
 
 
@@ -156,7 +156,14 @@ bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap>
 
 void A13FactoryBuildingMine::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const
 {
-    gui->renderInventory({pos.x + 3, pos.y}, fuelContainer.getInventory(), target);
+    // Inventory
+    gui->renderInventory({pos.x + (int)getSize().x - 0.25, pos.y}, fuelContainer.getInventory(), target);
+
+    EGE::Renderer renderer(target);
+
+    // Fuel status
+    renderer.renderRectangle(pos.x * 16, pos.y * 16 + 1, getSize().x * 16, 1, sf::Color(127, 0, 0));
+    renderer.renderRectangle(pos.x * 16, pos.y * 16 + 1, getSize().x * 16 * (m_fuel / 5.0), 1, sf::Color(0, 127, 0));
 }
 
 void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
@@ -291,18 +298,22 @@ bool A13FactoryBuildingMine::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> ob
 Cost A13FactoryBuildingRocketFactory::getCost() const
 {
     return {
-        { A13GameplayObjectManager::items.iron, 300 },
-        { A13GameplayObjectManager::items.silicon, 150 },
-        { A13GameplayObjectManager::items.aluminum, 100 }
+        { A13GameplayObjectManager::items.iron, 600 },
+        { A13GameplayObjectManager::items.silicon, 300 },
+        { A13GameplayObjectManager::items.aluminum, 200 }
     };
 }
 
 Cost A13FactoryBuildingStartPlatform::getCost() const
 {
     return {
-        { A13GameplayObjectManager::items.silicon_sand, 230 },
-        { A13GameplayObjectManager::items.iron, 100 },
-        { A13GameplayObjectManager::items.titanium, 50 }
+        { A13GameplayObjectManager::items.silicon, 700 },
+        { A13GameplayObjectManager::items.copper, 500 },
+        { A13GameplayObjectManager::items.iron, 400 },
+        { A13GameplayObjectManager::items.aluminum, 300 },
+        { A13GameplayObjectManager::items.titanium, 100 },
+        { A13GameplayObjectManager::items.gold, 100 },
+        { A13GameplayObjectManager::items.silver, 100 }
     };
 }
 
@@ -358,6 +369,6 @@ Cost A13FactoryBuildingQuickMine::getCost() const
 Cost A13FactoryBuildingItemRoad::getCost() const
 {
     return {
-        { A13GameplayObjectManager::items.silicon_sand, 6 }
+        { A13GameplayObjectManager::items.silicon, 6 }
     };
 }

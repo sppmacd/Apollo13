@@ -155,12 +155,12 @@ void A13GameplayObjectManager::registerResourceItems()
 void A13GameplayObjectManager::registerRecipes()
 {
     // Smelting
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.iron_ore, 4}     }, {items.iron, 3}      )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.copper_ore, 4}   }, {items.copper, 3}    )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.titanium_ore, 3} }, {items.titanium, 2}  )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silicon_sand, 5} }, {items.silicon, 3}   )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.aluminum_ore, 4} }, {items.aluminum, 3}  )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.diamond_ore, 2}  }, {items.diamond, 1}   )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.gold_ore, 2}     }, {items.gold, 1}      )));
-    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silver_ore, 2}   }, {items.silver, 1}    )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.iron_ore, 8}     }, {items.iron, 7}      )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.copper_ore, 8}   }, {items.copper, 7}    )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.titanium_ore, 6} }, {items.titanium, 5}  )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silicon_sand, 10}}, {items.silicon, 7}   )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.aluminum_ore, 8} }, {items.aluminum, 7}  )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.diamond_ore, 4}  }, {items.diamond, 3}   )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.gold_ore, 4}     }, {items.gold, 3}      )));
+    registerRecipe(std::make_unique<A13::Recipe>( A13::Recipe( { {items.coal_ore}, {items.silver_ore, 4}   }, {items.silver, 3}    )));
 }

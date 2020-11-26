@@ -46,9 +46,10 @@ EGE::EventResult Apollo13::load()
     return EGE::EventResult::Success;
 }
 
-EGE::EventResult Apollo13::onFinish(int exitCode)
+EGE::EventResult Apollo13::onFinish(int)
 {
     save.save("main");
+    return EGE::EventResult::Success;
 }
 
 void Apollo13::logicTick(long long tickCount)

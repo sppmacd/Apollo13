@@ -50,6 +50,9 @@ public:
     // Item is centered to tilePos.
     void renderItem(EGE::Vec2d tilePos, ResourceItem* item, sf::RenderTarget& target)
     {
+        if(!item)
+            return;
+
         EGE::Renderer renderer(target);
         sf::Vector2f scenePos(tilePos.x * 16, tilePos.y * 16);
 
@@ -59,7 +62,7 @@ public:
         texRect.top = item->getAtlasPosition().y * 16;
         texRect.width = 16;
         texRect.height = 16;
-        renderer.renderTexturedRectangle(scenePos.x - 4, scenePos.y - 4, 8, 8, *m_resourceStatsWidget->getAtlas(), texRect);
+        renderer.renderTexturedRectangle(scenePos.x - 6, scenePos.y - 6, 12, 12, *m_resourceStatsWidget->getAtlas(), texRect);
     }
 
     void renderInventory(EGE::Vec2d tilePos, const A13::Inventory& inventory, sf::RenderTarget& target)
