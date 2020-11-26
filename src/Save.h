@@ -2,6 +2,7 @@
 
 #include <ege/util.h>
 
+#include "A13RocketPart.h"
 #include "FactoryTilemap.h"
 #include "PlayerStats.h"
 
@@ -21,6 +22,7 @@ public:
     PlayerStats& playerStats() { return m_playerStats; }
     EGE::SharedPtr<A13::FactoryTilemap> tilemap() { return m_tilemap; }
     EGE::MaxInt seed() { return m_seed; }
+    EGE::SharedPtr<A13ProjectTilemap> projectTilemap() { return m_projectTilemap; }
 
     std::string getFileName() { return m_fileName; }
 
@@ -32,6 +34,7 @@ private:
     PlayerStats m_playerStats;
     EGE::SharedPtr<A13::FactoryTilemap> m_tilemap;
     EGE::MaxInt m_seed = 0;
+    EGE::SharedPtr<A13ProjectTilemap> m_projectTilemap;
 };
 
 }

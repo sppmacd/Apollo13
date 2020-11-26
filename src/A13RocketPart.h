@@ -19,6 +19,9 @@ struct A13RocketPartPart : public BuilderPart<A13ProjectTilemap>
 
     virtual EGE::Vec2d getAtlasPosition(int meta) const;
     virtual EGE::Vec2u getSize() const;
+
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>);
 };
 
 class A13RocketPart : public EGE::GameplayObject
@@ -41,6 +44,9 @@ class A13ProjectTilemap : public A13GUIProjectBuilder_Tilemap, public A13Builder
 {
 public:
     void onActivate(EGE::Vec2i, const StateType&) {}
+
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize();
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>);
 };
 
 class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>

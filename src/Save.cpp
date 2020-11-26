@@ -41,6 +41,9 @@ EGE::SharedPtr<EGE::ObjectMap> Save::serialize()
     // Tilemap
     obj->addObject("World", m_tilemap->serialize());
 
+    // Project tilemap
+    obj->addObject("Project", m_projectTilemap->serialize());
+
     return obj;
 }
 
@@ -69,6 +72,14 @@ bool Save::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     m_tilemap = make<A13::FactoryTilemap>(m_seed);
     if(!m_tilemap->deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_World.lock())))
         return false;
+
+    // Project tilemap
+    auto _Project = obj->getObject("Project");
+    if(_Project.expired() || !_Project.lock()->isMap())
+        return false;
+    m_projectTilemap = make<A13ProjectTilemap>();
+    if(!m_projectTilemap->deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_Project.lock())))
+        return false;
     return true;
 }
 
@@ -77,6 +88,7 @@ void Save::initialize()
     m_playerStats.initialize();
     m_seed = EGE::System::unixTime();
     m_tilemap = make<A13::FactoryTilemap>(m_seed);
+    m_projectTilemap = make<A13ProjectTilemap>();
 }
 
 bool Save::loadFromFile(std::string name)

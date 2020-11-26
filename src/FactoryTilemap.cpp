@@ -86,7 +86,7 @@ bool FactoryTilemap::onRemove(EGE::Vec2i partPos)
 
 EGE::SharedPtr<EGE::ObjectMap> FactoryTilemap::serialize()
 {
-    log() << "Saving part info";
+    log() << "Saving part info for factory tilemap";
     EGE::SharedPtr<EGE::ObjectMap> obj = make<EGE::ObjectMap>();
     EGE::SharedPtr<EGE::ObjectList> _parts = make<EGE::ObjectList>();
 
@@ -108,7 +108,7 @@ EGE::SharedPtr<EGE::ObjectMap> FactoryTilemap::serialize()
 
 bool FactoryTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
 {
-    log() << "Loading part info";
+    log() << "Loading part info for factory tilemap";
     EGE::WeakPtr<EGE::Object> _parts = obj->getObject("parts");
     if(_parts.expired())
         return false;

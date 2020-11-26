@@ -4,7 +4,7 @@
 #include "Apollo13.h"
 
 A13GUIProjectBuilder::A13GUIProjectBuilder(EGE::GUIScreen* loop)
-: A13GUIAbstractBuilder(loop, make<A13ProjectTilemap>())
+: A13GUIAbstractBuilder(loop, Apollo13::instance().save.projectTilemap())
 {
     setBuilderBackground("gui/pb/background.png");
     setBuilderAtlas("gui/pb/rocket_parts.png");

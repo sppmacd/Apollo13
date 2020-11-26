@@ -30,9 +30,9 @@ std::string toStringPrefixed(int n)
     else if(n > 1000000)
         oss << std::fixed << std::setprecision(2) << n / 1000000.0 << "M";
     else if(n > 100000)
-        oss << std::fixed << std::setprecision(0) << n / 1000000.0 << "k";
+        oss << std::fixed << std::setprecision(0) << n / 1000.0 << "k";
     else if(n > 10000)
-        oss << std::fixed << std::setprecision(1) << n / 1000000.0 << "k";
+        oss << std::fixed << std::setprecision(1) << n / 1000.0 << "k";
     else if(n > 1000)
         oss << std::fixed << std::setprecision(2) << n / 1000.0 << "k";
     else
