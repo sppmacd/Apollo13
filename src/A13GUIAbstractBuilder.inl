@@ -132,8 +132,10 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
 
             if(m_partSelector->getCurrentItem())
             {
-                if(!m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
-                    m_tileMapObject->placePart(tilePos, m_meta, m_partSelector->getCurrentItem()->getPart());
+                auto part = m_partSelector->getCurrentItem()->getPart();
+                if(m_tileMapObject->canPartBePlacedHere(tilePos, part->getSize())
+                   && !m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
+                    m_tileMapObject->placePart(tilePos, m_meta, part);
             }
             else
             {

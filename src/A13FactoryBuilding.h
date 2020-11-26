@@ -457,6 +457,9 @@ public:
 
     virtual bool onPlace(A13::FactoryTilemap* tilemap, int meta, EGE::Vec2i partPos) const
     {
+        if(A13FactoryBuildingItem::onPlace(tilemap, meta, partPos))
+            return true; // We don't have enough coins!
+
         tilemap->ensureTile(partPos).addObjs[FACTORY_BUILDER_LAYER_TERRAIN] = m_placed;
         return true;
     }

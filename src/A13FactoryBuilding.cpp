@@ -9,9 +9,6 @@
 
 bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE::Vec2i partPos) const
 {
-    if(!m_building)
-        return true;
-
     // Check resources in player inventory.
     Cost cost = getCost();
 
