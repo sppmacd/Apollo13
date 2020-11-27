@@ -57,17 +57,32 @@ public:
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>);
 
     A13::Inventory& getTotalCostInv() { return m_totalCostInv; }
+    A13::Inventory& getCurrentCostInv() { return m_items.getInventory(); }
 
     void onCloseProjectBuilder();
 
     int getTotalProjectTime() { return m_totalProjectTime; }
     int getCurrentProjectTime() { return m_currentProjectTime; }
 
+    A13::Inventory getMissingItems()
+    {
+        A13::Inventory msItems;
+        for(auto& stack: m_totalCostInv)
+        {
+            int diff = stack.second - m_items.getInventory()[stack.first];
+            if(diff > 0)
+            {
+                msItems.tryAddItems({stack.first, diff});
+            }
+        }
+        return msItems;
+    }
+
 private:
     A13::Container m_items;
     A13::Inventory m_totalCostInv; // Total cost of project (rocket)
     int m_totalProjectTime = 1;
-    int m_currentProjectTime = -1; // -2 - NOT STARTED, -1 - RESOURCES REQUESTED, >=0 - IN PROGRESS, TOTAL - FINISHED
+    int m_currentProjectTime = -2; // -2 - NOT STARTED, -1 - RESOURCES REQUESTED, >=0 - IN PROGRESS, TOTAL - FINISHED
 };
 
 class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>

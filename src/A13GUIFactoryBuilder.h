@@ -4,6 +4,7 @@
 #include "A13GameplayObjectManager.h"
 #include "A13FactoryBuilding.h"
 #include "PlayerStats.h"
+#include "ProjectStatsWidget.h"
 #include "ResourceStatsWidget.h"
 
 class A13GUIFactoryBuilder : public A13GUIAbstractBuilder<A13::FactoryTilemap, A13FactoryBuildingItem>
@@ -45,6 +46,14 @@ public:
         EGE::Size RESOURCE_STATS_SIZE = 90;
         m_resourceStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE, 0});
         m_resourceStatsWidget->setSize({RESOURCE_STATS_SIZE, event.height});
+
+        m_resourceStatsWidgetProject->setPosition({event.width - RESOURCE_STATS_SIZE * 2, 0});
+        m_resourceStatsWidgetProject->setSize({RESOURCE_STATS_SIZE, event.height});
+
+        EGE::Size PROJECT_STATS_SIZE_X = 400;
+        EGE::Size PROJECT_STATS_SIZE_Y = 60;
+        m_projectStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE * 2 - PROJECT_STATS_SIZE_X, 0});
+        m_projectStatsWidget->setSize({PROJECT_STATS_SIZE_X, PROJECT_STATS_SIZE_Y});
     }
 
     // Item is centered to tilePos.
@@ -102,4 +111,6 @@ public:
 
 private:
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
+    EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidgetProject;
+    EGE::SharedPtr<A13::ProjectStatsWidget> m_projectStatsWidget;
 };

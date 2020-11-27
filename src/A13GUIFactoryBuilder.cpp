@@ -93,4 +93,10 @@ void A13GUIFactoryBuilder::onLoad()
 
     m_resourceStatsWidget = make<ResourceStatsWidget>(this, A13::PlayerStats::instance().getInventory());
     addWidget(m_resourceStatsWidget);
+
+    m_resourceStatsWidgetProject = make<ResourceStatsWidget>(this, Apollo13::instance().save.projectTilemap()->getCurrentCostInv());
+    addWidget(m_resourceStatsWidgetProject);
+
+    m_projectStatsWidget = make<A13::ProjectStatsWidget>(this);
+    addWidget(m_projectStatsWidget);
 }

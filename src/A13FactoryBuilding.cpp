@@ -33,6 +33,11 @@ bool A13FactoryBuildingItem::onPlace(A13::FactoryTilemap* tilemap, int meta, EGE
 
 void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap, EGE::Vec2i)
 {
+    if(Apollo13::instance().save.projectTilemap()->getCurrentProjectTime() >= 0)
+    {
+        log() << "Cannot open project builder while building rocket!";
+        return;
+    }
     log() << "Open ProjectBuilder!";
     auto gui = Apollo13::instance().getCurrentGUIScreen().get();
     gui->openDialog(make<A13GUIProjectBuilder>(gui));

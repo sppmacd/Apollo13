@@ -93,7 +93,7 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonPress(sf::Event::Mouse
     if(m_dialog)
         return;
 
-    if(event.button == sf::Mouse::Left)
+    if(event.button == sf::Mouse::Right)
     {
         m_dragStartPos = sf::Vector2i(event.x, event.y);
         m_dragStartCamPos = m_camera->getEyePosition();
@@ -101,6 +101,10 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonPress(sf::Event::Mouse
 
         if(event.x < m_partSelector->getSize().x)
             m_meta = 0;
+    }
+    else if(event.button ==  sf::Mouse::Left)
+    {
+        m_placing = true;
     }
 }
 
@@ -119,42 +123,17 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
     if(m_dialog)
         return;
 
-    if(event.button == sf::Mouse::Left)
+    if(event.button == sf::Mouse::Right)
     {
         m_mousePressed = false;
         if(m_dragging)
             m_dragging = false;
-        else
-        {
-            if(event.x < m_partSelector->getSize().x)
-                return;
-            auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(event.x, event.y)));
-
-            if(m_partSelector->getCurrentItem())
-            {
-                auto part = m_partSelector->getCurrentItem()->getPart();
-                if(m_tileMapObject->canPartBePlacedHere(tilePos, part->getSize())
-                   && !m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
-                {
-                    m_tileMapObject->placePart(tilePos, m_meta, part);
-                    onPlace(tilePos, *part.get());
-                }
-            }
-            else
-            {
-                // TODO: BuilderPart::contextMenu() - right click
-                m_tileMapObject->onActivate(tilePos);
-            }
-        }
     }
-    else if(event.button == sf::Mouse::Right)
+    else if(event.button == sf::Mouse::Left)
     {
-        if(event.x < m_partSelector->getSize().x)
-            return;
-        auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(event.x, event.y)));
-        auto tile = m_useEnsure ? &m_tileMapObject->m_tilemap->ensureTile(tilePos) : m_tileMapObject->m_tilemap->getTile(tilePos);
-        onRemove(tilePos, tile ? tile->part : nullptr);
-        m_tileMapObject->removePart(tilePos);
+        sf::Event::MouseMoveEvent event2 = {event.x, event.y};
+        onMouseMove(event2);
+        m_placing = false;
     }
 }
 
@@ -183,6 +162,30 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
         // Move camera.
         auto vec = m_dragStartCamPos - diff / m_zoom;
         m_camera->setEyePosition(vec);
+    }
+
+    // Place object (if placing)
+    if(m_placing)
+    {
+        if(event.x < m_partSelector->getSize().x)
+            return;
+        auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(event.x, event.y)));
+
+        if(m_partSelector->getCurrentItem())
+        {
+            auto part = m_partSelector->getCurrentItem()->getPart();
+            if(m_tileMapObject->canPartBePlacedHere(tilePos, part->getSize())
+               && !m_partSelector->getCurrentItem()->onPlace(m_tileMapObject->m_tilemap.get(), m_meta, tilePos))
+            {
+                m_tileMapObject->placePart(tilePos, m_meta, part);
+                onPlace(tilePos, *part.get());
+            }
+        }
+        else
+        {
+            // TODO: BuilderPart::contextMenu() - right click
+            m_tileMapObject->onActivate(tilePos);
+        }
     }
 }
 
@@ -215,6 +218,9 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& eve
 {
     EGE::GUIScreen::onKeyPress(event);
 
+    auto& wnd = *getWindow().lock().get();
+    sf::Vector2f currentPos = (sf::Vector2f)sf::Mouse::getPosition(wnd);
+
     if(event.code == sf::Keyboard::Escape)
     {
         m_partSelector->setCurrentItemIndex(-1);
@@ -224,6 +230,15 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& eve
     {
         m_meta++;
         updateHighlight(sf::Mouse::getPosition(*getWindow().lock().get()));
+    }
+    else if(event.code == sf::Keyboard::Delete)
+    {
+        if(currentPos.x < m_partSelector->getSize().x)
+            return;
+        auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(currentPos.x, currentPos.y)));
+        auto tile = m_useEnsure ? &m_tileMapObject->m_tilemap->ensureTile(tilePos) : m_tileMapObject->m_tilemap->getTile(tilePos);
+        onRemove(tilePos, tile ? tile->part : nullptr);
+        m_tileMapObject->removePart(tilePos);
     }
 }
 

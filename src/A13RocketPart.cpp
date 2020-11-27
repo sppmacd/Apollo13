@@ -34,6 +34,8 @@ EGE::SharedPtr<EGE::ObjectMap> A13ProjectTilemap::serialize()
     }
 
     obj->addObject("parts", _parts);
+    obj->addInt("status", m_currentProjectTime);
+    obj->addObject("inventory", m_items.serialize());
     return obj;
 }
 
@@ -83,6 +85,18 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
         }
     }
 
+    // Project status
+    auto _status = obj->getObject("status");
+    if(_status.expired() || !_status.lock()->isFloat())
+        return false;
+    m_currentProjectTime = _status.lock()->asInt();
+
+    auto _inventory = obj->getObject("inventory");
+    if(_inventory.expired() || !_inventory.lock()->isMap())
+        return false;
+    if(!m_items.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_inventory.lock())))
+        return false;
+
     // Calculate total cost
     for(auto it: getParts())
     {
@@ -115,6 +129,10 @@ void A13ProjectTilemap::onCloseProjectBuilder()
             A13::PlayerStats::instance().addResourceItemRequest(stack, &m_items);
         }
     }
+
+    // Do nothing if rocket is empty
+    if(m_totalProjectTime == 0)
+        return;
 
     // Set to RESOURCES REQUESTED state
     m_currentProjectTime = -1;

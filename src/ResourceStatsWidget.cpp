@@ -82,6 +82,7 @@ void ResourceStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::Render
                mousePos.y > s * ITEM_SIZE + rpos && mousePos.y < s * ITEM_SIZE + rpos + ITEM_SIZE)
             {
                 std::string tooltip = pr.second->getId();
+                tooltip += " q=" + std::to_string(A13::PlayerStats::instance().getQueueSize(pr.second));
 
                 // TODO: EGE::Widget::enterGlobalView()
                 m_parent->setViewForWidget(target);

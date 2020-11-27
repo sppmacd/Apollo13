@@ -26,6 +26,8 @@ public:
 
     void update();
 
+    int getQueueSize(ResourceItem* item) { return m_requestQueues[item->getId()].size(); }
+
     // TODO: make it private
     struct ResourceRequest
     {
@@ -33,7 +35,8 @@ public:
         Container* requester;
     };
 
-    EGE::Map<ResourceItem*, std::queue<ResourceRequest>> m_requestQueues;
+    // TODO: serialize queues
+    EGE::Map<std::string, std::queue<ResourceRequest>> m_requestQueues;
 private:
 
     bool process(ResourceRequest& request);

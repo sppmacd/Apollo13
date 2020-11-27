@@ -129,6 +129,7 @@ private:
 
     bool m_dragging = false;
     bool m_mousePressed = false;
+    bool m_placing = false;
     sf::Vector2i m_dragStartPos;
     sf::Vector2f m_dragStartCamPos;
     float m_zoom = 4.f;

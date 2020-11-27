@@ -29,7 +29,7 @@ void PlayerStats::unregisterContainer(Container* container)
 
 void PlayerStats::addResourceItemRequest(ResourceItemStack stack, Container* requester)
 {
-    m_requestQueues[stack.getItem()].push({stack, requester});
+    m_requestQueues[stack.getItem()->getId()].push({stack, requester});
 }
 
 void PlayerStats::update()
@@ -47,10 +47,8 @@ void PlayerStats::update()
 
     for(auto& q: m_requestQueues)
     {
-        // Process half of the requests in the queue.
-        // It allows later added requests also to be processes.
         if(q.second.empty())
-            return;
+            continue;
 
         EGE::Size hsize = q.second.size();
         for(EGE::Size s = 0; s < hsize; s++)
