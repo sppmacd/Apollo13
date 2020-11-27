@@ -17,7 +17,10 @@ void A13GUIProjectBuilder::onKeyPress(sf::Event::KeyEvent& event)
 {
     if(event.code == sf::Keyboard::Escape && !m_partSelector->getCurrentItem())
     {
-        exitDialog(0);
+        if(checkValidity())
+            exitDialog(0);
+        else
+            log() << "The rocket must have exactly 1 capsule, at least 4 fuel units and at least 1 engine!";
     }
 
     A13GUIAbstractBuilder::onKeyPress(event);
@@ -71,4 +74,31 @@ void A13GUIProjectBuilder::onLoad()
     addWidget(m_resourceStatsWidget);
     m_resourceStatsWidgetProject = make<ResourceStatsWidget>(this, m_tilemap->getTotalCostInv());
     addWidget(m_resourceStatsWidgetProject);
+}
+
+bool A13GUIProjectBuilder::checkValidity()
+{
+    int capsules = 0, fuelTankUnits = 0, engines = 0;
+    for(auto it : m_tilemap->getParts())
+    {
+        std::string id = it.second->part->getId();
+        if(id == "a13:capsule:generic")
+            capsules++;
+        else if(id.find("a13:fuel_tank:generic:") == 0)
+        {
+            try
+            {
+                fuelTankUnits += stoi(id.substr(22));
+            }
+            catch(...)
+            {
+                CRASH();
+            }
+        }
+        else if(id == "a13:engine:generic")
+        {
+            engines++;
+        }
+    }
+    return capsules == 1 && fuelTankUnits >= 4 && engines >= 1;
 }

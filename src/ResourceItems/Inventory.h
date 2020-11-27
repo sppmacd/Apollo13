@@ -34,6 +34,8 @@ public:
     bool canRemoveItems(Cost cost) const;
     bool tryRemoveItems(Cost cost);
 
+    void clear();
+
     const ArrayType::const_iterator begin() const { return m_stacks.begin(); }
     const ArrayType::const_iterator end() const { return m_stacks.end(); }
 

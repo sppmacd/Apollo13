@@ -196,6 +196,7 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseWheelScroll(sf::Event::Mouse
 
     if(m_dialog)
         return;
+
     if(event.x < m_partSelector->getSize().x)
         return;
 
@@ -217,6 +218,9 @@ template<class _Tilemap, class _Item>
 void A13GUIAbstractBuilder<_Tilemap, _Item>::onKeyPress(sf::Event::KeyEvent& event)
 {
     EGE::GUIScreen::onKeyPress(event);
+
+    if(m_dialog)
+        return;
 
     auto& wnd = *getWindow().lock().get();
     sf::Vector2f currentPos = (sf::Vector2f)sf::Mouse::getPosition(wnd);

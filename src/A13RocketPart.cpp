@@ -103,6 +103,15 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
         m_totalCostInv.tryAddItems(it.second->part->getCost());
     }
 
+    // Calculate project time
+    m_totalProjectTime = 0;
+    for(auto& it: getParts())
+    {
+        int i = it.second->part->getBuildTime();
+        log() << "Adding time to totalProjectTime: " << i;
+        m_totalProjectTime += it.second->part->getBuildTime();
+    }
+
     return true;
 }
 
@@ -120,19 +129,28 @@ void A13ProjectTilemap::onCloseProjectBuilder()
 
     // TODO: Cancel resource requests
 
-    // Calculate project time and request resources
+    // Calculate project time
+    m_totalProjectTime = 0;
     for(auto& it: getParts())
     {
+        int i = it.second->part->getBuildTime();
+        log() << "Adding time to totalProjectTime: " << i;
         m_totalProjectTime += it.second->part->getBuildTime();
-        for(auto& stack : it.second->part->getCost())
-        {
-            A13::PlayerStats::instance().addResourceItemRequest(stack, &m_items);
-        }
+    }
+
+    // Request resources
+    auto missing = getMissingItems();
+    for(auto it: missing)
+    {
+        A13::PlayerStats::instance().addResourceItemRequest({it.first, it.second}, &m_items);
     }
 
     // Do nothing if rocket is empty
     if(m_totalProjectTime == 0)
+    {
+        m_currentProjectTime = -2;
         return;
+    }
 
     // Set to RESOURCES REQUESTED state
     m_currentProjectTime = -1;

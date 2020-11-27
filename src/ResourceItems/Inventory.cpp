@@ -140,4 +140,9 @@ bool Inventory::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     return true;
 }
 
+void Inventory::clear()
+{
+    m_stacks = {};
+}
+
 }

@@ -51,7 +51,7 @@ public:
         m_resourceStatsWidgetProject->setSize({RESOURCE_STATS_SIZE, event.height});
 
         EGE::Size PROJECT_STATS_SIZE_X = 400;
-        EGE::Size PROJECT_STATS_SIZE_Y = 60;
+        EGE::Size PROJECT_STATS_SIZE_Y = 120;
         m_projectStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE * 2 - PROJECT_STATS_SIZE_X, 0});
         m_projectStatsWidget->setSize({PROJECT_STATS_SIZE_X, PROJECT_STATS_SIZE_Y});
     }

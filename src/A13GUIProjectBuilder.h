@@ -49,6 +49,8 @@ public:
         m_tilemap->onCloseProjectBuilder();
     }
 
+    bool checkValidity();
+
 private:
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidgetProject;

@@ -43,6 +43,25 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
     gui->openDialog(make<A13GUIProjectBuilder>(gui));
 }
 
+void A13FactoryBuildingRocketFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount)
+{
+    auto ptm = Apollo13::instance().save.projectTilemap();
+    int projTime = ptm->getCurrentProjectTime();
+
+    if(projTime == -1)
+    {
+        auto missing = ptm->getMissingItems();
+        if(missing.getItemCount() == 0)
+        {
+            ptm->startWorkingOnProject();
+        }
+    }
+    else if(projTime >= 0 && projTime < ptm->getTotalProjectTime())
+    {
+        ptm->progress(1);
+    }
+}
+
 std::string A13FactoryBuildingFactory::Part::getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
 {
     return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
@@ -134,6 +153,15 @@ EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingFactory::Part::serialize()
     obj->addString("recipe", m_recipe->output.getItem()->getId());
     obj->addInt("error", m_error);
     return obj;
+}
+
+void A13FactoryBuildingStartPlatform::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2i)
+{
+    auto ptm = Apollo13::instance().save.projectTilemap();
+    if(ptm->finished())
+    {
+        log(LogLevel::Crash) << "Finally launch rocket!";
+    }
 }
 
 bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)

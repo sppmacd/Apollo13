@@ -241,7 +241,7 @@ bool FactoryTilemap::readFrom(EGE::Vec2i chunkCoords, ChunkType& chunk, std::ist
 
 bool FactoryTilemap::writeTo(EGE::Vec2i chunkCoord, FactoryTilemap::ChunkType& chunk, std::string worldName)
 {
-    log(LogLevel::Verbose) << "[FT] Saving chunk " <<  chunkCoord.x << "," << chunkCoord.y;
+    //log(LogLevel::Verbose) << "[FT] Saving chunk " <<  chunkCoord.x << "," << chunkCoord.y;
     std::ostringstream oss;
     oss << "saves/" << worldName << "/chunk_" << chunkCoord.x << "_" << chunkCoord.y << ".a13c";
     std::ofstream file(oss.str(), std::ios::binary);
@@ -252,7 +252,7 @@ bool FactoryTilemap::writeTo(EGE::Vec2i chunkCoord, FactoryTilemap::ChunkType& c
 
 bool FactoryTilemap::readFrom(EGE::Vec2i chunkCoord, FactoryTilemap::ChunkType& chunk, std::string worldName)
 {
-    log(LogLevel::Verbose) << "[FT] Loading chunk " <<  chunkCoord.x << "," << chunkCoord.y;
+    //log(LogLevel::Verbose) << "[FT] Loading chunk " <<  chunkCoord.x << "," << chunkCoord.y;
     std::ostringstream oss;
     oss << "saves/" << worldName << "/chunk_" << chunkCoord.x << "_" << chunkCoord.y << ".a13c";
     std::ifstream file(oss.str(), std::ios::binary);
@@ -281,7 +281,7 @@ bool FactoryTilemap::flush(std::string worldName)
 
 void FactoryTilemap::generateChunk(EGE::Vec2i chunkPos, A13::FactoryTilemap::ChunkType& chunk)
 {
-    log(LogLevel::Verbose) << "[FT] Generating chunk " <<  chunkPos.x << "," << chunkPos.y;
+    //log(LogLevel::Verbose) << "[FT] Generating chunk " <<  chunkPos.x << "," << chunkPos.y;
     EGE::Random random(chunkPos.x * 1024 * 1024 + chunkPos.y * 1024 + seed);
 
     // TODO: replace it by better generator

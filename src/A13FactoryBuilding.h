@@ -124,6 +124,8 @@ public:
         {
             return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state) + "\nClick to open Project Builder";
         }
+
+        virtual void onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount);
     };
 
     virtual std::string getDescription()
@@ -131,8 +133,9 @@ public:
         return
         "Rocket Factory is needed to\n"
         "create rocket project. Launching\n"
-        "a Rocket gives you many coins,\n"
-        "which you can use to buy resources.";
+        "working rocket is necessary to win\n"
+        "game. You also get points for\n"
+        "included parts\n";
     }
 
     virtual Cost getCost() const;
@@ -150,14 +153,29 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 2}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
 
+    struct Part : public A13::FactoryBuildingPart
+    {
+        Part(const A13FactoryBuilding* bld)
+        : A13::FactoryBuildingPart(bld) {}
+
+        virtual void onActivate(A13::FactoryTilemap*, EGE::Vec2i);
+
+        virtual std::string getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
+        {
+            return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state) + "\nClick to launch rocket";
+        }
+    };
+
     virtual Cost getCost() const;
 
     virtual std::string getDescription()
     {
         return
         "Use Start Platform to launch your\n"
-        "rockets!";
+        "rocket!";
     }
+
+    A13_CUSTOM_FACTORY_PART(Part);
 };
 
 namespace A13

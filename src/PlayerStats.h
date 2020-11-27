@@ -28,6 +28,9 @@ public:
 
     int getQueueSize(ResourceItem* item) { return m_requestQueues[item->getId()].size(); }
 
+    virtual EGE::SharedPtr<EGE::ObjectMap> serialize() override;
+    virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj) override;
+
     // TODO: make it private
     struct ResourceRequest
     {
@@ -36,7 +39,7 @@ public:
     };
 
     // TODO: serialize queues
-    EGE::Map<std::string, std::queue<ResourceRequest>> m_requestQueues;
+    EGE::Map<std::string, std::deque<ResourceRequest>> m_requestQueues;
 private:
 
     bool process(ResourceRequest& request);

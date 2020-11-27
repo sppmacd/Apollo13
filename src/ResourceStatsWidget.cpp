@@ -21,19 +21,19 @@ void ResourceStatsWidget::onLoad()
 std::string toStringPrefixed(int n)
 {
     std::ostringstream oss;
-    if(n > 1000000000)
+    if(n >= 1000000000)
         oss << std::fixed << std::setprecision(2) << n / 1000000000.0 << "G";
-    else if(n > 100000000)
+    else if(n >= 100000000)
         oss << std::fixed << std::setprecision(0) << n / 1000000.0 << "M";
-    else if(n > 10000000)
+    else if(n >= 10000000)
         oss << std::fixed << std::setprecision(1) << n / 1000000.0 << "M";
-    else if(n > 1000000)
+    else if(n >= 1000000)
         oss << std::fixed << std::setprecision(2) << n / 1000000.0 << "M";
-    else if(n > 100000)
+    else if(n >= 100000)
         oss << std::fixed << std::setprecision(0) << n / 1000.0 << "k";
-    else if(n > 10000)
+    else if(n >= 10000)
         oss << std::fixed << std::setprecision(1) << n / 1000.0 << "k";
-    else if(n > 1000)
+    else if(n >= 1000)
         oss << std::fixed << std::setprecision(2) << n / 1000.0 << "k";
     else
         oss << n;

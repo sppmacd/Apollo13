@@ -41,7 +41,7 @@ public:
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
     virtual Cost getCost() const { return {}; }
-    virtual int getBuildTime() const { return 1200; } // 20 s
+    virtual int getBuildTime() const { return 60 * 20; } // 20 s
 
     virtual std::string getDescription() { return "(No description provided)"; }
 };
@@ -76,6 +76,23 @@ public:
             }
         }
         return msItems;
+    }
+
+    void startWorkingOnProject()
+    {
+        m_currentProjectTime = 0;
+        m_items.getInventory().clear();
+    }
+
+    void progress(int i)
+    {
+        if(m_currentProjectTime >= 0 && m_currentProjectTime + i <= m_totalProjectTime)
+            m_currentProjectTime += i;
+    }
+
+    bool finished()
+    {
+        return m_currentProjectTime == m_totalProjectTime;
     }
 
 private:
@@ -129,6 +146,8 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 1}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
 
+    virtual int getBuildTime() const { return 60 * 60 * 2; } // 120 s
+
     virtual Cost getCost() const override;
 };
 
@@ -141,6 +160,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {2, 1}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {m_index, 2}; }
     virtual EGE::Vec2u getSize() const { return {2, m_size}; }
+
+    virtual int getBuildTime() const { return 60 * 20 * m_size; } // 20 * size s
 
     virtual Cost getCost() const override;
 
@@ -159,6 +180,8 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 3}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
 
+    virtual int getBuildTime() const { return 60 * 10; } // 10 s
+
     virtual Cost getCost() const override;
 
 private:
@@ -174,6 +197,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {0, 3}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 4}; }
     virtual EGE::Vec2u getSize() const { return {2, 2}; }
+
+    virtual int getBuildTime() const { return 60 * 60 * 3; } // 180 s
 
     virtual Cost getCost() const override;
 };

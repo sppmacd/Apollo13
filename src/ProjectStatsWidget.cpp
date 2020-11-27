@@ -20,53 +20,62 @@ void ProjectStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderS
     ASSERT(m_atlas);
     ASSERT(m_font);
 
+    // Get data
+    auto ptm = Apollo13::instance().save.projectTilemap();
+    int ptime = ptm->getCurrentProjectTime();
+    int ttime = ptm->getTotalProjectTime();
+
+    if(ptime == -2)
+        return;
+
     EGE::Renderer renderer(target);
 
     // Background
     renderer.renderRectangle(0, 0, getSize().x, getSize().y, sf::Color(0, 0, 0, 127));
 
-    // TODO: Status
+    // Status
     std::string status;
-    int ptime = Apollo13::instance().save.projectTilemap()->getCurrentProjectTime();
-    int ttime = Apollo13::instance().save.projectTilemap()->getTotalProjectTime();
-    if(ptime == -2)
-        status = "NOT STARTED";
-    else if(ptime == -1)
-        status = "RESOURCES REQUESTED";
-    else if(ptime < ttime)
-        status = "WORKING (" + std::to_string(int(double(ptime) / ttime * 100)) + "%)";
-    else
-        status = "FINISHED";
 
-    renderer.renderText(10, 10, *m_font, "STATUS: " + status, 20);
+    if(ptime == -1)
+        status += "RESOURCES REQUESTED";
+    else if(ptime < ttime)
+        status += "WORKING (" + std::to_string(int(double(ptime) / ttime * 100)) + "%)";
+    else
+        status += "FINISHED\n(Click Start Platform)";
+
+    renderer.renderText(10, 10, *m_font, "ROCKET STATUS: " + status, 20);
 
     // Missing items
-    Inventory missing = Apollo13::instance().save.projectTilemap()->getMissingItems();
-    EGE::Size s = 0;
-    for(auto& stack: missing)
+    if(ptime == -1)
     {
-        if(stack.first.empty() || !stack.second)
-            continue;
+        Inventory missing = Apollo13::instance().save.projectTilemap()->getMissingItems();
+        EGE::Size s = 0;
+        for(auto& stack: missing)
+        {
+            if(stack.first.empty() || !stack.second)
+                continue;
 
-        std::string str = std::to_string(stack.second);
+            std::string str = std::to_string(stack.second);
 
-        const unsigned WIDTH = 42;
+            const unsigned WIDTH = 42;
 
-        // Icon
-        sf::IntRect texRect;
-        // TODO: Name that '16' somehow
-        auto item = A13GameplayObjectManager::instance().resourceItems.findById(stack.first);
-        texRect.left = item->getAtlasPosition().x * 16;
-        texRect.top = item->getAtlasPosition().y * 16;
-        texRect.width = 16;
-        texRect.height = 16;
-        renderer.renderTexturedRectangle(10 + s * WIDTH, 40, 32, 32, *m_atlas, texRect);
+            // Icon
+            sf::IntRect texRect;
+            // TODO: Name that '16' somehow
+            auto item = A13GameplayObjectManager::instance().resourceItems.findById(stack.first);
+            texRect.left = item->getAtlasPosition().x * 16;
+            texRect.top = item->getAtlasPosition().y * 16;
+            texRect.width = 16;
+            texRect.height = 16;
+            renderer.renderTexturedRectangle(10 + s * WIDTH, 60, 32, 32, *m_atlas, texRect);
 
-        s++;
+            s++;
+        }
     }
 
     // TODO: Progress
-
+    renderer.renderRectangle(5, 95, getSize().x - 10, 3, sf::Color::Red);
+    renderer.renderRectangle(5, 95, (getSize().x - 10) * ((double)ptime / ttime), 3, sf::Color::Green);
 }
 
 }

@@ -29,7 +29,7 @@ void PlayerStats::unregisterContainer(Container* container)
 
 void PlayerStats::addResourceItemRequest(ResourceItemStack stack, Container* requester)
 {
-    m_requestQueues[stack.getItem()->getId()].push({stack, requester});
+    m_requestQueues[stack.getItem()->getId()].push_back({stack, requester});
 }
 
 void PlayerStats::update()
@@ -57,10 +57,10 @@ void PlayerStats::update()
             {
                 // Save a copy of request on the back of queue.
                 // We will try process it later.
-                q.second.push(q.second.front());
+                q.second.push_back(q.second.front());
             }
 
-            q.second.pop();
+            q.second.pop_front();
         }
     }
 }
@@ -91,6 +91,19 @@ bool PlayerStats::process(ResourceRequest& request)
         // We return true to force request be removed as it will always fail.
     }
     return true;
+}
+
+EGE::SharedPtr<EGE::ObjectMap> PlayerStats::serialize()
+{
+    // TODO
+    auto obj = Container::serialize();
+    return obj;
+}
+
+bool PlayerStats::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
+{
+    // TODO
+    return Container::deserialize(obj);
 }
 
 }
