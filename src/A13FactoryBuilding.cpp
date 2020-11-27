@@ -161,7 +161,7 @@ EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingFactory::Part::serialize()
     auto obj = A13::FactoryBuildingPart::serialize();
     if(m_recipe)
         obj->addString("recipe", m_recipe->output.getItem()->getId());
-    obj->addInt("error", m_error);
+    //obj->addInt("error", m_error);
     return obj;
 }
 
@@ -178,10 +178,10 @@ bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap>
                         A13GameplayObjectManager::instance().resourceItems.findById(_recipe.lock()->asString())
                                                                         );
 
-    auto _error = obj->getObject("error");
+    /*auto _error = obj->getObject("error");
     if(_error.expired() || !_error.lock()->isFloat())
         return false;
-    m_error = _error.lock()->asInt();
+    m_error = _error.lock()->asInt();*/
 
     return true;
 }
@@ -282,7 +282,7 @@ EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingMine::Part::serialize()
     obj->addFloat("multiplier", multiplier);
     obj->addInt("fuel", m_fuel);
     obj->addObject("fuelContainer", fuelContainer.serialize());
-    obj->addInt("requestedCoal", m_requestedCoal);
+    //obj->addInt("requestedCoal", m_requestedCoal);
     return obj;
 }
 
@@ -318,10 +318,10 @@ bool A13FactoryBuildingMine::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> ob
     if(!fuelContainer.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_fuelContainer.lock())))
         return false;
 
-    auto _requestedCoal = obj->getObject("requestedCoal");
+    /*auto _requestedCoal = obj->getObject("requestedCoal");
     if(_requestedCoal.expired() || !_requestedCoal.lock()->isInt())
         return false;
-    m_requestedCoal = _requestedCoal.lock()->asInt();
+    m_requestedCoal = _requestedCoal.lock()->asInt();*/
 
     return true;
 }
