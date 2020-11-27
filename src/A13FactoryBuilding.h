@@ -164,6 +164,9 @@ public:
         {
             return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state) + "\nClick to launch rocket";
         }
+
+        virtual void onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount) override;
+        virtual void render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const override;
     };
 
     virtual Cost getCost() const;

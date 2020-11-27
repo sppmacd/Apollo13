@@ -43,6 +43,13 @@ public:
     virtual Cost getCost() const { return {}; }
     virtual int getBuildTime() const { return 60 * 20; } // 20 s
 
+    virtual double getThrust() const { return 0; } // [N]
+    virtual double getFuelUsage() const { return 0.0; } // [kg/s]
+    virtual double getFuelStorage() const { return 0.0; } // [kg]
+
+    // Rocket mass (without fuel)
+    virtual double getMass() const { return 1.0; } // [kg]
+
     virtual std::string getDescription() { return "(No description provided)"; }
 };
 
@@ -63,6 +70,8 @@ public:
 
     int getTotalProjectTime() { return m_totalProjectTime; }
     int getCurrentProjectTime() { return m_currentProjectTime; }
+
+    void recalculateRocketProperties();
 
     A13::Inventory getMissingItems()
     {
@@ -90,16 +99,48 @@ public:
             m_currentProjectTime += i;
     }
 
-    bool finished()
+    bool finished() { return m_currentProjectTime == m_totalProjectTime; }
+    void launchRocket()
     {
-        return m_currentProjectTime == m_totalProjectTime;
+        m_currentProjectTime = -3;
+        m_rocketTick = 0;
+        m_rocketSpeed = 0;
+        m_rocketHeight = 0;
+        m_rocketMaxHeight = 0;
+        m_rocketFuel = m_fuelTotal;
+        m_thrust = m_maxThrust;
     }
+    void winGame() { m_currentProjectTime = -2; }
+    void loseGame() { m_currentProjectTime = -2; }
+
+    int m_rocketTick = -1;
+
+    // [m/s]
+    double m_rocketSpeed = 0;
+
+    // [m]
+    double m_rocketHeight = 0;
+    double m_rocketMaxHeight = 0;
+
+    // [kg]
+    double m_rocketFuel = 0;
+    double m_fuelTotal = 0;
+
+    // [kg/s]
+    double m_fuelUsage = 0;
+
+    // [N]
+    double m_thrust = 1;
+    double m_maxThrust = 1;
+
+    // [kg]
+    double m_mass = 0;
 
 private:
     A13::Container m_items;
     A13::Inventory m_totalCostInv; // Total cost of project (rocket)
     int m_totalProjectTime = 1;
-    int m_currentProjectTime = -2; // -2 - NOT STARTED, -1 - RESOURCES REQUESTED, >=0 - IN PROGRESS, TOTAL - FINISHED
+    int m_currentProjectTime = -2; // -3 - ROCKET LAUNCHED, -2 - NOT STARTED, -1 - RESOURCES REQUESTED, >=0 - IN PROGRESS, TOTAL - FINISHED
 };
 
 class A13RocketPartItem : public EGE::GameplayObject, public BuilderItem<A13ProjectTilemap>
@@ -148,6 +189,12 @@ public:
 
     virtual int getBuildTime() const { return 60 * 60 * 2; } // 120 s
 
+    virtual double getThrust() const override { return 100000; } // [N]
+    virtual double getFuelUsage() const override { return 55.0; } // [kg/s]
+
+    // Rocket mass (without fuel)
+    virtual double getMass() const override { return 500.0; } // [kg]
+
     virtual Cost getCost() const override;
 };
 
@@ -164,6 +211,11 @@ public:
     virtual int getBuildTime() const { return 60 * 20 * m_size; } // 20 * size s
 
     virtual Cost getCost() const override;
+
+    virtual double getFuelStorage() const override { return 1400.0; } // [kg]
+
+    // Rocket mass (without fuel)
+    virtual double getMass() const override { return 250.0 * (m_size - 0.5); } // [kg]
 
 private:
     EGE::Size m_size;
@@ -184,6 +236,9 @@ public:
 
     virtual Cost getCost() const override;
 
+    // Rocket mass (without fuel)
+    virtual double getMass() const override { return 400.0; } // [kg]
+
 private:
     EGE::Size m_size;
 };
@@ -201,4 +256,9 @@ public:
     virtual int getBuildTime() const { return 60 * 60 * 3; } // 180 s
 
     virtual Cost getCost() const override;
+
+    virtual double getFuelUsage() const override { return 0.05; } // [kg/s]
+
+    // Rocket mass (without fuel)
+    virtual double getMass() const override { return 650.0; } // [kg]
 };

@@ -54,9 +54,9 @@ bool Save::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     // PlayerStats
     auto _PS = obj->getObject("PS");
     if(_PS.expired() || !_PS.lock()->isMap())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found PS key in base.json");
     if(!m_playerStats.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_PS.lock())))
-        return false;
+        PRINT_ERROR_AND_RETURN("Invalid PS key in base.json");
 
     // Seed
     auto _Seed = obj->getObject("Seed");
@@ -68,18 +68,18 @@ bool Save::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     // Tilemap
     auto _World = obj->getObject("World");
     if(_World.expired() || !_World.lock()->isMap())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found World key in base.json");
     m_tilemap = make<A13::FactoryTilemap>(m_seed);
     if(!m_tilemap->deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_World.lock())))
-        return false;
+        PRINT_ERROR_AND_RETURN("Invalid world key in base.json");
 
     // Project tilemap
     auto _Project = obj->getObject("Project");
     if(_Project.expired() || !_Project.lock()->isMap())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found Project key in base.json");
     m_projectTilemap = make<A13ProjectTilemap>();
     if(!m_projectTilemap->deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_Project.lock())))
-        return false;
+        PRINT_ERROR_AND_RETURN("Invalid Project key in base.json");
     return true;
 }
 

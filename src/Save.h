@@ -6,6 +6,8 @@
 #include "FactoryTilemap.h"
 #include "PlayerStats.h"
 
+#define PRINT_ERROR_AND_RETURN(msg) {log(LogLevel::Error) << "Save load failed: " << msg; return false;}
+
 namespace A13
 {
 

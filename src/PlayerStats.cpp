@@ -12,6 +12,7 @@ PlayerStats& PlayerStats::instance()
 
 void PlayerStats::initialize()
 {
+    getInventory().clear();
     getInventory().setMaxItemCount(-1);
     // items for 5 quick mines
     getInventory()[A13GameplayObjectManager::items.iron] = 50;

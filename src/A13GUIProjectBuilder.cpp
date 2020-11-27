@@ -74,6 +74,11 @@ void A13GUIProjectBuilder::onLoad()
     addWidget(m_resourceStatsWidget);
     m_resourceStatsWidgetProject = make<ResourceStatsWidget>(this, m_tilemap->getTotalCostInv());
     addWidget(m_resourceStatsWidgetProject);
+    m_infoLabel = make<EGE::Label>(this);
+    m_infoLabel->setTextAlign(EGE::Label::Align::Center);
+    m_infoLabel->setString("Not built anything!");
+    addWidget(m_infoLabel);
+    recalculate();
 }
 
 bool A13GUIProjectBuilder::checkValidity()
@@ -100,5 +105,5 @@ bool A13GUIProjectBuilder::checkValidity()
             engines++;
         }
     }
-    return capsules == 1 && fuelTankUnits >= 4 && engines >= 1;
+    return m_tilemap->getTotalProjectTime() == 0 || (capsules == 1 && fuelTankUnits >= 4 && engines >= 1);
 }

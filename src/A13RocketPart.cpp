@@ -2,6 +2,7 @@
 #include "A13GameplayObjectManager.h"
 
 #include "PlayerStats.h"
+#include "Save.h"
 
 EGE::SharedPtr<EGE::ObjectMap> A13RocketPartPart::serialize()
 {
@@ -36,6 +37,15 @@ EGE::SharedPtr<EGE::ObjectMap> A13ProjectTilemap::serialize()
     obj->addObject("parts", _parts);
     obj->addInt("status", m_currentProjectTime);
     obj->addObject("inventory", m_items.serialize());
+
+    // rocket data
+    auto _rocket = make<EGE::ObjectMap>();
+    _rocket->addInt("speed", m_rocketSpeed);
+    _rocket->addFloat("height", m_rocketHeight);
+    _rocket->addFloat("fuel", m_rocketFuel);
+    _rocket->addFloat("maxHeight", m_rocketMaxHeight);
+    _rocket->addFloat("thrust", m_thrust);
+    obj->addObject("rocket", _rocket);
     return obj;
 }
 
@@ -44,7 +54,7 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     log() << "Loading part info for project builder";
     EGE::WeakPtr<EGE::Object> _parts = obj->getObject("parts");
     if(_parts.expired())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found valid Project/parts key!");
 
     for(auto& _obj : *((EGE::ObjectList*)_parts.lock().get()))
     {
@@ -88,14 +98,14 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     // Project status
     auto _status = obj->getObject("status");
     if(_status.expired() || !_status.lock()->isFloat())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found valid Project/status key!");
     m_currentProjectTime = _status.lock()->asInt();
 
     auto _inventory = obj->getObject("inventory");
     if(_inventory.expired() || !_inventory.lock()->isMap())
-        return false;
+        PRINT_ERROR_AND_RETURN("Not found valid Project/inventory key!");
     if(!m_items.deserialize(std::dynamic_pointer_cast<EGE::ObjectMap>(_inventory.lock())))
-        return false;
+        PRINT_ERROR_AND_RETURN("Invalid Project/inventory key!");
 
     // Calculate total cost
     for(auto it: getParts())
@@ -104,12 +114,39 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
     }
 
     // Calculate project time
-    m_totalProjectTime = 0;
-    for(auto& it: getParts())
+    recalculateRocketProperties();
+
+    // Rocket data
+    auto _rocket = obj->getObject("rocket");
+    if(_rocket.expired() || !_rocket.lock()->isMap())
+        PRINT_ERROR_AND_RETURN("Invalid Project/rocket key!");
     {
-        int i = it.second->part->getBuildTime();
-        log() << "Adding time to totalProjectTime: " << i;
-        m_totalProjectTime += it.second->part->getBuildTime();
+        auto rocket = _rocket.lock()->asMap();
+        auto _rocket_speed = rocket["speed"];
+        auto _rocket_height = rocket["height"];
+        auto _rocket_fuel = rocket["fuel"];
+        auto _rocket_maxHeight = rocket["maxHeight"];
+        auto _rocket_thrust = rocket["thrust"];
+
+        if(!_rocket_speed ||
+           !_rocket_height ||
+           !_rocket_fuel ||
+           !_rocket_maxHeight ||
+           !_rocket_thrust)
+            PRINT_ERROR_AND_RETURN("Not found Project/rocket keys!");
+
+        if(!_rocket_speed->isFloat() ||
+           !_rocket_height->isFloat() ||
+           !_rocket_fuel->isFloat() ||
+           !_rocket_maxHeight->isFloat() ||
+           !_rocket_thrust->isFloat())
+            PRINT_ERROR_AND_RETURN("Invalid format of Project/rocket keys!");
+
+        m_rocketSpeed = _rocket_speed->asFloat();
+        m_rocketHeight = _rocket_height->asFloat();
+        m_rocketFuel = _rocket_fuel->asFloat();
+        m_rocketMaxHeight = _rocket_maxHeight->asFloat();
+        m_thrust = _rocket_thrust->asFloat();
     }
 
     return true;
@@ -129,14 +166,8 @@ void A13ProjectTilemap::onCloseProjectBuilder()
 
     // TODO: Cancel resource requests
 
-    // Calculate project time
-    m_totalProjectTime = 0;
-    for(auto& it: getParts())
-    {
-        int i = it.second->part->getBuildTime();
-        log() << "Adding time to totalProjectTime: " << i;
-        m_totalProjectTime += it.second->part->getBuildTime();
-    }
+    // Calculate project time, thrust etc.
+    recalculateRocketProperties();
 
     // Request resources
     auto missing = getMissingItems();
@@ -154,6 +185,26 @@ void A13ProjectTilemap::onCloseProjectBuilder()
 
     // Set to RESOURCES REQUESTED state
     m_currentProjectTime = -1;
+}
+
+void A13ProjectTilemap::recalculateRocketProperties()
+{
+    m_totalProjectTime = 0;
+    m_maxThrust = 0;
+    m_fuelUsage = 0;
+    m_rocketFuel = 0;
+    m_fuelTotal = 0;
+    m_mass = 0;
+    for(auto& it: getParts())
+    {
+        int i = it.second->part->getBuildTime();
+        log() << "Adding time to totalProjectTime: " << i;
+        m_totalProjectTime += it.second->part->getBuildTime();
+        m_maxThrust += it.second->part->getThrust();
+        m_fuelUsage += it.second->part->getFuelUsage();
+        m_fuelTotal += it.second->part->getFuelStorage();
+        m_mass += it.second->part->getMass();
+    }
 }
 
 EGE::Vec2d A13RocketPartPart::getAtlasPosition(int) const

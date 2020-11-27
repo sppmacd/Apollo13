@@ -5,6 +5,9 @@
 #include <ege/gui/GUIGameLoop.h>
 #include <ege/gfx/Renderer.h>
 
+#include <iomanip>
+#include <sstream>
+
 namespace A13
 {
 
@@ -37,17 +40,19 @@ void ProjectStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderS
     std::string status;
 
     if(ptime == -1)
-        status += "RESOURCES REQUESTED";
+        status += "REQUESTING...";
+    else if(ptime == -3)
+        status += "ROCKET LAUNCHED";
     else if(ptime < ttime)
-        status += "WORKING (" + std::to_string(int(double(ptime) / ttime * 100)) + "%)";
+        status += "WORKING... (" + std::to_string(int(double(ptime) / ttime * 100)) + "%)";
     else
         status += "FINISHED\n(Click Start Platform)";
 
     renderer.renderText(10, 10, *m_font, "ROCKET STATUS: " + status, 20);
 
-    // Missing items
     if(ptime == -1)
     {
+        // Missing items
         Inventory missing = Apollo13::instance().save.projectTilemap()->getMissingItems();
         EGE::Size s = 0;
         for(auto& stack: missing)
@@ -72,10 +77,24 @@ void ProjectStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderS
             s++;
         }
     }
+    else if(ptime == -3)
+    {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(2);
+        oss << "Fuel: " << ptm->m_rocketFuel << " / " << ptm->m_fuelTotal << " kg (" << ptm->m_fuelUsage << " kg/t)";
+        oss << " Thrust: " << ptm->m_thrust << " / " << ptm->m_maxThrust << " N\n";
+        oss << "Speed: " << ptm->m_rocketSpeed << " m/s";
+        oss << " Height: " << ptm->m_rocketHeight << " m (max: " << ptm->m_rocketMaxHeight << " m)\n";
+        oss << "Total mass: " << ptm->m_mass + ptm->m_rocketFuel << " kg (" << ptm->m_mass << " kg without fuel)";
+        renderer.renderText(10, 45, *m_font, oss.str(), 10);
+    }
 
-    // TODO: Progress
-    renderer.renderRectangle(5, 95, getSize().x - 10, 3, sf::Color::Red);
-    renderer.renderRectangle(5, 95, (getSize().x - 10) * ((double)ptime / ttime), 3, sf::Color::Green);
+    // Progress
+    if(ptime == -3)
+        ptime = ttime;
+
+    renderer.renderRectangle(15, 90, getSize().x - 30, 10, sf::Color::Red);
+    renderer.renderRectangle(15, 90, (getSize().x - 30) * ((double)ptime / ttime), 10, sf::Color::Green);
 }
 
 }
