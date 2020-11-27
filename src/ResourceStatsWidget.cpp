@@ -66,7 +66,7 @@ void ResourceStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::Render
         const int ITEM_SIZE = 48;
         float rpos = (getSize().x - ITEM_SIZE) / 2;
 
-        renderer.renderText(rpos + ITEM_SIZE - 20, s * ITEM_SIZE + rpos + ITEM_SIZE / 2 - 6, *m_font, toStringPrefixed(count), 14);
+        renderer.renderText(rpos + ITEM_SIZE - 20, s * ITEM_SIZE + rpos + ITEM_SIZE / 2 - 6, *m_font, toStringPrefixed(count), 11);
 
         // Texture
         auto ac = pr.second->getAtlasPosition();
