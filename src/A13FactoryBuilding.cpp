@@ -62,6 +62,15 @@ void A13FactoryBuildingRocketFactory::Part::onUpdate(A13::FactoryTilemap* tilema
     }
 }
 
+void A13FactoryBuildingStartPlatform::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2i)
+{
+    auto ptm = Apollo13::instance().save.projectTilemap();
+    if(ptm->finished())
+    {
+        log(LogLevel::Crash) << "Finally launch rocket!";
+    }
+}
+
 std::string A13FactoryBuildingFactory::Part::getTooltip(const A13::FactoryTilemap* tilemap, EGE::Vec2i pos, const A13::FactoryTilemap::StateType& state) const
 {
     return A13::FactoryBuildingPart::getTooltip(tilemap, pos, state)
@@ -150,18 +159,10 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
 EGE::SharedPtr<EGE::ObjectMap> A13FactoryBuildingFactory::Part::serialize()
 {
     auto obj = A13::FactoryBuildingPart::serialize();
-    obj->addString("recipe", m_recipe->output.getItem()->getId());
+    if(m_recipe)
+        obj->addString("recipe", m_recipe->output.getItem()->getId());
     obj->addInt("error", m_error);
     return obj;
-}
-
-void A13FactoryBuildingStartPlatform::Part::onActivate(A13::FactoryTilemap*, EGE::Vec2i)
-{
-    auto ptm = Apollo13::instance().save.projectTilemap();
-    if(ptm->finished())
-    {
-        log(LogLevel::Crash) << "Finally launch rocket!";
-    }
 }
 
 bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
@@ -171,10 +172,11 @@ bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap>
 
     auto _recipe = obj->getObject("recipe");
     if(_recipe.expired() || !_recipe.lock()->isString())
-        return false;
-    m_recipe = A13GameplayObjectManager::instance().recipes.findById(
-                    A13GameplayObjectManager::instance().resourceItems.findById(_recipe.lock()->asString())
-                                                                    );
+        m_recipe = nullptr;
+    else
+        m_recipe = A13GameplayObjectManager::instance().recipes.findById(
+                        A13GameplayObjectManager::instance().resourceItems.findById(_recipe.lock()->asString())
+                                                                        );
 
     auto _error = obj->getObject("error");
     if(_error.expired() || !_recipe.lock()->isFloat())
