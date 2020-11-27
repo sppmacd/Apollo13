@@ -92,15 +92,13 @@ public:
 
     void setMaxMeta(int meta) { m_maxMeta = meta; }
 
+    sf::Font* m_font = nullptr;
 protected:
     sf::Vector2f screenToScene(sf::Vector2i pos)
     {
         auto& wnd = *getWindow().lock().get();
         return m_scene->mapScreenToScene(wnd, sf::Vector2i(pos.x, pos.y), getView(wnd));
     }
-
-protected:
-    sf::Font* m_font = nullptr;
 
 private:
     void updateHighlight(sf::Vector2i mousePos)
