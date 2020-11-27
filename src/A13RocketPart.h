@@ -190,7 +190,7 @@ public:
     virtual int getBuildTime() const { return 60 * 60 * 2; } // 120 s
 
     virtual double getThrust() const override { return 100000; } // [N]
-    virtual double getFuelUsage() const override { return 55.0; } // [kg/s]
+    virtual double getFuelUsage() const override { return 40.0; } // [kg/s]
 
     // Rocket mass (without fuel)
     virtual double getMass() const override { return 500.0; } // [kg]
