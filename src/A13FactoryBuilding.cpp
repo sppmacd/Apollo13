@@ -179,7 +179,7 @@ bool A13FactoryBuildingFactory::Part::deserialize(EGE::SharedPtr<EGE::ObjectMap>
                                                                         );
 
     auto _error = obj->getObject("error");
-    if(_error.expired() || !_recipe.lock()->isFloat())
+    if(_error.expired() || !_error.lock()->isFloat())
         return false;
     m_error = _error.lock()->asInt();
 
