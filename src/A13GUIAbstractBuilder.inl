@@ -134,6 +134,16 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseButtonRelease(sf::Event::Mou
         sf::Event::MouseMoveEvent event2 = {event.x, event.y};
         onMouseMove(event2);
         m_placing = false;
+
+        if(!m_partSelector->getCurrentItem())
+        {
+            if(event.x < m_partSelector->getSize().x)
+                return;
+            auto tilePos = m_tileMapObject->mapTilePosition(screenToScene(sf::Vector2i(event.x, event.y)));
+
+            // TODO: BuilderPart::contextMenu() - right click
+            m_tileMapObject->onActivate(tilePos);
+        }
     }
 }
 
@@ -180,11 +190,6 @@ void A13GUIAbstractBuilder<_Tilemap, _Item>::onMouseMove(sf::Event::MouseMoveEve
                 m_tileMapObject->placePart(tilePos, m_meta, part);
                 onPlace(tilePos, *part.get());
             }
-        }
-        else
-        {
-            // TODO: BuilderPart::contextMenu() - right click
-            m_tileMapObject->onActivate(tilePos);
         }
     }
 }
