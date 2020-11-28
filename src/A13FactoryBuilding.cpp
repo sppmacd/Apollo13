@@ -111,6 +111,18 @@ void A13FactoryBuildingFactory::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec
     gui->renderItem({pos.x + getSize().x / 2.0, pos.y + getSize().y / 2.0}, m_recipe ? m_recipe->output.getItem() : nullptr, target);
 }
 
+void A13FactoryBuildingFactory::Part::setRecipe(A13::Recipe* recipe)
+{
+    if(m_recipe != recipe)
+    {
+        m_recipe = recipe;
+
+        // Give back old resources and cancel requests
+        // as they aren't probably needed.
+        A13::PlayerStats::instance().loadItemsFrom(container.get());
+        A13::PlayerStats::instance().cancelAllRequests(container.get());
+    }
+}
 
 void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
 {
@@ -255,10 +267,13 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             if(m_fuel == 0)
             {
                 // Try remove coal from coal inventory and internal inventory (for coal mines)
-                if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}) && !container->getInventory().tryRemoveItems({"a13:coal:ore", 1}) && !m_requestedCoal)
+                if(!fuelContainer.getInventory().tryRemoveItems({"a13:coal:ore", 1}) && !container->getInventory().tryRemoveItems({"a13:coal:ore", 1}))
                 {
-                    A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", FUEL_BUFFER_SIZE}, &fuelContainer);
-                    m_requestedCoal = true;
+                    if(!m_requestedCoal)
+                    {
+                        A13::PlayerStats::instance().addResourceItemRequest({"a13:coal:ore", FUEL_BUFFER_SIZE}, &fuelContainer);
+                        m_requestedCoal = true;
+                    }
                     return;
                 }
                 else
@@ -408,6 +423,7 @@ Cost A13FactoryBuildingMine::getCost() const
         return {
             { A13GameplayObjectManager::items.iron, 150 },
             { A13GameplayObjectManager::items.copper, 100 },
+            { A13GameplayObjectManager::items.titanium, 55 },
             { A13GameplayObjectManager::items.diamond, 50 }
         };
     default:

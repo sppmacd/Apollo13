@@ -64,9 +64,25 @@ bool FactoryBuildingPart::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
 std::string FactoryTilemap::getTooltip(EGE::Vec2i pos, const FactoryTilemap::StateType& state) const
 {
     // TODO: use localization!
-    std::string terrain = "Terrain: " + std::to_string(state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN]) + "\n";
+    std::string oreId;
     Ore* _ore = (Ore*)&state.addObjs[FACTORY_BUILDER_LAYER_ORES];
-    std::string ore = _ore->id ? ("Ore: " + std::to_string(_ore->count) + "x #" + std::to_string(_ore->id) + "\n") : "";
+    switch(_ore->id)
+    {
+        case ORE_NONE: oreId = "None"; break;
+        case ORE_COAL: oreId = "Coal"; break;
+        case ORE_IRON: oreId = "Iron"; break;
+        case ORE_COPPER: oreId = "Copper"; break;
+        case ORE_TITANIUM: oreId = "Titanium"; break;
+        case ORE_SILICON: oreId = "Silicon (Sand)"; break;
+        case ORE_ALUMINUM: oreId = "Aluminum"; break;
+        case ORE_DIAMOND: oreId = "Diamond"; break;
+        case ORE_GOLD: oreId = "Gold"; break;
+        case ORE_SILVER: oreId = "Silver"; break;
+        default: oreId = "Unknown"; break;
+    }
+
+    std::string terrain = "Terrain: " + std::to_string(state.addObjs[FACTORY_BUILDER_LAYER_TERRAIN]) + "\n";
+    std::string ore = _ore->id ? ("Ore: " + std::to_string(_ore->count) + "x " + oreId + "\n") : "";
     EGE::Uint8 _logistic = state.addObjs[FACTORY_BUILDER_LAYER_LOGISTIC];
     std::string logistic = _logistic ? ("Logistic: " + std::to_string(_logistic) + "\n") : "";
     std::string tile = (state.part ? state.part->getTooltip(this, pos - EGE::Vec2i(state.cornerPos), state) : "No object") + "\n";

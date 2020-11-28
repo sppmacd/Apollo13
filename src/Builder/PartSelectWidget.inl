@@ -77,7 +77,7 @@ void PartSelectWidget<_Tilemap, _Item>::renderOnly(sf::RenderTarget& target, con
                 renderer.renderRectangle(0, (getSize().x) * index - scrollPos, getSize().x, getSize().x, sf::Color(255, 255, 255, 127));
 
                 // Tooltip
-                tooltip = m_items[index]->getTooltip();
+                tooltip = m_items[index]->getLabel();
 
                 m_parent->setViewForWidget(target);
 

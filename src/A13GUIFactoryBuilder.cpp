@@ -45,7 +45,7 @@ void A13GUIFactoryBuilder::onLoad()
         renderer.renderRectangle(m_partSelector->getSize().x, 0, 230, m_partSelector->getSize().y, sf::Color(0, 0, 0, 127));
 
         // Item name
-        renderer.renderText(m_partSelector->getSize().x + 10, 20, *m_font, item->getId(), 16);
+        renderer.renderText(m_partSelector->getSize().x + 10, 20, *m_font, item->getLabel(), 16);
 
         // Cost
         Cost cost = item->getCost();

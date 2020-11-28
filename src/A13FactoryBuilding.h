@@ -43,6 +43,8 @@ public:
         return "(No description)";
     }
 
+    virtual std::string getLabel() { return "(No label assigned)"; }
+
     virtual Cost getCost() const
     {
         return {};
@@ -94,6 +96,8 @@ public:
         return m_building ? m_building->getDescription() : "(No building assigned)";
     }
 
+    virtual std::string getLabel() { return m_building->getLabel(); }
+
     virtual bool onPlace(A13::FactoryTilemap* tilemap, int meta, EGE::Vec2i partPos) const;
 
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; };
@@ -112,6 +116,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {1, 0}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 1}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual std::string getLabel() { return "Rocket Factory"; }
 
     struct Part : public A13::FactoryBuildingPart
     {
@@ -152,6 +158,8 @@ public:
     virtual EGE::Vec2d getAtlasPosition() const { return {5, 0}; }
     virtual EGE::Vec2d getItemAtlasPosition() const { return {0, 2}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
+
+    virtual std::string getLabel() { return "Start Platform"; }
 
     struct Part : public A13::FactoryBuildingPart
     {
@@ -221,10 +229,7 @@ public:
             return true;
         }
 
-        virtual void setRecipe(A13::Recipe* recipe)
-        {
-            m_recipe = recipe;
-        }
+        virtual void setRecipe(A13::Recipe* recipe);
 
         virtual A13::Recipe* getRecipe()
         {
@@ -240,8 +245,9 @@ public:
 
         int nextRandomTime = 0;
         EGE::TickCount lastCrafting = 0;
-        A13::Recipe* m_recipe = nullptr;
         bool m_error = false;
+    private:
+        A13::Recipe* m_recipe = nullptr;
     };
 
     A13_CUSTOM_FACTORY_PART(Part);
@@ -250,6 +256,8 @@ public:
     virtual EGE::Vec2d getItemAtlasPosition() const { return {1, 1}; }
     virtual EGE::Vec2u getSize() const { return {4, 4}; }
     virtual EGE::TickCount getCraftingDuration() const { return 60; }
+
+    virtual std::string getLabel() { return "Factory"; }
 
     virtual Cost getCost() const;
 
@@ -282,6 +290,7 @@ public:
         "can be used also when you don't\n"
         "have resources";
     }
+    virtual std::string getLabel() { return "Quick Factory"; }
 };
 
 class A13FactoryBuildingMine : public A13FactoryBuilding
@@ -386,6 +395,7 @@ public:
         "The higher is level, the more\n"
         "resources it mines.";
     }
+    virtual std::string getLabel() { return "Mine (Level " + std::to_string(m_level) + ")"; }
 
 private:
     EGE::Size m_level;
@@ -413,6 +423,8 @@ public:
         "can be used also when you don't\n"
         "have resources";
     }
+
+    virtual std::string getLabel() { return "Quick Mine"; }
 };
 
 class A13FactoryBuildingPortal : public A13FactoryBuilding
@@ -504,6 +516,7 @@ public:
         "you can place on terrain, below\n"
         "regular buildings.";
     }
+    virtual std::string getLabel() { return "Road"; }
 
 private:
     EGE::Size m_index;

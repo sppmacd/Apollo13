@@ -54,11 +54,11 @@ void PlayerStats::update()
         EGE::Size hsize = q.second.size();
         for(EGE::Size s = 0; s < hsize; s++)
         {
-            if(!process(q.second.top()))
+            if(!process(q.second.front()))
             {
                 // Save a copy of request on the back of queue.
                 // We will try process it later.
-                q.second.push(q.second.top());
+                q.second.push(q.second.front());
             }
 
             q.second.pop();
@@ -77,14 +77,14 @@ void PlayerStats::cancelAllRequests(Container* container)
         EGE::Size hsize = q.second.size();
         for(EGE::Size s = 0; s < hsize; s++)
         {
-            if(q.second.top().requester == container)
+            if(q.second.front().requester == container)
             {
                 hsize--;
                 q.second.pop();
             }
 
             // Re-add it.
-            q.second.push(q.second.top());
+            q.second.push(q.second.front());
             q.second.pop();
         }
     }

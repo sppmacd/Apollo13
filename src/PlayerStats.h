@@ -41,7 +41,7 @@ public:
     };
 
     // TODO: serialize queues
-    EGE::Map<std::string, std::priority_queue<ResourceRequest>> m_requestQueues;
+    EGE::Map<std::string, std::queue<ResourceRequest>> m_requestQueues;
 private:
 
     bool process(const ResourceRequest& request);

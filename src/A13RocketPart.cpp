@@ -165,7 +165,8 @@ void A13ProjectTilemap::onCloseProjectBuilder()
         A13::PlayerStats::instance().loadItemsFrom(&m_items);
     }
 
-    // TODO: Cancel resource requests
+    // Cancel resource requests
+    A13::PlayerStats::instance().cancelAllRequests(&m_items);
 
     // Calculate project time, thrust etc.
     recalculateRocketProperties();
@@ -220,7 +221,9 @@ void A13ProjectTilemap::cancelMission()
         // Give back all resources
         A13::PlayerStats::instance().loadItemsFrom(&m_items);
 
-        // TODO: Cancel resource requests
+        // Cancel resource requests
+        A13::PlayerStats::instance().cancelAllRequests(&m_items);
+
         m_currentProjectTime = -2;
     }
     else if(m_currentProjectTime >= 0 && m_currentProjectTime <= m_totalProjectTime)
