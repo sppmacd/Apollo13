@@ -31,6 +31,8 @@ public:
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() override;
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap> obj) override;
 
+    void cancelAllRequests(Container* container);
+
     // TODO: make it private
     struct ResourceRequest
     {
@@ -39,12 +41,14 @@ public:
     };
 
     // TODO: serialize queues
-    EGE::Map<std::string, std::deque<ResourceRequest>> m_requestQueues;
+    EGE::Map<std::string, std::priority_queue<ResourceRequest>> m_requestQueues;
 private:
 
-    bool process(ResourceRequest& request);
+    bool process(const ResourceRequest& request);
 
     EGE::Set<Container*> m_registeredContainers;
 };
+
+bool operator<(const PlayerStats::ResourceRequest& _L, const PlayerStats::ResourceRequest& _R);
 
 }

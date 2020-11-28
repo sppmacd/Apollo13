@@ -112,6 +112,7 @@ public:
     }
     void winGame() { m_currentProjectTime = -2; }
     void loseGame() { m_currentProjectTime = -2; }
+    void cancelMission();
 
     void update();
     double calculatePointsForWin();

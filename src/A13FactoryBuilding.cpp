@@ -166,12 +166,15 @@ void A13FactoryBuildingFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE
         }
         else if(tickCount - lastCrafting == CRAFTING_TIME)
         {
-            // Add request for each item in input.
+            // Add request for each item in input, if are needed
             // TODO: requests for multiple items at once
             if(!m_error)
             {
                 for(auto item: m_recipe->input)
-                    A13::PlayerStats::instance().addResourceItemRequest(item, container.get());
+                {
+                    if(!container->getInventory().canRemoveItems(item))
+                        A13::PlayerStats::instance().addResourceItemRequest(item, container.get());
+                }
             }
         }
     }

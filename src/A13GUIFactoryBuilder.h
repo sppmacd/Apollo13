@@ -118,7 +118,7 @@ public:
 
         if(event.code == sf::Keyboard::P)
         {
-            Apollo13::instance().messageBox("Do you REALLY want to stop tracking rocket?\nYou won't get back any resources!", 1, A13::MessageBox::Type::YesNo);
+            Apollo13::instance().messageBox("Do you REALLY want to cancel the mission?\nYou won't get back any resources!", 1, A13::MessageBox::Type::YesNo);
         }
     }
 
@@ -127,7 +127,7 @@ public:
         A13::MessageBox* mb = (A13::MessageBox*)dialog;
         if(mb && mb->getId() == 1 && exitCode == MSGBOX_RET_YES)
         {
-            Apollo13::instance().save.projectTilemap()->loseGame();
+            Apollo13::instance().save.projectTilemap()->cancelMission();
         }
     }
 private:

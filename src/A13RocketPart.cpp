@@ -211,6 +211,34 @@ void A13ProjectTilemap::recalculateRocketProperties()
     }
 }
 
+void A13ProjectTilemap::cancelMission()
+{
+    if(m_currentProjectTime == -2)
+        return; // Do nothing, the project is not started
+    else if(m_currentProjectTime == -1)
+    {
+        // Give back all resources
+        A13::PlayerStats::instance().loadItemsFrom(&m_items);
+
+        // TODO: Cancel resource requests
+        m_currentProjectTime = -2;
+    }
+    else if(m_currentProjectTime >= 0 && m_currentProjectTime <= m_totalProjectTime)
+    {
+        // TODO: Give back all resources
+        m_currentProjectTime = -2;
+    }
+    else if(m_currentProjectTime == -3)
+    {
+        // Set rocket height to 0 to trigger game win check
+        m_rocketHeight = 0;
+        m_rocketSpeed = 0;
+        m_thrust = 0;
+    }
+    else
+        CRASH(); // probably not possible
+}
+
 void A13ProjectTilemap::update()
 {
     if(getCurrentProjectTime() == -3)

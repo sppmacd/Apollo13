@@ -30,7 +30,7 @@ void PlayerStats::unregisterContainer(Container* container)
 
 void PlayerStats::addResourceItemRequest(ResourceItemStack stack, Container* requester)
 {
-    m_requestQueues[stack.getItem()->getId()].push_back({stack, requester});
+    m_requestQueues[stack.getItem()->getId()].push({stack, requester});
 }
 
 void PlayerStats::update()
@@ -54,19 +54,43 @@ void PlayerStats::update()
         EGE::Size hsize = q.second.size();
         for(EGE::Size s = 0; s < hsize; s++)
         {
-            if(!process(q.second.front()))
+            if(!process(q.second.top()))
             {
                 // Save a copy of request on the back of queue.
                 // We will try process it later.
-                q.second.push_back(q.second.front());
+                q.second.push(q.second.top());
             }
 
-            q.second.pop_front();
+            q.second.pop();
         }
     }
 }
 
-bool PlayerStats::process(ResourceRequest& request)
+void PlayerStats::cancelAllRequests(Container* container)
+{
+    // Re-add all requests, removing requests from canceled container.
+    for(auto& q: m_requestQueues)
+    {
+        if(q.second.empty())
+            continue;
+
+        EGE::Size hsize = q.second.size();
+        for(EGE::Size s = 0; s < hsize; s++)
+        {
+            if(q.second.top().requester == container)
+            {
+                hsize--;
+                q.second.pop();
+            }
+
+            // Re-add it.
+            q.second.push(q.second.top());
+            q.second.pop();
+        }
+    }
+}
+
+bool PlayerStats::process(const ResourceRequest& request)
 {
     if(m_registeredContainers.count(request.requester))
     {
@@ -105,6 +129,11 @@ bool PlayerStats::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
 {
     // TODO
     return Container::deserialize(obj);
+}
+
+bool operator<(const PlayerStats::ResourceRequest& _L, const PlayerStats::ResourceRequest& _R)
+{
+    return _L.stack.getItemCount() < _R.stack.getItemCount();
 }
 
 }
