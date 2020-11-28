@@ -36,12 +36,12 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
     int ptime = Apollo13::instance().save.projectTilemap()->getCurrentProjectTime();
     if(ptime >= 0)
     {
-        log() << "Cannot open project builder while building rocket!";
+        Apollo13::instance().messageBox("Cannot open project builder while building rocket!", MBID_DONT_CARE);
         return;
     }
     if(ptime == -3)
     {
-        log() << "Cannot open project builder when rocket is launched!";
+        Apollo13::instance().messageBox("Cannot open project builder when rocket is launched!", MBID_DONT_CARE);
         return;
     }
     log() << "Open ProjectBuilder!";
@@ -81,54 +81,6 @@ void A13FactoryBuildingStartPlatform::Part::onActivate(A13::FactoryTilemap*, EGE
 
 void A13FactoryBuildingStartPlatform::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount)
 {
-    auto ptm = Apollo13::instance().save.projectTilemap();
-    if(ptm->getCurrentProjectTime() == -3)
-    {
-        const double GRAVITY = 160000000000;
-
-        // Rocket physics (simple)
-        ptm->m_rocketTick++;
-        double dst = ptm->m_rocketHeight + 1000000;
-        ptm->m_rocketSpeed += (ptm->m_thrust / 60.0 - GRAVITY * (ptm->m_mass + ptm->m_rocketFuel)
-                               / (dst * dst)) / (ptm->m_mass + ptm->m_rocketFuel);
-        ptm->m_rocketHeight += ptm->m_rocketSpeed / 60.0;
-
-        if(ptm->m_rocketHeight <= 0)
-        {
-            ptm->m_rocketHeight = 0;
-            ptm->m_rocketSpeed = 0;
-        }
-
-        if(ptm->m_rocketHeight > ptm->m_rocketMaxHeight)
-            ptm->m_rocketMaxHeight = ptm->m_rocketHeight;
-
-        if(ptm->m_rocketFuel > 0)
-            ptm->m_rocketFuel -= ptm->m_fuelUsage * (ptm->m_thrust / ptm->m_maxThrust) / 60.0;
-        else
-        {
-            ptm->m_rocketFuel = 0;
-            ptm->m_thrust = 0;
-        }
-
-        // Win game
-        if(ptm->m_rocketHeight == 0)
-        {
-            if(ptm->m_rocketMaxHeight > 100000)
-            {
-                // TODO: calculate point count, height, etc.
-                log(LogLevel::Crash) << "!!!!!!! Win game !!!!!!!";
-                ptm->m_rocketTick = -1;
-                ptm->winGame();
-                //Apollo13::instance().winGame();
-            }
-            else if(ptm->m_rocketMaxHeight > 0)
-            {
-                log(LogLevel::Crash) << "!!!!!!! Rocket crashed !!!!!!!";
-                ptm->m_rocketTick = -1;
-                ptm->loseGame();
-            }
-        }
-    }
 }
 
 void A13FactoryBuildingStartPlatform::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i pos, sf::RenderTarget& target) const

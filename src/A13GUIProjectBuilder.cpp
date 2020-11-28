@@ -20,7 +20,7 @@ void A13GUIProjectBuilder::onKeyPress(sf::Event::KeyEvent& event)
         if(checkValidity())
             exitDialog(0);
         else
-            log() << "The rocket must have exactly 1 capsule, at least 4 fuel units and at least 1 engine!";
+            Apollo13::instance().messageBox("The rocket must have:\n* exactly 1 capsule\n* at least 4 fuel units\n* at least 1 engine", MBID_DONT_CARE);
     }
 
     A13GUIAbstractBuilder::onKeyPress(event);
@@ -83,6 +83,9 @@ void A13GUIProjectBuilder::onLoad()
 
 bool A13GUIProjectBuilder::checkValidity()
 {
+    // Ensure that project time is properly calculated.
+    recalculate();
+
     int capsules = 0, fuelTankUnits = 0, engines = 0;
     for(auto it : m_tilemap->getParts())
     {
@@ -105,5 +108,5 @@ bool A13GUIProjectBuilder::checkValidity()
             engines++;
         }
     }
-    return m_tilemap->getTotalProjectTime() == 0 || (capsules == 1 && fuelTankUnits >= 4 && engines >= 1);
+    return projectTime == 0 || (capsules == 1 && fuelTankUnits >= 4 && engines >= 1);
 }

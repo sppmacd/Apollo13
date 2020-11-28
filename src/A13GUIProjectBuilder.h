@@ -22,19 +22,14 @@ public:
         return item->canPlaceHere(tileRel, tile);
     }
 
-    virtual void onPlace(EGE::Vec2i tilePos, A13RocketPartPart& part) override
+    virtual void onPlace(EGE::Vec2i, A13RocketPartPart&) override
     {
-        m_tilemap->getTotalCostInv().tryAddItems(part.part->getCost());
         recalculate();
     }
 
-    virtual void onRemove(EGE::Vec2i tilePos, A13RocketPartPart* part) override
+    virtual void onRemovePost(EGE::Vec2i) override
     {
-        if(part)
-        {
-            m_tilemap->getTotalCostInv().tryRemoveItems(part->part->getCost());
-            recalculate();
-        }
+        recalculate();
     }
 
     virtual void onResize(sf::Event::SizeEvent& event)
@@ -62,19 +57,21 @@ public:
 
     void recalculate()
     {
-        double time = 0;
+        projectTime = 0;
         double thrust = 0;
         double fuel = 0;
         double fuelUsage = 0;
         double mass = 0;
+        m_tilemap->getTotalCostInv().clear();
 
         for(auto& it: m_tilemap->getParts())
         {
-            time += it.second->part->getBuildTime();
+            projectTime += it.second->part->getBuildTime();
             thrust += it.second->part->getThrust();
             fuelUsage += it.second->part->getFuelUsage();
             fuel += it.second->part->getFuelStorage();
             mass += it.second->part->getMass();
+            m_tilemap->getTotalCostInv().tryAddItems(it.second->part->getCost());
         }
 
         std::ostringstream oss;
@@ -82,7 +79,7 @@ public:
         oss << "Fuel: " << fuel << " kg";
         oss << " Fuel Usage: " << fuelUsage << " kg/t\n";
         oss << "Thrust: " << thrust << " N";
-        oss << " Build time: " << time / 60.0 << " s)\n";
+        oss << " Build time: " << projectTime / 60.0 << " s\n";
         oss << "Total mass: " << mass + fuel << " kg (" << mass << " kg without fuel)\n";
         oss << "Expected acceleration (for g = 9.81 m/s^2): " << thrust / (mass + fuel) - 9.81;
 
@@ -92,4 +89,5 @@ public:
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidgetProject;
     EGE::SharedPtr<EGE::Label> m_infoLabel;
+    int projectTime = 0;
 };

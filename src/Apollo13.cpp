@@ -48,11 +48,26 @@ EGE::EventResult Apollo13::load()
 
 EGE::EventResult Apollo13::onFinish(int)
 {
-    save.save("main");
+    if(!save.save("main"))
+        return EGE::EventResult::Failure;
     return EGE::EventResult::Success;
 }
 
 void Apollo13::logicTick(long long tickCount)
 {
-    A13::PlayerStats::instance().update();
+    save.playerStats().update();
+    save.projectTilemap()->update();
+}
+
+void Apollo13::messageBoxHelper(EGE::SharedPtr<EGE::GUIScreen> scr, std::string message, EGE::IdType id, A13::MessageBox::Type type)
+{
+    if(scr->getDialog())
+        messageBoxHelper(scr->getDialog(), message, id, type);
+    else
+        scr->openDialog(make<A13::MessageBox>(scr.get(), id, message, type));
+}
+
+void Apollo13::messageBox(std::string message, EGE::IdType id, A13::MessageBox::Type type)
+{
+    messageBoxHelper(getCurrentGUIScreen(), message, id, type);
 }

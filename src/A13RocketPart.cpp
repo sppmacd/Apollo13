@@ -1,6 +1,7 @@
 #include "A13RocketPart.h"
 #include "A13GameplayObjectManager.h"
 
+#include "Apollo13.h"
 #include "PlayerStats.h"
 #include "Save.h"
 
@@ -195,6 +196,8 @@ void A13ProjectTilemap::recalculateRocketProperties()
     m_rocketFuel = 0;
     m_fuelTotal = 0;
     m_mass = 0;
+    m_totalCostInv.clear();
+
     for(auto& it: getParts())
     {
         int i = it.second->part->getBuildTime();
@@ -204,7 +207,64 @@ void A13ProjectTilemap::recalculateRocketProperties()
         m_fuelUsage += it.second->part->getFuelUsage();
         m_fuelTotal += it.second->part->getFuelStorage();
         m_mass += it.second->part->getMass();
+        m_totalCostInv.tryAddItems(it.second->part->getCost());
     }
+}
+
+void A13ProjectTilemap::update()
+{
+    if(getCurrentProjectTime() == -3)
+    {
+        const double GRAVITY = 160000000000;
+
+        // Rocket physics (simple)
+        m_rocketTick++;
+        double dst = m_rocketHeight + 1000000;
+        m_rocketSpeed += (m_thrust / 60.0 - GRAVITY * (m_mass + m_rocketFuel)
+                               / (dst * dst)) / (m_mass + m_rocketFuel);
+        m_rocketHeight += m_rocketSpeed / 60.0;
+
+        if(m_rocketHeight <= 0)
+        {
+            m_rocketHeight = 0;
+            m_rocketSpeed = 0;
+        }
+
+        if(m_rocketHeight > m_rocketMaxHeight)
+            m_rocketMaxHeight = m_rocketHeight;
+
+        if(m_rocketFuel > 0)
+            m_rocketFuel -= m_fuelUsage * (m_thrust / m_maxThrust) / 60.0;
+        else
+        {
+            m_rocketFuel = 0;
+            m_thrust = 0;
+        }
+
+        // Win game
+        if(m_rocketHeight == 0)
+        {
+            if(m_rocketMaxHeight > 100000)
+            {
+                // TODO: calculate point count, height, etc.
+                Apollo13::instance().messageBox("You won the game!\n\nYour points: " + std::to_string(calculatePointsForWin()), MBID_DONT_CARE);
+                m_rocketTick = -1;
+                winGame();
+                //Apollo13::instance().winGame();
+            }
+            else if(m_rocketMaxHeight > 0)
+            {
+                Apollo13::instance().messageBox("The rocket crashed!", MBID_DONT_CARE);
+                m_rocketTick = -1;
+                loseGame();
+            }
+        }
+    }
+}
+
+double A13ProjectTilemap::calculatePointsForWin()
+{
+    return m_rocketMaxHeight / 100.0;
 }
 
 EGE::Vec2d A13RocketPartPart::getAtlasPosition(int) const
@@ -226,9 +286,10 @@ EGE::SharedPtr<A13RocketPartPart> A13RocketPartItem::getPart() const
 Cost A13RocketPartEngine::getCost() const
 {
     return {
-        { A13GameplayObjectManager::items.aluminum, 100 },
-        { A13GameplayObjectManager::items.titanium, 50 },
-        { A13GameplayObjectManager::items.gold, 25 }
+        { A13GameplayObjectManager::items.aluminum, 200 },
+        { A13GameplayObjectManager::items.titanium, 100 },
+        { A13GameplayObjectManager::items.gold, 50 },
+        { A13GameplayObjectManager::items.silver, 50 }
     };
 }
 

@@ -50,7 +50,7 @@ public:
         m_resourceStatsWidgetProject->setPosition({event.width - RESOURCE_STATS_SIZE * 2, 0});
         m_resourceStatsWidgetProject->setSize({RESOURCE_STATS_SIZE, event.height});
 
-        EGE::Size PROJECT_STATS_SIZE_X = 400;
+        EGE::Size PROJECT_STATS_SIZE_X = 500;
         EGE::Size PROJECT_STATS_SIZE_Y = 120;
         m_projectStatsWidget->setPosition({event.width - RESOURCE_STATS_SIZE * 2 - PROJECT_STATS_SIZE_X, 0});
         m_projectStatsWidget->setSize({PROJECT_STATS_SIZE_X, PROJECT_STATS_SIZE_Y});
@@ -109,6 +109,27 @@ public:
         }
     }
 
+    virtual void onKeyPress(sf::Event::KeyEvent& event)
+    {
+        A13GUIAbstractBuilder::onKeyPress(event);
+
+        if(m_dialog)
+            return;
+
+        if(event.code == sf::Keyboard::P)
+        {
+            Apollo13::instance().messageBox("Do you REALLY want to stop tracking rocket?\nYou won't get back any resources!", 1, A13::MessageBox::Type::YesNo);
+        }
+    }
+
+    virtual void onDialogExit(EGE::GUIScreen* dialog, int exitCode)
+    {
+        A13::MessageBox* mb = (A13::MessageBox*)dialog;
+        if(mb && mb->getId() == 1 && exitCode == MSGBOX_RET_YES)
+        {
+            Apollo13::instance().save.projectTilemap()->loseGame();
+        }
+    }
 private:
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidget;
     EGE::SharedPtr<ResourceStatsWidget> m_resourceStatsWidgetProject;

@@ -91,13 +91,13 @@ bool TileMapObject<_Tilemap>::canPartBePlacedHere(EGE::Vec2i tileRel, EGE::Vec2u
 }
 
 template<class _Tilemap>
-void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part)
+bool TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part)
 {
     EGE::Vec2u partSize = part->getSize();
 
     // Check if part can be placed here
     if(!canPartBePlacedHere(tileRel, partSize) || !part->onPlace(m_tilemap.get(), tileRel))
-        return;
+        return false;
 
     auto it = m_tilemap->getParts().insert(std::make_pair(EGE::Vec2i(tileRel.x, tileRel.y), part));
 
@@ -113,23 +113,24 @@ void TileMapObject<_Tilemap>::placePart(EGE::Vec2i tileRel, int meta, EGE::Share
         tile->cornerPos = {x, y};
         tile->meta = meta;
     }
+    return true;
 }
 
 template<class _Tilemap>
-void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
+bool TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
 {
     // Check if tilemap doesn't have its own remove handler for that tile
     if(m_tilemap->onRemove(tileRel))
-        return;
+        return false;
 
     // Check which object is here
     auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({tileRel.x, tileRel.y}) : m_tilemap->getTile({tileRel.x, tileRel.y}));
     if(!tile)
-        return; // Out of bounds!
+        return false; // Out of bounds!
 
     EGE::FlatPtr<typename _Tilemap::TileType::PartType> part = tile->part;
     if(!part)
-        return; // Nothing is here!
+        return false; // Nothing is here!
 
     // Calculate left-top coordinate
     EGE::Vec2i objectPos = tileRel - EGE::Vec2i(tile->cornerPos);
@@ -139,14 +140,14 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
     if(it == m_tilemap->getParts().end())
     {
         err() << "Can't find object at " << objectPos.x << "," << objectPos.y;
-        return;
+        return false;
     }
 
     EGE::Vec2u partSize = tile->part->getSize();
 
     // Check if we want it object to be removed
     if(!it->second->onRemove(m_tilemap.get(), objectPos))
-        return;
+        return false;
 
     // Remove that object
     m_tilemap->getParts().erase(it);
@@ -157,11 +158,13 @@ void TileMapObject<_Tilemap>::removePart(EGE::Vec2i tileRel)
     {
         auto tile = (m_tilemap->useEnsure() ? &m_tilemap->ensureTile({x + objectPos.x, y + objectPos.y}) : m_tilemap->getTile({x + objectPos.x, y + objectPos.y}));
         if(!tile)
-            return;
+            return false;
 
         tile->part = nullptr;
         tile->cornerPos = {0, 0};
     }
+
+    return true;
 }
 
 template<class _Tilemap>

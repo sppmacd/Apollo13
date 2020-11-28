@@ -113,6 +113,9 @@ public:
     void winGame() { m_currentProjectTime = -2; }
     void loseGame() { m_currentProjectTime = -2; }
 
+    void update();
+    double calculatePointsForWin();
+
     int m_rocketTick = -1;
 
     // [m/s]
@@ -189,8 +192,8 @@ public:
 
     virtual int getBuildTime() const { return 60 * 60 * 2; } // 120 s
 
-    virtual double getThrust() const override { return 100000; } // [N]
-    virtual double getFuelUsage() const override { return 40.0; } // [kg/s]
+    virtual double getThrust() const override { return 110000; } // [N]
+    virtual double getFuelUsage() const override { return 30.0; } // [kg/s]
 
     // Rocket mass (without fuel)
     virtual double getMass() const override { return 500.0; } // [kg]
@@ -238,6 +241,8 @@ public:
 
     // Rocket mass (without fuel)
     virtual double getMass() const override { return 400.0; } // [kg]
+
+    virtual double getThrust() const override { return 5000; } // [N]
 
 private:
     EGE::Size m_size;

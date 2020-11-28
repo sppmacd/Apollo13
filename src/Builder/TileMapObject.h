@@ -15,8 +15,9 @@ class TileMapObject : public EGE::SceneObject2D
 public:
     TileMapObject(EGE::SharedPtr<EGE::Scene> scene, std::array<std::string, _Tilemap::TileType::AdditionalLayerCount + 1>& atlasTextureNames, EGE::SharedPtr<_Tilemap> tilemap);
 
-    void placePart(EGE::Vec2i pos, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part);
-    void removePart(EGE::Vec2i pos);
+    // These functions returns true if object was actually placed/removed, false otherwise.
+    bool placePart(EGE::Vec2i pos, int meta, EGE::SharedPtr<typename _Tilemap::TileType::PartType> part);
+    bool removePart(EGE::Vec2i pos);
 
     void onActivate(EGE::Vec2i pos);
     std::string getTooltip(EGE::Vec2i pos);

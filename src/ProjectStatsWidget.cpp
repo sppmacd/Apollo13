@@ -85,16 +85,17 @@ void ProjectStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderS
         oss << " Thrust: " << ptm->m_thrust << " / " << ptm->m_maxThrust << " N\n";
         oss << "Speed: " << ptm->m_rocketSpeed << " m/s";
         oss << " Height: " << ptm->m_rocketHeight << " m (max: " << ptm->m_rocketMaxHeight << " m)\n";
-        oss << "Total mass: " << ptm->m_mass + ptm->m_rocketFuel << " kg (" << ptm->m_mass << " kg without fuel)";
-        renderer.renderText(10, 45, *m_font, oss.str(), 10);
+        oss << "Total mass: " << ptm->m_mass + ptm->m_rocketFuel << " kg (" << ptm->m_mass << " kg without fuel)\n";
+        oss << "Press P to stop tracking";
+        renderer.renderText(10, 40, *m_font, oss.str(), 10);
     }
 
     // Progress
     if(ptime == -3)
         ptime = ttime;
 
-    renderer.renderRectangle(15, 90, getSize().x - 30, 10, sf::Color::Red);
-    renderer.renderRectangle(15, 90, (getSize().x - 30) * ((double)ptime / ttime), 10, sf::Color::Green);
+    renderer.renderRectangle(15, 95, getSize().x - 30, 10, sf::Color::Red);
+    renderer.renderRectangle(15, 95, (getSize().x - 30) * ((double)ptime / ttime), 10, sf::Color::Green);
 }
 
 }

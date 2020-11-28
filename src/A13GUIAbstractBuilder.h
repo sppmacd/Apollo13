@@ -50,8 +50,16 @@ public:
     A13GUIAbstractBuilder(EGE::GUIScreen* screen, EGE::SharedPtr<_Tilemap> tilemap)
     : EGE::GUIScreen(screen), m_tilemap(tilemap) {}
 
+    // Called after part is placed. It's called only when the part IS actually placed.
     virtual void onPlace(EGE::Vec2i tilePos, typename _Tilemap::TileType::PartType& part) {}
+
+    // Called when a request for part removal is processed. We don't know if this part will be actually
+    // removed. We can only guess basing on %part.
     virtual void onRemove(EGE::Vec2i tilePos, typename _Tilemap::TileType::PartType* part) {}
+
+    // Called after part is removed. This is called ONLY when the part IS actually
+    // removed.
+    virtual void onRemovePost(EGE::Vec2i tilePos) {}
 
     virtual void onLoad();
     virtual void onResize(sf::Event::SizeEvent& event);
