@@ -14,9 +14,19 @@ void GUICraftingSelector::CraftingSelectionWidget::onLoad()
     m_atlas = resMan->getTexture("game/resource_items.png").get();
     m_font = resMan->getDefaultFont().get();
 
+    EGE::Size s = 0;
+    GUICraftingSelector* parent = (GUICraftingSelector*)m_parent;
+    if(!parent)
+        CRASH();
+
+    m_recipes.push_back(nullptr);
+    m_selectedRecipe = 0;
     for(auto& rc: A13GameplayObjectManager::instance().recipes)
     {
+        s++;
         m_recipes.push_back(rc.second.get());
+        if(parent->m_factory->getRecipe() == rc.second.get())
+            m_selectedRecipe = s;
     }
 }
 
@@ -37,10 +47,10 @@ void GUICraftingSelector::CraftingSelectionWidget::renderOnly(sf::RenderTarget& 
     sf::RenderWindow* wnd = (sf::RenderWindow*)&target;
 
     // Background
-    renderer.renderRectangle(0, 0, getSize().x, getSize().y, sf::Color(0, 0, 0, 127));
+    renderer.renderRectangle(0, 0, getSize().x, getSize().y, sf::Color(60, 60, 60, 127));
 
     // Label
-    renderer.renderText(30, 30, *m_font, "Crafting Selection", 30, sf::Color::White);
+    renderer.renderText(200, 30, *m_font, "Select a crafting for Factory", 30, sf::Color::White);
 
     // Craftings
     EGE::Size s = 0;
@@ -49,13 +59,13 @@ void GUICraftingSelector::CraftingSelectionWidget::renderOnly(sf::RenderTarget& 
     for(Recipe* recipe : m_recipes)
     {
         // Icon
-        auto ap = recipe->output.getItem()->getAtlasPosition();
+        auto ap = recipe ? recipe->output.getItem()->getAtlasPosition() : EGE::Vec2d(15, 15);
         sf::IntRect textureRect;
         textureRect.left = ap.x * 16;
         textureRect.top = ap.y * 16;
         textureRect.width = 16;
         textureRect.height = 16;
-        double x = (s % 16) * ITEM_SIZE + 30;
+        double x = (s % 16) * ITEM_SIZE + 200;
         double y = (s / 16) * ITEM_SIZE + 100;
         renderer.renderTexturedRectangle(x, y, ITEM_ICON_SIZE, ITEM_ICON_SIZE, *m_atlas, textureRect);
 
@@ -89,7 +99,7 @@ void GUICraftingSelector::CraftingSelectionWidget::onMouseButtonPress(sf::Event:
     sf::RenderWindow* wnd = getWindow().lock().get();
     for(Recipe* recipe : m_recipes)
     {
-        double x = (s % 16) * ITEM_SIZE + 30;
+        double x = (s % 16) * ITEM_SIZE + 200;
         double y = (s / 16) * ITEM_SIZE + 100;
 
         {
