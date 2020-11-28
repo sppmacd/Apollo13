@@ -227,6 +227,7 @@ void TileMapObject<_Tilemap>::render(sf::RenderTarget& target, const EGE::Render
         rs.setTexture(m_tmRenderer->getTextureForLayer(m_highlightAtlasLayer == -1 ? _Tilemap::TileType::AdditionalLayerCount : m_highlightAtlasLayer).get());
         rs.setTextureRect(sf::IntRect((m_highlightAtlasPos.x + x - m_highlightPos.x) * 16,
                                       (m_highlightAtlasPos.y + y - m_highlightPos.y) * 16, 16, 16));
+        rs.setFillColor(sf::Color(255, 255, 255, 200));
         target.draw(rs);
 
         rs.setFillColor(sf::Color(bc.r, bc.g, bc.b, 70));

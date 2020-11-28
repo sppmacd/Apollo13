@@ -40,7 +40,7 @@ void A13GUIProjectBuilder::onLoad()
         renderer.renderRectangle(m_partSelector->getSize().x, 0, 230, m_partSelector->getSize().y, sf::Color(0, 0, 0, 127));
 
         // Item name
-        renderer.renderText(m_partSelector->getSize().x + 10, 20, *m_font, item->getId(), 16);
+        renderer.renderText(m_partSelector->getSize().x + 10, 20, *m_font, item->getLabel(), 16);
 
         // Cost
         Cost cost = item->getRocketPart()->getCost();
@@ -48,7 +48,7 @@ void A13GUIProjectBuilder::onLoad()
         EGE::Size s = 0;
         for(ResourceItemStack& stack: cost)
         {
-            std::string str = stack.getItem()->getId() + " x" + std::to_string(stack.getItemCount());
+            std::string str = stack.getItem()->getLabel() + " x" + std::to_string(stack.getItemCount());
 
             // Text
             sf::Color color = A13::PlayerStats::instance().getInventory()[stack.getItem()] < stack.getItemCount() ? sf::Color::Red : sf::Color::White;

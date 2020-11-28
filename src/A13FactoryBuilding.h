@@ -285,8 +285,8 @@ public:
     virtual std::string getDescription() override
     {
         return
-        "The Quick Factory is a factory that you\n"
-        "place as the first building. It\n"
+        "The Quick Factory is a factory that\n"
+        "you place as the first building. It\n"
         "can be used also when you don't\n"
         "have resources";
     }
@@ -395,7 +395,7 @@ public:
         "The higher is level, the more\n"
         "resources it mines.";
     }
-    virtual std::string getLabel() { return "Mine (Level " + std::to_string(m_level) + ")"; }
+    virtual std::string getLabel() { return "Mine (Level " + std::to_string(m_level + 1) + ")"; }
 
 private:
     EGE::Size m_level;

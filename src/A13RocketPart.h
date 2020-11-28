@@ -50,6 +50,7 @@ public:
     // Rocket mass (without fuel)
     virtual double getMass() const { return 1.0; } // [kg]
 
+    virtual std::string getLabel() { return "(No label provided)"; }
     virtual std::string getDescription() { return "(No description provided)"; }
 };
 
@@ -173,7 +174,7 @@ public:
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
-    virtual std::string getTooltip() { return m_rocketPart->getId(); }
+    virtual std::string getLabel() { return m_rocketPart->getLabel(); }
 
     virtual std::string getDescription() { return m_rocketPart->getDescription(); }
 
@@ -200,6 +201,15 @@ public:
     virtual double getMass() const override { return 500.0; } // [kg]
 
     virtual Cost getCost() const override;
+
+    virtual std::string getLabel() { return "Engine"; }
+
+    virtual std::string getDescription()
+    {
+        return
+        "Engine gives your rocket\n"
+        "thrust.";
+    }
 };
 
 class A13RocketPartFuelTank : public A13RocketPart
@@ -220,6 +230,15 @@ public:
 
     // Rocket mass (without fuel)
     virtual double getMass() const override { return 250.0 * (m_size - 0.5); } // [kg]
+
+    virtual std::string getLabel() { return "Fuel Tank (" + std::to_string(m_size) + (m_size == 1 ? " unit)" : " units)"); }
+
+    virtual std::string getDescription()
+    {
+        return
+        "Fuel Tank stores fuel for\n"
+        "rocket engines.";
+    }
 
 private:
     EGE::Size m_size;
@@ -245,6 +264,15 @@ public:
 
     virtual double getThrust() const override { return 5000; } // [N]
 
+    virtual std::string getLabel() { return "Rocket Cone"; }
+
+    virtual std::string getDescription()
+    {
+        return
+        "Cone is used to minimalize\n"
+        "air drag.";
+    }
+
 private:
     EGE::Size m_size;
 };
@@ -267,4 +295,14 @@ public:
 
     // Rocket mass (without fuel)
     virtual double getMass() const override { return 650.0; } // [kg]
+
+    virtual std::string getLabel() { return "Capsule"; }
+
+    virtual std::string getDescription()
+    {
+        return
+        "In capsule there are Astronauts\n"
+        "which are needed for rocket to\n"
+        "fly.";
+    }
 };

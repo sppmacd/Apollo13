@@ -6,8 +6,8 @@
 class ResourceItem : public EGE::GameplayObject
 {
 public:
-    ResourceItem(std::string id)
-    : EGE::GameplayObject(id) {}
+    ResourceItem(std::string id, std::string label)
+    : EGE::GameplayObject(id), m_label(label) {}
 
     void setNumericId(EGE::IdType id) { if(!m_numericId) m_numericId = id; }
     EGE::IdType getNumericId() const { return m_numericId; }
@@ -17,8 +17,11 @@ public:
     virtual EGE::SharedPtr<EGE::ObjectMap> serialize() { return nullptr; }
     virtual bool deserialize(EGE::SharedPtr<EGE::ObjectMap>) { return true; }
 
+    virtual std::string getLabel() { return m_label; }
+
 private:
     EGE::IdType m_numericId = 0;
+    std::string m_label;
 };
 
 class ResourceItemStack

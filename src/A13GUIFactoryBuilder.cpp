@@ -53,7 +53,7 @@ void A13GUIFactoryBuilder::onLoad()
         EGE::Size s = 0;
         for(ResourceItemStack& stack: cost)
         {
-            std::string str = stack.getItem()->getId() + " x" + std::to_string(stack.getItemCount());
+            std::string str = stack.getItem()->getLabel() + " x" + std::to_string(stack.getItemCount());
 
             // Text
             sf::Color color = A13::PlayerStats::instance().getInventory()[stack.getItem()] < stack.getItemCount() ? sf::Color::Red : sf::Color::White;

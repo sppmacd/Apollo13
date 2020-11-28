@@ -231,7 +231,7 @@ void A13FactoryBuildingMine::Part::render(A13GUIFactoryBuilder* gui, EGE::Vec2i 
 
     // Fuel status
     renderer.renderRectangle(pos.x * 16, pos.y * 16 + 1, getSize().x * 16, 1, sf::Color(127, 0, 0));
-    renderer.renderRectangle(pos.x * 16, pos.y * 16 + 1, getSize().x * 16 * (m_fuel / 5.0), 1, sf::Color(0, 127, 0));
+    renderer.renderRectangle(pos.x * 16, pos.y * 16 + 1, getSize().x * 16 * (m_fuel / 8.0), 1, sf::Color(0, 127, 0));
 }
 
 void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i partPos, EGE::TickCount tickCount)
@@ -260,9 +260,8 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
                 default: break;
             }
 
-            // Remove a coal from player inventory (every 5 items)
-            // TODO: add other fuels (oil) and depend FUEL_UNITS_PER
-            const int FUEL_UNITS_PER_FUEL_ITEM = 5;
+            // Remove a coal from player inventory (every 8 items)
+            const int FUEL_UNITS_PER_FUEL_ITEM = 8;
             const int FUEL_BUFFER_SIZE = 5;
             if(m_fuel == 0)
             {
@@ -289,7 +288,7 @@ void A13FactoryBuildingMine::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::V
             // Add an ore to player inventory
             if(!container->getInventory().tryAddItems({id, 1}))
             {
-                A13::PlayerStats::instance().loadItemsFrom(container.get());
+                A13::PlayerStats::instance().loadItemsFrom(container.get(), container->getInventory().getMaxItemCount() - 1);
                 nextRandomTime = EGE::Random::fastRandom().nextIntRanged(240 / std::sqrt(orePos.size()), 360 / std::sqrt(orePos.size())) / multiplier;
                 return;
             }
