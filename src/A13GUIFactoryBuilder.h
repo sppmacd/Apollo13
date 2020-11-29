@@ -112,18 +112,22 @@ public:
 
     virtual void onKeyPress(sf::Event::KeyEvent& event)
     {
-        A13GUIAbstractBuilder::onKeyPress(event);
-
         if(m_dialog)
+        {
+            A13GUIAbstractBuilder::onKeyPress(event);
             return;
+        }
+
+        if(event.code == sf::Keyboard::Escape && !m_partSelector->getCurrentItem())
+        {
+            openDialog(make<A13::GUIIngameMenu>(this));
+        }
+
+        A13GUIAbstractBuilder::onKeyPress(event);
 
         if(event.code == sf::Keyboard::P)
         {
             Apollo13::instance().messageBox("Do you REALLY want to cancel the mission?\nYou won't get back any resources!", 1, A13::MessageBox::Type::YesNo);
-        }
-        else if(event.code == sf::Keyboard::Escape && !m_partSelector->getCurrentItem())
-        {
-            openDialog(make<A13::GUIIngameMenu>(this));
         }
     }
 

@@ -17,15 +17,15 @@ void GUIIngameMenu::onLoad()
     addWidget(m_resumeGame);
 
     m_exitSave = make<EGE::Button>(this);
-    m_exitSave->setLabel("Save and return to Main Menu");
+    m_exitSave->setLabel("Save and return to main menu");
     m_exitSave->setCallback( [this]{
         Apollo13::instance().save.unload();
-        Apollo13::instance().setCurrentGUIScreen(make<A13::GUIMainMenu>(getLoop()));
+        Apollo13::instance().setCurrentGUIScreen(make<A13::GUIMainMenu>(getLoop()), EGE::GUIGameLoop::GUIScreenImmediateInit::Yes);
     } );
     addWidget(m_exitSave);
 
     m_exitGame = make<EGE::Button>(this);
-    m_exitGame->setLabel("Exit Game");
+    m_exitGame->setLabel("Save and exit game");
     m_exitGame->setCallback( [this]{ getLoop()->exit(); } );
     addWidget(m_exitGame);
 

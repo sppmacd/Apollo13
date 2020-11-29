@@ -25,7 +25,7 @@ public:
     // -1 for no item
     void setCurrentItemIndex(int index) { m_index = index; }
     _Item* getCurrentItem() { return m_index == -1 ? nullptr : m_items[m_index]; }
-    int* getCurrentItemIndex() { return m_index; }
+    int getCurrentItemIndex() { return m_index; }
 
     void setCustomRenderer(std::function<void(sf::RenderTarget&, _Item*)> renderer) { m_customRenderer = renderer; }
 

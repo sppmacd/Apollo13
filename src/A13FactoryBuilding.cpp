@@ -51,6 +51,9 @@ void A13FactoryBuildingRocketFactory::Part::onActivate(A13::FactoryTilemap* tmap
 
 void A13FactoryBuildingRocketFactory::Part::onUpdate(A13::FactoryTilemap* tilemap, EGE::Vec2i, EGE::TickCount tickCount)
 {
+    if(!Apollo13::instance().save.loaded())
+        return;
+
     auto ptm = Apollo13::instance().save.projectTilemap();
     int projTime = ptm->getCurrentProjectTime();
 
