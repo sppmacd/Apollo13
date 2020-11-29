@@ -156,7 +156,7 @@ bool A13ProjectTilemap::deserialize(EGE::SharedPtr<EGE::ObjectMap> obj)
 void A13ProjectTilemap::onCloseProjectBuilder()
 {
     log() << "onCloseProjectBuilder";
-    if(m_currentProjectTime >= 0)
+    if(m_currentProjectTime > 0)
         CRASH(); // We should NOT be able to open Project Builder while building rocket!
 
     if(m_currentProjectTime == -1)
