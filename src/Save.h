@@ -20,6 +20,10 @@ public:
     void initialize();
     bool load(std::string name);
     bool save(std::string name = "");
+    void remove(std::string name = "main");
+    void unload();
+
+    bool loaded() { return m_loaded; }
 
     PlayerStats& playerStats() { return m_playerStats; }
     EGE::SharedPtr<A13::FactoryTilemap> tilemap() { return m_tilemap; }
@@ -37,6 +41,7 @@ private:
     EGE::SharedPtr<A13::FactoryTilemap> m_tilemap;
     EGE::MaxInt m_seed = 0;
     EGE::SharedPtr<A13ProjectTilemap> m_projectTilemap;
+    bool m_loaded = false;
 };
 
 }

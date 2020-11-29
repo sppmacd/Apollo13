@@ -2,6 +2,7 @@
 
 #include "PlayerStats.h"
 
+#include <ege/util/system.h>
 #include <fstream>
 
 namespace A13
@@ -9,19 +10,32 @@ namespace A13
 
 bool Save::load(std::string name)
 {
+    if(loaded())
+        return false;
+
     m_fileName = name;
     if(!loadFromFile(m_fileName))
     {
         log() << "Initializing and saving new world " << name;
         initialize();
-        saveToFile(m_fileName);
-        return false;
+
+        if(saveToFile(m_fileName))
+        {
+            m_loaded = true;
+            return true;
+        }
+        else
+            return false;
     }
+    m_loaded = true;
     return true;
 }
 
 bool Save::save(std::string name)
 {
+    if(!loaded())
+        return true;
+
     if(!name.empty())
         m_fileName = name;
     return saveToFile(m_fileName);
@@ -89,11 +103,16 @@ void Save::initialize()
     m_seed = EGE::System::unixTime();
     m_tilemap = make<A13::FactoryTilemap>(m_seed);
     m_projectTilemap = make<A13ProjectTilemap>();
+    m_loaded = true;
 }
 
 bool Save::loadFromFile(std::string name)
 {
     log() << "Loading world from file " << name;
+
+    // Create directories
+    if(!EGE::System::createPath("saves/" + name))
+        PRINT_ERROR_AND_RETURN("Failed to create path!");
 
     // Base file (JSON)
     std::ifstream file("saves/" + name + "/base.json");
@@ -128,6 +147,10 @@ bool Save::saveToFile(std::string name)
 {
     log() << "Saving world to file " << name;
 
+    // Create directories
+    if(!EGE::System::createPath("saves/" + name))
+        PRINT_ERROR_AND_RETURN("Failed to create path!");
+
     // Base file (JSON)
     std::shared_ptr<EGE::ObjectMap> object = serialize();
     if(!object)
@@ -147,6 +170,23 @@ bool Save::saveToFile(std::string name)
         return false;
 
     return true;
+}
+
+void Save::remove(std::string name)
+{
+    EGE::System::removePath("saves/" + name);
+}
+
+void Save::unload()
+{
+    if(m_loaded)
+    {
+        log() << "Unloading save";
+        save();
+        m_projectTilemap.reset();
+        m_tilemap.reset();
+        m_loaded = false;
+    }
 }
 
 }

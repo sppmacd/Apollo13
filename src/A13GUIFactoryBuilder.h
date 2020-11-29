@@ -3,6 +3,7 @@
 #include "Apollo13.h"
 #include "A13GameplayObjectManager.h"
 #include "A13FactoryBuilding.h"
+#include "GUIIngameMenu.h"
 #include "PlayerStats.h"
 #include "ProjectStatsWidget.h"
 #include "ResourceStatsWidget.h"
@@ -119,6 +120,10 @@ public:
         if(event.code == sf::Keyboard::P)
         {
             Apollo13::instance().messageBox("Do you REALLY want to cancel the mission?\nYou won't get back any resources!", 1, A13::MessageBox::Type::YesNo);
+        }
+        else if(event.code == sf::Keyboard::Escape && !m_partSelector->getCurrentItem())
+        {
+            openDialog(make<A13::GUIIngameMenu>(this));
         }
     }
 

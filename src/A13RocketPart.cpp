@@ -228,7 +228,10 @@ void A13ProjectTilemap::cancelMission()
     }
     else if(m_currentProjectTime >= 0 && m_currentProjectTime <= m_totalProjectTime)
     {
-        // TODO: Give back all resources
+        // Give back 80% of resources
+        for(auto& it: m_totalCostInv)
+            A13::PlayerStats::instance().getInventory().tryAddItems({it.first, it.second * 0.8});
+
         m_currentProjectTime = -2;
     }
     else if(m_currentProjectTime == -3)

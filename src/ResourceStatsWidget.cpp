@@ -1,5 +1,6 @@
 #include "ResourceStatsWidget.h"
 
+#include "Apollo13.h"
 #include "PlayerStats.h"
 
 #include <sstream>
@@ -51,6 +52,9 @@ void ResourceStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::Render
     // Items
     ASSERT(m_atlas);
     ASSERT(m_font);
+
+    if(!Apollo13::instance().save.loaded())
+        return;
 
     sf::RenderWindow* wnd = (sf::RenderWindow*)&target;
 

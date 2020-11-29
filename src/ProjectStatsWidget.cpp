@@ -23,6 +23,9 @@ void ProjectStatsWidget::renderOnly(sf::RenderTarget& target, const EGE::RenderS
     ASSERT(m_atlas);
     ASSERT(m_font);
 
+    if(!Apollo13::instance().save.loaded())
+        return;
+
     // Get data
     auto ptm = Apollo13::instance().save.projectTilemap();
     int ptime = ptm->getCurrentProjectTime();
