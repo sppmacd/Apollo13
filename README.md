@@ -9,10 +9,10 @@ This game is a submission for GitHub Game Off game jam.
 
 ## CONTROLS
 
-LMB - Place object(s)
-RMB - Drag screen
-Delete - Remove object under mouse. You got 80% of resources
-P - Reset mission state (stop building or tracking a rocket)
+- LMB - Place object(s)
+- RMB - Drag screen
+- Delete - Remove object under mouse. You have 80% of resources given back.
+- P - Reset mission state (stop building or tracking a rocket). You have 80% of resources given back (if you have not launched the rocket).
 
 ## BUILDINGS
 
